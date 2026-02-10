@@ -1,0 +1,40 @@
+---
+description: "Plan-driven development workflow: analysis, planning, implementation, and finalization phases"
+alwaysApply: true
+---
+
+# Task Workflow: Plan-Driven Development
+
+This workflow is mandatory for every new feature, bug fix, or significant code modification.
+
+## Phase 1: Analysis & Planning
+
+1. **Read Memory**: Check `agent-docs/MEMORIES.md` for existing stack info, preferences, and patterns. If stack information is missing, detect it by scanning for common configuration files and append to `agent-docs/MEMORIES.md`. For UI work, also read `agent-docs/OXYGENUI-INFO.md`.
+
+2. **Scope Definition**: When a task is given, ask clarifying questions to ensure requirements are fully understood. Do not proceed with ambiguous instructions.
+
+3. **Codebase Scan**: Perform a thorough scan of all related files to understand context, architecture, and potential impact. Update `agent-docs/MEMORIES.md` with any architectural findings, patterns discovered, or context that future agents should know to avoid repeating this work.
+
+4. **Create `PLAN.md`**: Create a temporary `PLAN.md` file in the root directory with structured steps, goals, files, and verification criteria.
+
+5. **Seek Approval**: After creating `PLAN.md`, stop and wait for explicit user approval before proceeding.
+
+## Phase 2: Implementation & Verification
+
+1. **Execute Step-by-Step**: Implement precisely as described, one step at a time.
+2. **Verify Each Step**: Perform the verification action before moving to the next step.
+3. **Surgical Precision**: Make extremely targeted changes. Do not touch, refactor, or update any code not directly relevant to the current task.
+
+## Phase 3: Finalization
+
+1. **Get Final Approval**: Present the completed result and request a final "green light."
+2. **Update `agent-docs/MEMORIES.md`**: Record any new learnings, preferences, or patterns discovered.
+3. **Update `PROGRESS.md`**: Add task entry with file changes and any flags (TODO/ISSUE/WORKAROUND/TRADEOFF/DEPRECATED).
+4. **Cleanup**: Delete `PLAN.md`.
+5. **Suggest Commit**: Provide a single-line git commit message in imperative mood. Do not run the commit.
+
+## File Handling
+
+- Only create `.md` files when explicitly requested, with the exception of `PLAN.md` as part of the task workflow.
+- Always maintain and update `PROGRESS.md` (root-level) and `agent-docs/MEMORIES.md` after each completed task.
+- The `PLAN.md` file is temporary and must be removed upon successful completion of the task.

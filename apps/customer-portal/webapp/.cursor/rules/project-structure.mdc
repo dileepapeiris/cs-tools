@@ -1,0 +1,57 @@
+---
+description: "Project folder structure, tech stack, and architectural patterns"
+alwaysApply: true
+---
+
+# Project Structure & Stack
+
+## Tech Stack
+
+- **Runtime:** React 19, TypeScript 5.9 (strict), ESNext modules
+- **Build:** Vite 7, @vitejs/plugin-react (with babel-plugin-react-compiler)
+- **UI:** @wso2/oxygen-ui, @wso2/oxygen-ui-icons-react (Lucide wrapper), @wso2/oxygen-ui-charts-react
+- **Theme:** Acrylic Orange only (light/dark via `data-color-scheme`). See `agent-docs/OXYGENUI-INFO.md`
+- **Auth:** @asgardeo/react
+- **Data:** @tanstack/react-query, Zod for validation
+- **Routing:** react-router 7
+- **Package manager:** pnpm
+- **Lint:** ESLint 9 (typescript-eslint, react-hooks, react-refresh)
+- **Tests:** Vitest, @testing-library/react; add a test file for every new component (colocated in `__tests__/`)
+
+## Folder Structure
+
+```
+src/
+├── api/              # Data-fetching hooks (useGetX, useGetY)
+├── assets/           # Static assets (images, SVGs)
+├── components/       # UI components only (no page logic)
+│   ├── common/       # Shared: header, footer, side-nav-bar, filter-panel, tab-bar, error-indicator, notification-banner
+│   ├── dashboard/    # Dashboard: stats, charts, cases-table
+│   ├── login-page/   # Login: LoginBox, LoginBackground, LoginSlogan, LoginFooter, ParticleBackground
+│   ├── project-details/  # Project details views
+│   ├── project-hub/  # Project hub / project cards
+│   └── support/      # Support: case-creation-layout, cases-overview-stats, novera-ai-assistant
+├── config/           # apiConfig, authConfig, themeConfig, loggerConfig, notificationBannerConfig
+├── constants/        # Domain constants (dashboard, appLayout, support, api, etc.)
+├── context/          # React context (LoaderContext, LoggerContext, etc.)
+├── hooks/            # Shared hooks (useLogger, etc.)
+├── layouts/          # AppLayout (shell: Header, Sidebar, Main, Footer)
+├── models/           # Types and request/response shapes (requests.ts, responses.ts, mockData)
+├── pages/            # Route-level components; only compose components from components/
+├── providers/        # MockConfigProvider, etc.
+└── utils/            # Pure helpers (logger, casesTable, projectCard, projectStats, apiUtils)
+```
+
+## Memory Files
+
+- **`agent-docs/MEMORIES.md`**: Long-term memory for stack info, user preferences, project patterns, and domain context. Update when new context is discovered.
+- **`agent-docs/OXYGENUI-INFO.md`**: Reference for Oxygen UI components, theme, and styling. Read for UI work.
+- **`PROGRESS.md`**: High-level project evolution log. One entry per completed task. Updated after each task is finalized.
+
+## Execution & Commands
+
+DO NOT RUN any commands which would do irreversible changes to the host system like:
+- Install/Updating/Uninstalling system level packages
+- Changing system level configurations
+
+You are encouraged to use tools (kubectl, git, gh, curl, ls, docker, etc.) as much as needed in READ ONLY to gather information.

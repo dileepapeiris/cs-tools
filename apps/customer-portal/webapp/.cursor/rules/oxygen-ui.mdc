@@ -1,0 +1,51 @@
+---
+description: "Oxygen UI theme, components, styling, and Acrylic Orange guidelines"
+globs: ["**/*.tsx", "**/*.ts", "**/components/**", "**/pages/**"]
+---
+
+# Oxygen UI Guidelines
+
+## Theme: Acrylic Orange Only
+
+- Use `OxygenUIThemeProvider` with `AcrylicOrangeTheme` (or `themeConfig` from `@config/themeConfig`).
+- Color scheme is controlled via `data-color-scheme` on `<html>` (e.g. `light` or `dark`).
+- Do not use other themes (Acrylic Purple, Choreo, Classic, High Contrast, Pale, etc.).
+
+## No Border Radius
+
+- Do not add `borderRadius` in `sx` or styles.
+- Exception: circular avatars/icons may use `borderRadius: "50%"` where the design requires a circle.
+- Do not add rounded corners to cards, buttons, or panels.
+
+## Colors
+
+- Use theme semantic tokens (`palette.primary`, `palette.text.primary`, etc.) for semantic UI.
+- Use the `colors` namespace from `@wso2/oxygen-ui` (e.g. `colors.blue[500]`, `colors.orange[500]`) for charts and non-semantic UI.
+- See `agent-docs/OXYGENUI-INFO.md` for complete palette and `colors` usage.
+
+## Components and Icons
+
+- Import UI components from `@wso2/oxygen-ui`.
+- Import icons from `@wso2/oxygen-ui-icons-react` (not lucide-react directly).
+- Prefer Oxygen custom components (AppShell, Header, Sidebar, PageTitle, ListingTable, Form.*, etc.) where they fit.
+- Otherwise use MUI components re-exported from `@wso2/oxygen-ui`.
+
+## Typography and Layout
+
+- Prefer Oxygen and MUI re-exports (Box, Grid, Stack, Typography, Card, etc.) and theme spacing.
+- Font family: `'Inter Variable', sans-serif`
+- Base font size: `14px`
+- Use Typography variants (h1–h6, subtitle1/2, body1/2, caption, button, overline) as documented in `agent-docs/OXYGENUI-INFO.md`.
+
+## Spacing
+
+- **Main content area:** `p: 3` on the scrollable content container.
+- **Between major sections:** `mb: 3` or `mt: 3` (theme units).
+- **Grid between items:** `spacing={2}` on Grid container.
+- **Cards / stat blocks:** Internal padding e.g. `p: 2.5`, `gap: 3` for vertical rhythm.
+- **Buttons / inline groups:** `gap: 2` or `gap: 1` in Stack/Box; button padding e.g. `px: 2`.
+- Use theme spacing scale (1, 2, 3, 4) consistently; avoid arbitrary pixel values except where design explicitly requires.
+
+## Reference
+
+For complete component list, palette values, and advanced usage, see `agent-docs/OXYGENUI-INFO.md`.

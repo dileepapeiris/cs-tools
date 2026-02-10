@@ -1,0 +1,59 @@
+---
+description: "Code style, file format, naming conventions, and TypeScript patterns"
+alwaysApply: true
+---
+
+# Code Style & Conventions
+
+## License Header and File Format
+
+Every source file must start with the WSO2 Apache 2.0 license block (15 lines), same as `src/layouts/AppLayout.tsx` (lines 1–15). One blank line between the license block and the first import or code. One trailing newline at the end of each file.
+
+## Naming Conventions
+
+- **Files exporting React components:** PascalCase (e.g. `AuthGuard.tsx`, `StatCard.tsx`, `AppLayout.tsx`)
+- **Hooks:** camelCase with `use` prefix (e.g. `useGetProjects.ts`, `useLogger.ts`)
+- **Utils / config / constants:** camelCase (e.g. `casesTable.ts`, `themeConfig.ts`, `dashboardConstants.ts`)
+- **Folders:** kebab-case (e.g. `case-creation-layout`, `novera-ai-assistant`, `side-nav-bar`)
+- **Constants and types:** UPPER_SNAKE for exported constants, PascalCase for types/interfaces
+
+## Commenting Patterns
+
+- **Components (and page components):** JSDoc block directly above the component declaration. Include brief description and `@returns {JSX.Element}`.
+- **Functions / hooks:** JSDoc with `@param` and `@returns` where useful.
+- **Other logic:** Use `//` comments when it helps clarity; not on every line.
+- **Inline JSX:** Optional `{/* Section description */}` for large blocks.
+
+## Types
+
+- Define types/interfaces for all props, APIs, and request/response shapes.
+- Types live in `src/models/` (responses.ts, requests.ts) for API and domain types; component props can be defined in the same file as the component or in a sibling type file.
+- Prefer interfaces for object shapes; use `type` for unions and derived types.
+- Export interfaces and types that are used across modules.
+
+## Path Aliases
+
+Use path aliases for imports:
+- `@components/` → `src/components/`
+- `@api/` → `src/api/`
+- `@pages/` → `src/pages/`
+- `@layouts/` → `src/layouts/`
+- `@config/` → `src/config/`
+- `@constants/` → `src/constants/`
+- `@context/` → `src/context/`
+- `@hooks/` → `src/hooks/`
+- `@models/` → `src/models/`
+- `@utils/` → `src/utils/`
+- `@providers/` → `src/providers/`
+- `@assets/` → `src/assets/`
+
+## Pages vs Components
+
+- **Pages** (`src/pages/*`): Route-level components only. They must compose components from `src/components/` and use hooks from `@api/`, `@hooks/`, `@context/`. They must not contain inline component implementations (no large JSX blocks that belong in a reusable component).
+- **Components** (`src/components/*`): Reusable UI and feature components. Business logic and data fetching stay in pages or in hooks (api/).
+
+## Tests
+
+- Add test files for every created component.
+- Place tests in a `__tests__` folder next to the component (e.g. `components/common/header/__tests__/Header.test.tsx`).
+- Use Vitest and @testing-library/react.

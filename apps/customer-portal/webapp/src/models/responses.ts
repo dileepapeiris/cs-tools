@@ -213,6 +213,49 @@ export interface ChatHistoryResponse {
   chatHistory: ChatHistoryItem[];
 }
 
+// Product deployed in an environment.
+export interface DeploymentProduct {
+  id: string;
+  name: string;
+  version: string;
+  supportStatus: string;
+  description: string;
+  cores: number;
+  tps: number;
+  releasedDate: string;
+  eolDate: string;
+  updateLevel: string;
+}
+
+// Document attached to a deployment.
+export interface DeploymentDocument {
+  id: string;
+  name: string;
+  category: string;
+  sizeBytes: number;
+  uploadedAt: string;
+  uploadedBy: string;
+}
+
+// Single deployment environment.
+export interface Deployment {
+  id: string;
+  name: string;
+  status: "Healthy" | "Warning";
+  url: string;
+  version: string;
+  description: string;
+  products: DeploymentProduct[];
+  documents: DeploymentDocument[];
+  deployedAt: string;
+  uptimePercent: number;
+}
+
+// Response for project deployments list.
+export interface DeploymentsResponse {
+  deployments: Deployment[];
+}
+
 // Interface for all cases filters state
 export interface AllCasesFilterValues {
   statusId?: string;

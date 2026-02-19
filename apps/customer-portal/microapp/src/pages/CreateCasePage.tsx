@@ -47,55 +47,12 @@ export default function CreateCasePage() {
   const navigate = useNavigate();
   const location = useLocation();
   const messages = location.state?.messages || [];
+  const queryClient = useQueryClient();
   const { projectId } = useProject();
 
-  const issueTypeOptions = [
-    { value: 1, label: "Total Outage" },
-    { value: 2, label: "Partial Outage" },
-    { value: 3, label: "Performance Degradation" },
-    { value: 4, label: "Question" },
-    { value: 5, label: "Security or Compliance" },
-    { value: 6, label: "Error" },
-  ];
-
-  const severityLevelOptions = [
-    {
-      value: 10,
-      label: (
-        <Stack direction="row" alignItems="center" gap={1}>
-          <Circle fill={colors.red[500]} color={colors.red[500]} size={pxToRem(12)} />
-          Critical (P1)
-        </Stack>
-      ),
-    },
-    {
-      value: 11,
-      label: (
-        <Stack direction="row" alignItems="center" gap={1}>
-          <Circle fill={colors.orange[500]} color={colors.orange[500]} size={pxToRem(12)} />
-          High (P2)
-        </Stack>
-      ),
-    },
-    {
-      value: 12,
-      label: (
-        <Stack direction="row" alignItems="center" gap={1}>
-          <Circle fill={colors.yellow[600]} color={colors.orange[500]} size={pxToRem(12)} />
-          Medium (P3)
-        </Stack>
-      ),
-    },
-    {
-      value: 14,
-      label: (
-        <Stack direction="row" alignItems="center" gap={1}>
-          <Circle fill={colors.blue[500]} color={colors.orange[500]} size={pxToRem(12)} />
-          Catastrophic (P0)
-        </Stack>
-      ),
-    },
-  ];
+  const { data: filters } = useSuspenseQuery(cases.filters(projectId!));
+  const issueTypeOptions = filters.issueTypes.map((type) => ({ value: Number(type.id), label: type.label }));
+  const severityLevelOptions = filters.severities.map((type) => ({ value: Number(type.id), label: type.label }));
 
   const formik = useFormik<CreateCaseFormValues>({
     initialValues: {
@@ -119,8 +76,6 @@ export default function CreateCasePage() {
       });
     },
   });
-
-  const queryClient = useQueryClient();
 
   const deploymentQuery = useQuery({
     ...projects.deployments(projectId!),

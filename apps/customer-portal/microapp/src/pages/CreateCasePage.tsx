@@ -16,7 +16,16 @@
 
 import { useLocation, useNavigate } from "react-router-dom";
 import { Circle, Folder } from "@wso2/oxygen-ui-icons-react";
-import { Button, Stack, Typography, InputAdornment, pxToRem, colors } from "@wso2/oxygen-ui";
+import {
+  Button,
+  Stack,
+  Typography,
+  InputAdornment,
+  pxToRem,
+  Backdrop,
+  CircularProgress,
+  colors,
+} from "@wso2/oxygen-ui";
 import { SelectField, TextField, ConversationSummary } from "@components/features/create";
 import { useFormik } from "formik";
 import { useMutation, useQuery, useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
@@ -108,7 +117,6 @@ export default function CreateCasePage() {
         issueTypeKey: values.type,
         severityKey: values.severity,
       });
-      navigate("/support");
     },
   });
 
@@ -142,90 +150,109 @@ export default function CreateCasePage() {
     ...cases.create,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["cases"] });
+      setTimeout(() => {
+        navigate("/support");
+      }, 500);
     },
   });
 
   return (
-    <form onSubmit={formik.handleSubmit}>
-      <Stack pb={5} gap={5}>
-        <Stack gap={2}>
-          <SelectField
-            name="project"
-            label="Project"
-            options={projectsOptions}
-            value={formik.values.project}
-            onChange={formik.handleChange}
-            startAdornment={
-              <InputAdornment position="start">
-                <Folder size={pxToRem(20)} />
-              </InputAdornment>
-            }
-            required
-          />
-          <SelectField
-            name="deployment"
-            label="Deployment Type"
-            aiLabel="Auto Detected"
-            options={deploymentOptions}
-            value={formik.values.deployment}
-            onChange={formik.handleChange}
-            disabled={!formik.values.project || deploymentQuery.isLoading}
-          />
-          <SelectField
-            name="product"
-            label="Product & Version"
-            options={productOptions}
-            value={formik.values.product}
-            onChange={formik.handleChange}
-            disabled={!formik.values.deployment || productQuery.isLoading}
-            required
-          />
+    <>
+      <Backdrop
+        sx={{
+          color: "primary.contrastText",
+          zIndex: (theme) => theme.zIndex.drawer + 1,
+          flexDirection: "column",
+          gap: 2,
+        }}
+        open={mutation.isPending}
+      >
+        <CircularProgress color="inherit" />
+        <Typography variant="h6" color="inherit">
+          Saving your case...
+        </Typography>
+      </Backdrop>
+      <form onSubmit={formik.handleSubmit}>
+        <Stack pb={5} gap={5}>
+          <Stack gap={2}>
+            <SelectField
+              name="project"
+              label="Project"
+              options={projectsOptions}
+              value={formik.values.project}
+              onChange={formik.handleChange}
+              startAdornment={
+                <InputAdornment position="start">
+                  <Folder size={pxToRem(20)} />
+                </InputAdornment>
+              }
+              required
+            />
+            <SelectField
+              name="deployment"
+              label="Deployment Type"
+              aiLabel="Auto Detected"
+              options={deploymentOptions}
+              value={formik.values.deployment}
+              onChange={formik.handleChange}
+              disabled={!formik.values.project || deploymentQuery.isLoading}
+            />
+            <SelectField
+              name="product"
+              label="Product & Version"
+              options={productOptions}
+              value={formik.values.product}
+              onChange={formik.handleChange}
+              disabled={!formik.values.deployment || productQuery.isLoading}
+              required
+            />
+          </Stack>
+          <Stack gap={2}>
+            <Typography variant="body1" fontWeight="medium">
+              Case Details
+            </Typography>
+            <TextField
+              name="title"
+              label="Issue Title"
+              aiLabel="Generated from Chat"
+              value={formik.values.title}
+              onChange={formik.handleChange}
+              required
+            />
+            <TextField
+              multiline
+              name="description"
+              label="Case Description"
+              aiLabel="From Coversation"
+              value={formik.values.description}
+              onChange={formik.handleChange}
+              required
+            />
+            <SelectField
+              name="type"
+              label="Issue Type"
+              aiLabel="AI Classified"
+              options={issueTypeOptions}
+              value={formik.values.type}
+              onChange={formik.handleChange}
+              required
+            />
+            <SelectField
+              name="severity"
+              label="Severity Levels"
+              aiLabel="AI Accessed"
+              options={severityLevelOptions}
+              value={formik.values.severity}
+              onChange={formik.handleChange}
+              required
+            />
+          </Stack>
+          <ConversationSummary messages={messages} />
+          <Button type="submit" variant="contained" sx={{ textTransform: "initial" }}>
+            Create Case
+          </Button>
         </Stack>
-        <Stack gap={2}>
-          <Typography variant="body1" fontWeight="medium">
-            Case Details
-          </Typography>
-          <TextField
-            name="title"
-            label="Issue Title"
-            aiLabel="Generated from Chat"
-            value={formik.values.title}
-            onChange={formik.handleChange}
-            required
-          />
-          <TextField
-            multiline
-            name="description"
-            label="Case Description"
-            aiLabel="From Coversation"
-            value={formik.values.description}
-            onChange={formik.handleChange}
-            required
-          />
-          <SelectField
-            name="type"
-            label="Issue Type"
-            aiLabel="AI Classified"
-            options={issueTypeOptions}
-            value={formik.values.type}
-            onChange={formik.handleChange}
-            required
-          />
-          <SelectField
-            name="severity"
-            label="Severity Levels"
-            aiLabel="AI Accessed"
-            options={severityLevelOptions}
-            value={formik.values.severity}
-            onChange={formik.handleChange}
-            required
-          />
-        </Stack>
-        <ConversationSummary messages={messages} />
-        <Button type="submit" variant="contained" sx={{ textTransform: "initial" }}>
-          Create Case
-        </Button>
-      </Stack>
-    </form>
+      </form>
+    </>
   );
 }

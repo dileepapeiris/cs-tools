@@ -6,6 +6,7 @@ import type {
   CaseClassificationResponseDTO,
   CasesDTO,
   CasesFiltersDTO,
+  CasesStatsDTO,
   CreateCaseRequestDTO,
   CreateCaseResponseDTO,
   GetCasesRequestDTO,
@@ -13,6 +14,7 @@ import type {
 
 import {
   CASE_CLASSIFICATION_ENDPOINT,
+  CASE_STATS_ENDPOINT,
   CREATE_CASE_ENDPOINT,
   PROJECT_CASES_ENDPOINT,
   PROJECT_CASES_FILTERS_ENDPOINT,
@@ -42,6 +44,10 @@ const classify = async (
       tier: "Tier 1",
     })
   ).data;
+};
+
+const getCasesStats = async (id: string): Promise<CasesStatsDTO> => {
+  return (await apiClient.get<CasesStatsDTO>(CASE_STATS_ENDPOINT(id))).data;
 };
 
 /* Mappers */
@@ -81,4 +87,12 @@ export const cases = {
   classify: mutationOptions({
     mutationFn: (body: Omit<CaseClassificationRequestDTO, "region" | "tier">) => classify(body),
   }),
+
+  stats: (id: string) =>
+    queryOptions({
+      queryKey: ["cases-stats", id],
+      queryFn: () => getCasesStats(id),
+      staleTime: 0,
+      gcTime: 0,
+    }),
 };

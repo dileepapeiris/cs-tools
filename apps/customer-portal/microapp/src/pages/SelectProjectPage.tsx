@@ -87,7 +87,7 @@ function SelectProjectContent() {
       <Typography variant="body2" color="text.secondary" textAlign="center" lineHeight={1.5} px={3} mt={1.5}>
         Choose a project to access your support cases, chat history, and dashboard
       </Typography>
-      <Stack mt={5} gap={3}>
+      <Stack mt={3} gap={3}>
         <SearchBar
           size="small"
           placeholder="Search Projects"

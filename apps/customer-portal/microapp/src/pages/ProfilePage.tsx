@@ -19,24 +19,28 @@
 //       with dynamic values in the future.
 
 import { useLayoutEffect, type ReactNode } from "react";
-import { Card, Divider, Stack, Switch, Typography, colors } from "@wso2/oxygen-ui";
+import { Card, Divider, Skeleton, Stack, Switch, Typography, colors } from "@wso2/oxygen-ui";
 import { Bell, BookOpen, Bot, Clock4, Lock, Mail, Phone, User } from "@wso2/oxygen-ui-icons-react";
 import { useLayout } from "@context/layout";
 import { SettingListItem } from "@components/features/settings";
 import { Avatar } from "@components/features/users";
+import { useQuery } from "@tanstack/react-query";
+import { users } from "@src/services/users";
 
 export default function ProfilePage() {
   const layout = useLayout();
+  const { data } = useQuery(users.me());
+  const name = data ? data?.firstName + " " + data?.lastName : undefined;
 
   const AppBarSlot = () => (
     <Stack direction="row" alignItems="center" gap={1.5} mt={1}>
-      <Avatar>John Smith</Avatar>
-      <Stack>
-        <Typography variant="h6" fontWeight="medium">
-          John Smith
+      {name ? <Avatar>{name}</Avatar> : <Skeleton variant="circular" width={40} height={40} sx={{ flexShrink: 0 }} />}
+      <Stack width="100%">
+        <Typography variant="h6" fontWeight="medium" sx={{ flex: 1 }}>
+          {name ?? <Skeleton variant="text" width="100%" height={30} />}
         </Typography>
         <Typography variant="subtitle2" fontWeight="regular" color="text.secondary">
-          Customer since 2024
+          {data ? "Customer since 2024" : <Skeleton variant="text" width="35%" height={20} />}
         </Typography>
       </Stack>
     </Stack>
@@ -48,14 +52,27 @@ export default function ProfilePage() {
     return () => {
       layout.setAppBarSlotsOverride(undefined);
     };
-  }, []);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [data]);
 
   return (
     <Stack gap={2.5}>
       <SectionCard title="Account Information">
-        <SettingListItem name="Email" value="user@example.com" icon={Mail} />
-        <SettingListItem name="Phone" value="+1 (555) 123-4567" icon={Phone} />
-        <SettingListItem name="Timezone" value="Eastern Time (ET) - UTC-5" icon={Clock4} />
+        <SettingListItem
+          name="Email"
+          value={data?.email ?? <Skeleton variant="text" width="100%" height={25} />}
+          icon={Mail}
+        />
+        <SettingListItem
+          name="Phone"
+          value={data ? "+1 (555) 123-4567" : <Skeleton variant="text" width="100%" height={25} />}
+          icon={Phone}
+        />
+        <SettingListItem
+          name="Timezone"
+          value={data?.timezone ?? <Skeleton variant="text" width="100%" height={25} />}
+          icon={Clock4}
+        />
       </SectionCard>
 
       <SectionCard title="Settings">

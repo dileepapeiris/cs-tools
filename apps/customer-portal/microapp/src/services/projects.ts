@@ -40,7 +40,7 @@ const getAllProjects = async (): Promise<Project[]> => {
   const projectsWithStats = await Promise.all(
     projects.map(async (project) => {
       const stats: ProjectStatsDTO | undefined = await apiClient
-        .get<ProjectStatsDTO>(PROJECT_STATS_ENDPOINT(project.id))
+        .get<ProjectStatsDTO>(PROJECT_STATS_ENDPOINT(project.id), { timeout: 3000 })
         .then((res) => res.data)
         .catch(() => undefined);
       return mapProjectAndStatsDTOToProject(project, stats);

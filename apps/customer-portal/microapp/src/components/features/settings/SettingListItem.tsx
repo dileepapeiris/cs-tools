@@ -31,7 +31,7 @@ export function SettingListItem({
   icon: LucideIcon;
   iconColor?: string;
   iconBackgroundColor?: string;
-  value?: string;
+  value?: string | ReactNode;
   description?: string;
   suffix?: "chevron" | ReactNode;
 }) {
@@ -47,7 +47,7 @@ export function SettingListItem({
       sx={{ cursor: "pointer" }}
       p={1.5}
     >
-      <Stack direction="row" alignItems="center" gap={1.5}>
+      <Stack direction="row" alignItems="center" gap={1.5} width="100%">
         <Stack
           width={40}
           height={40}
@@ -58,14 +58,16 @@ export function SettingListItem({
         >
           <Icon size={pxToRem(18)} color={iconColor} />
         </Stack>
-        <Stack>
+        <Stack width="100%">
           {value && (
             <Typography variant="caption" color="text.secondary">
               {name}
             </Typography>
           )}
 
-          <Typography variant="body1">{value ?? name}</Typography>
+          <Typography variant="body1" sx={{ flex: 1 }}>
+            {value ?? name}
+          </Typography>
 
           {description && (
             <Typography variant="caption" fontWeight="regular" color="text.secondary">

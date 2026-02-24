@@ -38,7 +38,7 @@ export function BarChartWidget({ title, data, series, xAxisKey, height = 200 }: 
 
   return (
     <WidgetBox title={title}>
-      <Box mt={2}>
+      <Box mt={2} display="flex" justifyContent="flex-start">
         {loading ? (
           <Skeleton variant="rectangular" height={200} width="100%" animation="wave" sx={{ borderRadius: 1 }} />
         ) : (

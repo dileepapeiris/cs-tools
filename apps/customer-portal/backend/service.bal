@@ -850,7 +850,6 @@ service http:InterceptableService / on new http:Listener(9090, listenerConf) {
                     }
                 };
             }
-
             if getStatusCode(createdCaseResponse) == http:STATUS_FORBIDDEN {
                 log:printWarn(string `User: ${userInfo.userId} is forbidden to create a case for project: ${
                         payload.projectId}!`);
@@ -2912,7 +2911,7 @@ service http:InterceptableService / on new http:Listener(9090, listenerConf) {
     # + return - List of change requests matching the criteria or an error
     resource function post projects/[entity:IdString id]/change\-requests/search(http:RequestContext ctx,
             types:ChangeRequestSearchPayload payload)
-        returns http:Ok|http:Unauthorized|http:Forbidden|http:InternalServerError {
+        returns http:Ok|http:BadRequest|http:Unauthorized|http:Forbidden|http:InternalServerError {
 
         authorization:UserInfoPayload|error userInfo = ctx.getWithType(authorization:HEADER_USER_INFO);
         if userInfo is error {
@@ -2949,6 +2948,13 @@ service http:InterceptableService / on new http:Listener(9090, listenerConf) {
                 return <http:Forbidden>{
                     body: {
                         message: "Access to change request information is forbidden for the user!"
+                    }
+                };
+            }
+            if getStatusCode(response) == http:STATUS_BAD_REQUEST {
+                return <http:BadRequest>{
+                    body: {
+                        message: "Invalid request parameters for searching change requests."
                     }
                 };
             }

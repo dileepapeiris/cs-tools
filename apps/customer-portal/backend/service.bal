@@ -2467,7 +2467,7 @@ service http:InterceptableService / on new http:Listener(9090, listenerConf) {
                 });
         if validationResponse is user_management:CONFLICT_ERROR {
             log:printWarn(string `Contact with email: ${payload.contactEmail} already exists in project with ID: ${
-                id}`);
+                    id}`);
             return <http:Conflict>{
                 body: {
                     message: "Contact with the provided email already exists in the project!"
@@ -2903,5 +2903,66 @@ service http:InterceptableService / on new http:Listener(9090, listenerConf) {
         }
 
         return response;
+    }
+
+    # Search change requests for a project based on provided filters and pagination.
+    #
+    # + id - ID of the project
+    # + payload - Change request search payload containing filters and pagination info
+    # + return - List of change requests matching the criteria or an error
+    resource function post projects/[entity:IdString id]/change\-requests/search(http:RequestContext ctx,
+            types:ChangeRequestSearchPayload payload)
+        returns http:Ok|http:Unauthorized|http:Forbidden|http:InternalServerError {
+
+        authorization:UserInfoPayload|error userInfo = ctx.getWithType(authorization:HEADER_USER_INFO);
+        if userInfo is error {
+            return <http:InternalServerError>{
+                body: {
+                    message: ERR_MSG_USER_INFO_HEADER_NOT_FOUND
+                }
+            };
+        }
+
+        entity:ChangeRequestSearchResponse|error response = entity:searchChangeRequests(userInfo.idToken,
+                {
+                    filters: {
+                        projectIds: [id],
+                        searchQuery: payload.filters?.searchQuery,
+                        stateKeys: payload.filters?.stateKeys,
+                        impactKey: payload.filters?.impactKey
+                    },
+                    pagination: payload.pagination
+                });
+        if response is error {
+            if getStatusCode(response) == http:STATUS_UNAUTHORIZED {
+                log:printWarn(string `User: ${
+                        userInfo.userId} is not authorized to access change request information!`);
+                return <http:Unauthorized>{
+                    body: {
+                        message: ERR_MSG_UNAUTHORIZED_ACCESS
+                    }
+                };
+            }
+
+            if getStatusCode(response) == http:STATUS_FORBIDDEN {
+                log:printWarn(string `Access to change request information is forbidden for user: ${userInfo.userId}`);
+                return <http:Forbidden>{
+                    body: {
+                        message: "Access to change request information is forbidden for the user!"
+                    }
+                };
+            }
+
+            string customError = "Failed to search change requests.";
+            log:printError(customError, response);
+            return <http:InternalServerError>{
+                body: {
+                    message: customError
+                }
+            };
+        }
+        return <http:Ok>{
+            body: mapChangeRequestSearchResponse(response)
+        };
     }
 }

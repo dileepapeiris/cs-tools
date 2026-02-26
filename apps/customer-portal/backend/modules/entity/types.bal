@@ -61,6 +61,8 @@ public type UserResponse record {|
     string? firstName;
     # Time zone
     string? timeZone;
+    # User roles
+    string[] roles = [];
     json...;
 |};
 

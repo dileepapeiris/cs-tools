@@ -19,11 +19,11 @@ import { useNavigate, useParams } from "react-router";
 import { useLoader } from "@context/linear-loader/LoaderContext";
 import { useErrorBanner } from "@context/error-banner/ErrorBannerContext";
 import useGetCaseDetails from "@api/useGetCaseDetails";
-import CaseDetailsContent from "@case-details-details/CaseDetailsContent";
+import ServiceRequestDetailContent from "@components/support/service-requests/ServiceRequestDetailContent";
 
 /**
- * ServiceRequestDetailsPage displays details for a single service request.
- * It reuses the generic case details layout but is routed under service-requests.
+ * ServiceRequestDetailsPage displays the SR-specific detail view for a single
+ * service request. Data is fetched via GET cases/[id]; layout is SR-only.
  *
  * URL: /:projectId/support/service-requests/:serviceRequestId
  */
@@ -77,7 +77,7 @@ export default function ServiceRequestDetailsPage(): JSX.Element {
   };
 
   return (
-    <CaseDetailsContent
+    <ServiceRequestDetailContent
       data={data}
       isLoading={showSkeletons}
       isError={isError}

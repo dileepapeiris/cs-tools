@@ -1,0 +1,752 @@
+// Copyright (c) 2026 WSO2 LLC. (https://www.wso2.com).
+//
+// WSO2 LLC. licenses this file to you under the Apache License,
+// Version 2.0 (the "License"); you may not use this file except
+// in compliance with the License.
+// You may obtain a copy of the License at
+//
+// http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing,
+// software distributed under the License is distributed on an
+// "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+// KIND, either express or implied.  See the License for the
+// specific language governing permissions and limitations
+// under the License.
+
+import { useState, useMemo, type JSX, type ReactElement } from "react";
+import {
+  Box,
+  Button,
+  Chip,
+  Paper,
+  Stack,
+  Typography,
+  Avatar,
+  TextField,
+  alpha,
+  useTheme,
+} from "@wso2/oxygen-ui";
+import {
+  ArrowLeft,
+  Calendar,
+  Layers,
+  MessageSquare,
+  Package,
+  User,
+  Users,
+  Folder,
+  Globe,
+  CirclePlay,
+} from "@wso2/oxygen-ui-icons-react";
+import useGetCasesFilters from "@api/useGetCasesFilters";
+import { usePatchCase } from "@api/usePatchCase";
+import { useErrorBanner } from "@context/error-banner/ErrorBannerContext";
+import { useSuccessBanner } from "@context/success-banner/SuccessBannerContext";
+import useGetCaseComments from "@api/useGetCaseComments";
+import { usePostComment } from "@api/usePostComment";
+import type { CaseDetails } from "@models/responses";
+import type { CaseComment } from "@models/responses";
+import {
+  formatDateTime,
+  formatRelativeTime,
+  getAssignedEngineerLabel,
+  getInitials,
+  getStatusColor,
+  getStatusIconElement,
+  mapSeverityToDisplay,
+  resolveColorFromTheme,
+  stripHtml,
+  hasDisplayableContent,
+  ACTION_TO_CASE_STATE_LABEL,
+  getAvailableCaseActions,
+  toPresentContinuousActionLabel,
+  toPresentTenseActionLabel,
+} from "@utils/support";
+import { CASE_STATUS_ACTIONS, CommentType } from "@constants/supportConstants";
+import ErrorIndicator from "@components/common/error-indicator/ErrorIndicator";
+
+export interface ServiceRequestDetailContentProps {
+  data: CaseDetails | undefined;
+  isLoading: boolean;
+  isError: boolean;
+  caseId: string;
+  projectId: string | undefined;
+  onBack: () => void;
+}
+
+interface RequestDetailSection {
+  label: string;
+  value: string;
+}
+
+function parseRequestDetails(
+  descriptionHtml: string | null | undefined,
+): RequestDetailSection[] {
+  if (!descriptionHtml) {
+    return [];
+  }
+
+  if (typeof document === "undefined") {
+    const text = stripHtml(descriptionHtml);
+    return text ? [{ label: "Details", value: text }] : [];
+  }
+
+  const container = document.createElement("div");
+  container.innerHTML = descriptionHtml;
+
+  const sections: RequestDetailSection[] = [];
+  let currentLabel: string | null = null;
+  let currentValueParts: string[] = [];
+
+  const flush = () => {
+    const rawLabel = currentLabel?.trim().replace(/:$/, "") ?? "";
+    const valueText = stripHtml(currentValueParts.join(" ").trim());
+    if (rawLabel && valueText) {
+      sections.push({
+        label: rawLabel,
+        value: valueText,
+      });
+    }
+    currentLabel = null;
+    currentValueParts = [];
+  };
+
+  const walk = (node: Node) => {
+    if (node.nodeType === Node.ELEMENT_NODE) {
+      const el = node as HTMLElement;
+      const tag = el.tagName.toLowerCase();
+
+      if (tag === "strong") {
+        flush();
+        currentLabel = el.textContent ?? "";
+        return;
+      }
+
+      if (tag === "br") {
+        currentValueParts.push("\n");
+        return;
+      }
+
+      Array.from(el.childNodes).forEach(walk);
+      return;
+    }
+
+    if (node.nodeType === Node.TEXT_NODE) {
+      const text = node.textContent ?? "";
+      if (text.trim()) {
+        currentValueParts.push(text);
+      }
+    }
+  };
+
+  Array.from(container.childNodes).forEach(walk);
+  flush();
+
+  return sections;
+}
+
+export default function ServiceRequestDetailContent({
+  data,
+  isLoading,
+  isError,
+  caseId,
+  projectId,
+  onBack,
+}: ServiceRequestDetailContentProps): JSX.Element {
+  const theme = useTheme();
+  const [commentText, setCommentText] = useState("");
+
+  const { data: commentsData } = useGetCaseComments(projectId ?? "", caseId, {
+    offset: 0,
+    limit: 50,
+  });
+  const postComment = usePostComment();
+
+  const { data: filterMetadata } = useGetCasesFilters(projectId ?? "");
+  const caseStates = filterMetadata?.caseStates;
+  const patchCase = usePatchCase(projectId ?? "", caseId);
+  const { showSuccess } = useSuccessBanner();
+  const { showError } = useErrorBanner();
+  const [pendingActionLabel, setPendingActionLabel] = useState<string | null>(
+    null,
+  );
+
+  const statusLabel = data?.status?.label;
+  const severityLabel = data?.severity?.label;
+  const statusColorPath = getStatusColor(statusLabel ?? undefined);
+  const resolvedStatusColor = resolveColorFromTheme(statusColorPath, theme);
+  const statusChipIcon = getStatusIconElement(
+    statusLabel,
+    12,
+  ) as ReactElement | undefined;
+
+  const assignedLabel = getAssignedEngineerLabel(data?.assignedEngineer);
+  const environmentLabel = data?.deployment?.label ?? null;
+  const productLabel = data?.deployedProduct?.label
+    ? data.deployedProduct.version
+      ? `${data.deployedProduct.label} ${data.deployedProduct.version}`
+      : data.deployedProduct.label
+    : null;
+
+  const raw: Record<string, unknown> =
+    ((data as unknown as Record<string, unknown>) ?? {}) || {};
+  const srMeta =
+    (raw.serviceRequestDetails as Record<string, unknown> | undefined) ??
+    (raw.serviceRequest as Record<string, unknown> | undefined) ??
+    raw;
+
+  const requestedBy: string | null =
+    (srMeta.requestedBy as string | undefined) ??
+    (srMeta.requester as string | undefined) ??
+    (srMeta.requestedFor as string | undefined) ??
+    (srMeta.openedBy as string | undefined) ??
+    (srMeta.createdBy as string | undefined) ??
+    null;
+
+  const requestDetailSections = useMemo(
+    () => parseRequestDetails(data?.description),
+    [data?.description],
+  );
+
+  const commentsSorted = useMemo(() => {
+    const list = commentsData?.comments ?? [];
+    return [...list].sort(
+      (a, b) =>
+        new Date(a.createdOn).getTime() - new Date(b.createdOn).getTime(),
+    );
+  }, [commentsData?.comments]);
+
+  const commentsToShow = useMemo(
+    () => commentsSorted.filter(hasDisplayableContent),
+    [commentsSorted],
+  );
+
+  const timelineEntries = useMemo(() => {
+    const entries: { type: string; label: string; date: string; desc?: string }[] = [
+      {
+        type: "created",
+        label: "Service Request Created",
+        date: data?.createdOn ?? "",
+        desc: "New service request submitted",
+      },
+    ];
+    commentsToShow.forEach((c) => {
+      entries.push({
+        type: "comment",
+        label: "Comment Added",
+        date: c.createdOn,
+        desc: `${c.createdBy} - ${formatRelativeTime(c.createdOn)}`,
+      });
+    });
+    return entries.sort(
+      (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime(),
+    );
+  }, [data?.createdOn, commentsToShow]);
+
+  const handleAddComment = () => {
+    const content = commentText.trim();
+    if (!content) return;
+    postComment.mutate(
+      {
+        caseId,
+        body: { content, type: CommentType.COMMENT },
+      },
+      {
+        onSuccess: () => setCommentText(""),
+      },
+    );
+  };
+
+  if (isLoading) {
+    return (
+      <Box>
+        <Button
+          startIcon={<ArrowLeft size={16} />}
+          onClick={onBack}
+          sx={{ mb: 2 }}
+          variant="text"
+        >
+          Back to Service Requests
+        </Button>
+        <Paper variant="outlined" sx={{ p: 3 }}>
+          <Stack spacing={2}>
+            <Box sx={{ height: 24, width: 120 }} />
+            <Box sx={{ height: 32, width: "60%" }} />
+            <Box sx={{ height: 56, width: "100%" }} />
+            <Stack direction="row" spacing={3} sx={{ pt: 2 }}>
+              {[1, 2, 3, 4].map((i) => (
+                <Box key={i} sx={{ height: 40, width: 140 }} />
+              ))}
+            </Stack>
+          </Stack>
+        </Paper>
+      </Box>
+    );
+  }
+
+  if (isError) {
+    return (
+      <Box>
+        <Button
+          startIcon={<ArrowLeft size={16} />}
+          onClick={onBack}
+          sx={{ mb: 2 }}
+          variant="text"
+        >
+          Back to Service Requests
+        </Button>
+        <ErrorIndicator entityName="service request details" size="medium" />
+      </Box>
+    );
+  }
+
+  return (
+    <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
+      <Button
+        startIcon={<ArrowLeft size={16} />}
+        onClick={onBack}
+        sx={{ alignSelf: "flex-start", mb: 0.5 }}
+        variant="text"
+      >
+        Back to Service Requests
+      </Button>
+
+      <Paper variant="outlined" sx={{ p: 2, borderRadius: 0 }}>
+        <Stack spacing={1.5}>
+          <Stack
+            direction="row"
+            spacing={1.5}
+            alignItems="center"
+            sx={{ flexWrap: "wrap" }}
+          >
+            <Typography variant="body2" fontWeight={600} color="text.primary">
+              {data?.number ?? "--"}
+            </Typography>
+            <Chip
+              size="small"
+              variant="outlined"
+              label={statusLabel ?? "--"}
+              icon={statusChipIcon}
+              sx={{
+                bgcolor: alpha(resolvedStatusColor, 0.1),
+                color: resolvedStatusColor,
+                height: 22,
+                fontSize: "0.75rem",
+                "& .MuiChip-icon": { color: "inherit", ml: "6px", mr: "6px" },
+                "& .MuiChip-label": { pl: 0, pr: "6px" },
+              }}
+            />
+            <Typography variant="body2" color="text.secondary">
+              Priority: {mapSeverityToDisplay(severityLabel ?? undefined)}
+            </Typography>
+          </Stack>
+          <Typography variant="h6" color="text.primary" fontWeight={500}>
+            {data?.title ?? "--"}
+          </Typography>
+
+          {/* Top SR meta row: Environment, Product, Requested By, Created */}
+          <Box
+            sx={{
+              mt: 1.5,
+              display: "grid",
+              gridTemplateColumns: { xs: "1fr", md: "repeat(4, minmax(0, 1fr))" },
+              gap: 3,
+            }}
+          >
+            <Box>
+              <Stack spacing={0.5}>
+                <Stack direction="row" alignItems="center" spacing={1}>
+                  <Box color="text.secondary">
+                    <Layers size={16} />
+                  </Box>
+                  <Typography variant="caption" color="text.secondary">
+                    Environment
+                  </Typography>
+                </Stack>
+                <Typography variant="body2" color="text.primary">
+                  {environmentLabel ?? "--"}
+                </Typography>
+              </Stack>
+            </Box>
+            <Box>
+              <Stack spacing={0.5}>
+                <Stack direction="row" alignItems="center" spacing={1}>
+                  <Box color="text.secondary">
+                    <Package size={16} />
+                  </Box>
+                  <Typography variant="caption" color="text.secondary">
+                    Product
+                  </Typography>
+                </Stack>
+                <Typography variant="body2" color="text.primary">
+                  {productLabel ?? "--"}
+                </Typography>
+              </Stack>
+            </Box>
+            <Box>
+              <Stack spacing={0.5}>
+                <Stack direction="row" alignItems="center" spacing={1}>
+                  <Box color="text.secondary">
+                    <User size={16} />
+                  </Box>
+                  <Typography variant="caption" color="text.secondary">
+                    Requested By
+                  </Typography>
+                </Stack>
+                <Typography variant="body2" color="text.primary">
+                  {requestedBy ?? "--"}
+                </Typography>
+              </Stack>
+            </Box>
+            <Box>
+              <Stack spacing={0.5}>
+                <Stack direction="row" alignItems="center" spacing={1}>
+                  <Box color="text.secondary">
+                    <Calendar size={16} />
+                  </Box>
+                  <Typography variant="caption" color="text.secondary">
+                    Created
+                  </Typography>
+                </Stack>
+                <Typography variant="body2" color="text.primary">
+                  {data?.createdOn
+                    ? formatDateTime(data.createdOn, "long") ?? "--"
+                    : "--"}
+                </Typography>
+              </Stack>
+            </Box>
+          </Box>
+        </Stack>
+      </Paper>
+
+      <Box
+        sx={{
+          display: "grid",
+          gridTemplateColumns: { xs: "1fr", md: "1fr 360px" },
+          gap: 3,
+          alignItems: "start",
+        }}
+      >
+        <Stack spacing={3}>
+          <Paper variant="outlined" sx={{ p: 2, borderRadius: 0 }}>
+            <Typography variant="subtitle2" color="text.primary" sx={{ mb: 1.5 }}>
+              Request Details
+            </Typography>
+            {requestDetailSections.length > 0 ? (
+              requestDetailSections.map((section, index) => (
+                <Box key={`${section.label}-${index}`} sx={{ mb: 1.5 }}>
+                  <Typography
+                    variant="caption"
+                    color="text.secondary"
+                    sx={{ display: "block", mb: 0.5 }}
+                  >
+                    {section.label}
+                  </Typography>
+                  <Typography
+                    variant="body2"
+                    color="text.primary"
+                    sx={{ whiteSpace: "pre-wrap" }}
+                  >
+                    {section.value}
+                  </Typography>
+                  {index < requestDetailSections.length - 1 && (
+                    <Box
+                      sx={{
+                        mt: 1.5,
+                        borderBottom: "1px solid",
+                        borderColor: "divider",
+                      }}
+                    />
+                  )}
+                </Box>
+              ))
+            ) : (
+              <Typography
+                variant="body2"
+                color="text.primary"
+                sx={{ whiteSpace: "pre-wrap" }}
+              >
+                {stripHtml(data?.description ?? "") || "--"}
+              </Typography>
+            )}
+          </Paper>
+
+          <Paper variant="outlined" sx={{ p: 2, borderRadius: 0 }}>
+            <Typography
+              variant="subtitle2"
+              color="text.primary"
+              sx={{ mb: 1.5, display: "flex", alignItems: "center", gap: 0.5 }}
+            >
+              <MessageSquare size={18} />
+              Communication
+            </Typography>
+            <Stack spacing={2} sx={{ mb: 2 }}>
+              {commentsToShow.length === 0 ? (
+                <Typography variant="body2" color="text.secondary">
+                  No comments yet.
+                </Typography>
+              ) : (
+                commentsToShow.map((comment: CaseComment) => (
+                  <Stack
+                    key={comment.id}
+                    direction="row"
+                    spacing={1.5}
+                    alignItems="flex-start"
+                  >
+                    <Avatar
+                      sx={{
+                        width: 32,
+                        height: 32,
+                        fontSize: "0.75rem",
+                        bgcolor: "action.hover",
+                      }}
+                    >
+                      {getInitials(comment.createdBy)}
+                    </Avatar>
+                    <Box sx={{ flex: 1, minWidth: 0 }}>
+                      <Typography
+                        variant="caption"
+                        color="text.secondary"
+                        sx={{ display: "block" }}
+                      >
+                        {comment.createdBy} • {formatRelativeTime(comment.createdOn)}
+                      </Typography>
+                      <Typography
+                        variant="body2"
+                        color="text.primary"
+                        sx={{ mt: 0.5, whiteSpace: "pre-wrap" }}
+                      >
+                        {stripHtml(comment.content)}
+                      </Typography>
+                    </Box>
+                  </Stack>
+                ))
+              )}
+            </Stack>
+            <Stack direction="row" spacing={1} alignItems="flex-start">
+              <TextField
+                fullWidth
+                multiline
+                minRows={2}
+                placeholder="Add a comment..."
+                value={commentText}
+                onChange={(e) => setCommentText(e.target.value)}
+                size="small"
+              />
+              <Button
+                variant="contained"
+                color="primary"
+                onClick={handleAddComment}
+                disabled={!commentText.trim() || postComment.isPending}
+              >
+                Add comment
+              </Button>
+            </Stack>
+          </Paper>
+        </Stack>
+
+        <Stack spacing={3}>
+          <Paper variant="outlined" sx={{ p: 2, borderRadius: 0 }}>
+            <Typography variant="subtitle2" color="text.primary" sx={{ mb: 1.5 }}>
+              Assignment
+            </Typography>
+            <Stack spacing={1.5}>
+              <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                <Users size={16} />
+                <Typography variant="body2" color="text.primary">
+                  Assigned To: {assignedLabel ?? "--"}
+                </Typography>
+              </Box>
+              {data?.issueType?.label && (
+                <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                  <Folder size={16} />
+                  <Typography variant="body2" color="text.primary">
+                    Categorized: {data.issueType.label}
+                  </Typography>
+                </Box>
+              )}
+              <Box sx={{ display: "flex", alignItems: "center", gap: 1, mt: 1 }}>
+                <CirclePlay size={14} />
+                <Typography variant="caption" color="text.secondary">
+                  Manage service request status
+                </Typography>
+              </Box>
+              <Stack direction="row" spacing={1} flexWrap="wrap">
+                {CASE_STATUS_ACTIONS.filter((action) =>
+                  getAvailableCaseActions(statusLabel).includes(action.label),
+                )
+                  .filter((action) => action.label !== "Open Related Case")
+                  .map(({ label, Icon }) => {
+                    const stateLabel = ACTION_TO_CASE_STATE_LABEL[label];
+                    const stateKeyEntry = caseStates?.find(
+                      (s) =>
+                        s.label.toLowerCase() ===
+                        (stateLabel ?? "").toLowerCase(),
+                    );
+                    const stateKey =
+                      stateKeyEntry && !Number.isNaN(Number(stateKeyEntry.id))
+                        ? Number(stateKeyEntry.id)
+                        : undefined;
+                    const canPatch = stateKey != null && !!caseId;
+                    const isThisPending =
+                      patchCase.isPending && pendingActionLabel === label;
+
+                    return (
+                      <Button
+                        key={label}
+                        variant="outlined"
+                        size="small"
+                        startIcon={
+                          isThisPending ? (
+                            <Box
+                              sx={{
+                                width: 12,
+                                height: 12,
+                                borderRadius: "50%",
+                                border: "2px solid currentColor",
+                              }}
+                            />
+                          ) : (
+                            <Icon size={12} />
+                          )
+                        }
+                        disabled={patchCase.isPending || !canPatch}
+                        onClick={
+                          canPatch
+                            ? () => {
+                                setPendingActionLabel(label);
+                                patchCase.mutate(
+                                  { stateKey },
+                                  {
+                                    onSuccess: () => {
+                                      showSuccess(
+                                        "Service request status updated successfully.",
+                                      );
+                                    },
+                                    onError: (err) => {
+                                      showError(
+                                        err?.message ??
+                                          "Failed to update service request status. Please try again.",
+                                      );
+                                    },
+                                    onSettled: () => {
+                                      setPendingActionLabel(null);
+                                    },
+                                  },
+                                );
+                              }
+                            : undefined
+                        }
+                        sx={{
+                          fontSize: "0.7rem",
+                          minHeight: 0,
+                          py: 0.5,
+                          px: 1,
+                          textTransform: "none",
+                        }}
+                      >
+                        {isThisPending
+                          ? toPresentContinuousActionLabel(label)
+                          : toPresentTenseActionLabel(label)}
+                      </Button>
+                    );
+                  })}
+              </Stack>
+            </Stack>
+          </Paper>
+
+          <Paper variant="outlined" sx={{ p: 2, borderRadius: 0 }}>
+            <Typography variant="subtitle2" color="text.primary" sx={{ mb: 1.5 }}>
+              Activity Timeline
+            </Typography>
+            <Stack spacing={1.5}>
+              {timelineEntries.map((entry, idx) => (
+                <Stack
+                  key={`${entry.type}-${entry.date}-${idx}`}
+                  direction="row"
+                  spacing={1.5}
+                  alignItems="flex-start"
+                >
+                  <Box
+                    sx={{
+                      width: 10,
+                      height: 10,
+                      borderRadius: "50%",
+                      bgcolor: idx === 0 ? "success.main" : "primary.main",
+                      mt: 0.75,
+                      flexShrink: 0,
+                    }}
+                  />
+                  <Box>
+                    <Typography
+                      variant="caption"
+                      fontWeight={600}
+                      color="text.primary"
+                    >
+                      {entry.label}
+                    </Typography>
+                    {entry.desc && (
+                      <Typography
+                        variant="caption"
+                        color="text.secondary"
+                        display="block"
+                      >
+                        {entry.desc}
+                      </Typography>
+                    )}
+                    <Typography
+                      variant="caption"
+                      color="text.secondary"
+                      display="block"
+                    >
+                      {formatRelativeTime(entry.date)}
+                    </Typography>
+                  </Box>
+                </Stack>
+              ))}
+            </Stack>
+          </Paper>
+
+          <Paper variant="outlined" sx={{ p: 2, borderRadius: 0 }}>
+            <Typography variant="subtitle2" color="text.primary" sx={{ mb: 1.5 }}>
+              Related Information
+            </Typography>
+            <Stack spacing={1.5}>
+              {data?.project?.label && (
+                <Box sx={{ display: "flex", flexDirection: "column", gap: 0.5 }}>
+                  <Stack direction="row" alignItems="center" spacing={1}>
+                    <Box color="text.secondary">
+                      <Globe size={16} />
+                    </Box>
+                    <Typography variant="caption" color="text.secondary">
+                      Project
+                    </Typography>
+                  </Stack>
+                  <Typography variant="body2" color="text.primary">
+                    {data.project.label}
+                  </Typography>
+                </Box>
+              )}
+              <Box sx={{ display: "flex", flexDirection: "column", gap: 0.5 }}>
+                <Stack direction="row" alignItems="center" spacing={1}>
+                  <Box color="text.secondary">
+                    <Calendar size={16} />
+                  </Box>
+                  <Typography variant="caption" color="text.secondary">
+                    Last Updated
+                  </Typography>
+                </Stack>
+                <Typography variant="body2" color="text.primary">
+                  {data?.updatedOn
+                    ? formatDateTime(data.updatedOn, "long") ?? "--"
+                    : "--"}
+                </Typography>
+              </Box>
+            </Stack>
+          </Paper>
+        </Stack>
+      </Box>
+    </Box>
+  );
+}

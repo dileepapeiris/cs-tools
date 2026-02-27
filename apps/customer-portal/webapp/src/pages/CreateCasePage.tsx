@@ -70,7 +70,6 @@ import UploadAttachmentModal from "@components/support/case-details/attachments-
 
 const DEFAULT_CASE_TITLE = "Support case";
 const DEFAULT_CASE_DESCRIPTION = "Please describe your issue here.";
-const SECURITY_REPORT_MAX_FILE_SIZE_BYTES = 15 * 1024 * 1024;
 
 const RELATED_DESCRIPTION_PREFIX_HTML =
   "<p>-- This is the previous description (Edit or Delete if you want to alter) --</p>";
@@ -504,42 +503,6 @@ export default function CreateCasePage(): JSX.Element {
     });
   };
 
-  const handleSecurityReportFilesSelect = useCallback(
-    (files: File[]) => {
-      const validFiles = files.filter((file) => {
-        if (file.size > SECURITY_REPORT_MAX_FILE_SIZE_BYTES) {
-          showError(`File '${file.name}' exceeds 15 MB limit.`);
-          return false;
-        }
-        return true;
-      });
-
-      if (validFiles.length === 0) {
-        return;
-      }
-
-      setAttachments((prev) => {
-        const existing = new Set(prev.map((item) => fileSignature(item.file)));
-        const additions: AttachmentItem[] = [];
-
-        for (const file of validFiles) {
-          const signature = fileSignature(file);
-          if (existing.has(signature)) {
-            continue;
-          }
-          existing.add(signature);
-          additions.push({
-            id: `att-${++attachmentIdCounterRef.current}-${Date.now()}`,
-            file,
-          });
-        }
-
-        return [...prev, ...additions];
-      });
-    },
-    [showError],
-  );
-
   const fileToBase64Content = (file: File): Promise<string> =>
     new Promise((resolve, reject) => {
       const reader = new FileReader();
@@ -731,7 +694,6 @@ export default function CreateCasePage(): JSX.Element {
             attachments={attachments.map((a) => a.file)}
             onAttachmentClick={handleAttachmentClick}
             onAttachmentRemove={handleAttachmentRemove}
-            onSecurityReportFilesSelect={handleSecurityReportFilesSelect}
             storageKey={
               !relatedCase && projectId
                 ? `create-case-draft-${projectId}`

@@ -34,7 +34,7 @@ import {
   Upload,
   X,
 } from "@wso2/oxygen-ui-icons-react";
-import { useRef, useState, type JSX } from "react";
+import { useState, type JSX } from "react";
 import { CaseSeverity, CaseSeverityLevel } from "@constants/supportConstants";
 import type { CaseMetadataResponse } from "@models/responses";
 import { getSeverityColor } from "@utils/support";
@@ -58,7 +58,6 @@ export interface CaseDetailsSectionProps {
   attachments?: File[];
   onAttachmentClick?: () => void;
   onAttachmentRemove?: (index: number) => void;
-  onSecurityReportFilesSelect?: (files: File[]) => void;
   isRelatedCaseMode?: boolean;
   isTitleDisabled?: boolean;
   relatedCaseNumber?: string;
@@ -87,13 +86,11 @@ export function CaseDetailsSection({
   attachments = [],
   onAttachmentClick,
   onAttachmentRemove,
-  onSecurityReportFilesSelect,
   isRelatedCaseMode = false,
   isTitleDisabled = false,
   relatedCaseNumber,
   isSecurityReport = false,
 }: CaseDetailsSectionProps): JSX.Element {
-  const securityReportFileInputRef = useRef<HTMLInputElement>(null);
   const [isEditing, setIsEditing] = useState(false);
   const effectiveEditing = isRelatedCaseMode || isEditing;
   const titleReadOnly = isTitleDisabled || !effectiveEditing;
@@ -306,33 +303,31 @@ export function CaseDetailsSection({
             </Box>
 
             <Paper
+              role="button"
+              tabIndex={0}
+              onClick={() => onAttachmentClick?.()}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" || e.key === " ") {
+                  e.preventDefault();
+                  onAttachmentClick?.();
+                }
+              }}
               sx={{
                 border: 1,
                 borderColor: "divider",
                 p: 2,
                 bgcolor: "action.hover",
+                cursor: "pointer",
                 transition: "border-color 0.2s ease",
                 "&:hover": {
                   borderColor: "warning.main",
                 },
+                "&:focus-visible": {
+                  outline: "2px solid",
+                  outlineColor: "warning.main",
+                },
               }}
             >
-              <input
-                ref={securityReportFileInputRef}
-                id="security-report-files"
-                type="file"
-                multiple
-                accept=".pdf,.doc,.docx,.txt,.csv,.xls,.xlsx,.html,.json"
-                onChange={(e) => {
-                  const selectedFiles = Array.from(e.target.files ?? []);
-                  if (selectedFiles.length > 0) {
-                    onSecurityReportFilesSelect?.(selectedFiles);
-                  }
-                  e.target.value = "";
-                }}
-                style={{ display: "none" }}
-              />
-
               <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
                 <Box
                   sx={{
@@ -351,15 +346,7 @@ export function CaseDetailsSection({
 
                 <Box sx={{ minWidth: 0, flex: 1 }}>
                   <Typography
-                    component="button"
-                    type="button"
-                    onClick={() => securityReportFileInputRef.current?.click()}
                     sx={{
-                      border: 0,
-                      p: 0,
-                      m: 0,
-                      background: "none",
-                      cursor: "pointer",
                       color: "warning.main",
                       fontSize: "0.875rem",
                       fontWeight: 500,
@@ -367,9 +354,12 @@ export function CaseDetailsSection({
                   >
                     Upload files
                   </Typography>
-                  <Typography variant="caption" color="text.secondary">
-                    {" "}
-                    PDF, DOCX, TXT, CSV or other formats • Max 10MB per file
+                  <Typography
+                    variant="caption"
+                    color="text.secondary"
+                    sx={{ mt: 1, display: "block" }}
+                  >
+                    PDF, DOCX, TXT, CSV or other formats • Max 15MB per file
                   </Typography>
                 </Box>
               </Box>

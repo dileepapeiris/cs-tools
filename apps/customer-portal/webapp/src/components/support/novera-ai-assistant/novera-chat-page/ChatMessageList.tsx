@@ -25,8 +25,6 @@ interface ChatMessageListProps {
   messagesEndRef: RefObject<HTMLDivElement | null>;
   onCreateCase?: () => void;
   isCreateCaseLoading?: boolean;
-  onSlotSelection?: (messageId: string, slot: string, value: string) => void;
-  onChooseSlots?: (messageId: string) => void;
 }
 
 /**
@@ -42,8 +40,6 @@ export default function ChatMessageList({
   messagesEndRef,
   onCreateCase,
   isCreateCaseLoading = false,
-  onSlotSelection,
-  onChooseSlots,
 }: ChatMessageListProps): JSX.Element {
   return (
     <Box
@@ -64,8 +60,6 @@ export default function ChatMessageList({
             key={msg.id}
             message={msg}
             onCreateCase={onCreateCase}
-            onSlotSelection={onSlotSelection}
-            onChooseSlots={onChooseSlots}
             isCreateCaseLoading={isCreateCaseLoading}
           />
         ),

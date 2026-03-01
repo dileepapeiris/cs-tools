@@ -14,8 +14,8 @@
 // specific language governing permissions and limitations
 // under the License.
 
-import { Box, IconButton, Chip, Tooltip } from "@wso2/oxygen-ui";
-import { Send, Bold } from "@wso2/oxygen-ui-icons-react";
+import { Box, IconButton, Tooltip } from "@wso2/oxygen-ui";
+import { Send, Sparkles } from "@wso2/oxygen-ui-icons-react";
 import { type JSX, useState } from "react";
 import Editor from "@components/common/rich-text-editor/Editor";
 import { htmlToPlainText } from "@utils/richTextEditor";
@@ -26,14 +26,13 @@ interface ChatInputProps {
   onSend: () => void;
   isSending?: boolean;
   resetTrigger?: number;
-  filledSlots?: { label: string; value: string }[];
 }
 
 const CHAT_PLACEHOLDER = "Type your message...";
 
 /**
  * Renders the input area for the Novera Chat page with rich text editor.
- * Single line by default, extends on Shift+Enter. Same toolbar as describe-issue.
+ * Single line by default, extends on Shift+Enter up to 5 lines, then scrollable.
  *
  * @returns The ChatInput JSX element.
  */
@@ -42,64 +41,90 @@ export default function ChatInput({
   setInputValue,
   onSend,
   isSending = false,
-  filledSlots = [],
   resetTrigger = 0,
 }: ChatInputProps): JSX.Element {
   const plainText = htmlToPlainText(inputValue).trim();
   const isSendDisabled = !plainText || isSending;
   const [showToolbar, setShowToolbar] = useState(false);
 
+  // Calculate max height for 5 lines (line-height is ~24px in body2)
+  const singleLineHeight = 40;
+  const maxLinesHeight = 120;
+  const BUTTON_TOP_WITHOUT_TOOLBAR = 8;
+  const BUTTON_TOP_WITH_TOOLBAR = 56;
+
   return (
     <Box sx={{ p: 2, bgcolor: "background.paper", flexShrink: 0 }}>
       <Box sx={{ display: "flex", gap: 1, alignItems: "flex-end" }}>
-        <Box sx={{ flex: 1, minWidth: 0 }}>
-          {filledSlots.length > 0 && (
-            <Box sx={{ mb: 1, display: "flex", gap: 1, flexWrap: "wrap" }}>
-              {filledSlots.map((slot) => (
-                <Chip
-                  key={`${slot.label}:${slot.value}`}
-                  label={`${slot.label}: ${slot.value}`}
-                  size="small"
-                  color="primary"
-                  variant="outlined"
-                />
-              ))}
-            </Box>
-          )}
-          <Editor
-            id="novera-chat-input-editor"
-            value={inputValue}
-            onChange={setInputValue}
-            placeholder={CHAT_PLACEHOLDER}
-            minHeight={40}
-            showToolbar={showToolbar}
-            toolbarVariant="describeIssue"
-            onSubmitKeyDown={() => !isSendDisabled && onSend()}
-            disabled={isSending}
-            resetTrigger={resetTrigger}
-          />
-        </Box>
-        <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
-          <Tooltip title={showToolbar ? "Hide formatting" : "Show formatting"}>
-            <IconButton
-              onClick={() => setShowToolbar(!showToolbar)}
-              color="default"
-              sx={{ flexShrink: 0 }}
-              aria-label={showToolbar ? "Hide formatting" : "Show formatting"}
-            >
-              <Bold size={18} />
-            </IconButton>
-          </Tooltip>
-          <IconButton
-            disabled={isSendDisabled}
-            onClick={onSend}
-            color="warning"
-            sx={{ flexShrink: 0 }}
-            aria-label="Send message"
+        <Box sx={{ flex: 1, minWidth: 0, position: "relative" }}>
+          {/* Toolbar toggle button as prefix */}
+          <Box
+            sx={{
+              position: "absolute",
+              left: 8,
+              top: showToolbar
+                ? BUTTON_TOP_WITH_TOOLBAR
+                : BUTTON_TOP_WITHOUT_TOOLBAR,
+              zIndex: 10,
+              transition: "top 0.2s ease",
+            }}
           >
-            <Send size={18} />
-          </IconButton>
+            <Tooltip
+              title={showToolbar ? "Hide formatting" : "Show formatting"}
+            >
+              <IconButton
+                onClick={() => setShowToolbar(!showToolbar)}
+                color="default"
+                size="small"
+                sx={{
+                  flexShrink: 0,
+                  width: 32,
+                  height: 32,
+                  "&:hover": {
+                    backgroundColor: "action.hover",
+                  },
+                }}
+                aria-label={showToolbar ? "Hide formatting" : "Show formatting"}
+              >
+                <Sparkles size={16} />
+              </IconButton>
+            </Tooltip>
+          </Box>
+
+          {/* Editor with adjusted padding for prefix button */}
+          <Box
+            sx={{
+              "& .MuiPaper-root": {
+                pl: 6, // Add padding-left to make room for the button
+              },
+            }}
+          >
+            <Editor
+              id="novera-chat-input-editor"
+              value={inputValue}
+              onChange={setInputValue}
+              placeholder={CHAT_PLACEHOLDER}
+              minHeight={singleLineHeight}
+              maxHeight={maxLinesHeight}
+              showToolbar={showToolbar}
+              toolbarVariant="describeIssue"
+              onSubmitKeyDown={() => !isSendDisabled && onSend()}
+              disabled={isSending}
+              resetTrigger={resetTrigger}
+            />
+          </Box>
         </Box>
+
+        {/* Send button */}
+        <IconButton
+          disabled={isSendDisabled}
+          onClick={onSend}
+          color="warning"
+          sx={{ flexShrink: 0 }}
+          aria-label="Send message"
+        >
+          <Send size={18} />
+        </IconButton>
       </Box>
     </Box>
   );

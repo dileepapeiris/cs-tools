@@ -43,8 +43,9 @@ const SubscriptionDetails = ({
   isLoading,
   isError,
 }: SubscriptionDetailsProps): JSX.Element => {
-  const isDateInvalid =
-    isError || !startDate || startDate === "--" || !endDate || endDate === "--";
+  const isDateMissing =
+    !startDate || startDate === "--" || !endDate || endDate === "--";
+  const isDateInvalid = isError || isDateMissing;
 
   const subscriptionStatus = getSubscriptionStatus(endDate || "");
   const subscriptionColor = getSubscriptionColor(subscriptionStatus);
@@ -69,8 +70,12 @@ const SubscriptionDetails = ({
 
         {isLoading ? (
           <Skeleton variant="rounded" width={70} height={24} />
-        ) : isDateInvalid ? (
+        ) : isError ? (
           <ErrorIndicator entityName="subscription status" />
+        ) : isDateMissing ? (
+          <Typography variant="caption" color="text.secondary">
+            Not available
+          </Typography>
         ) : (
           <Chip
             label={subscriptionStatus}
@@ -114,8 +119,12 @@ const SubscriptionDetails = ({
           </Typography>
           {isLoading ? (
             <Skeleton variant="text" width="60%" />
-          ) : isDateInvalid ? (
+          ) : isError ? (
             <ErrorIndicator entityName="subscription details" />
+          ) : isDateMissing ? (
+            <Typography variant="body2" color="text.secondary">
+              Not available
+            </Typography>
           ) : (
             <Typography variant="body2">{startDate}</Typography>
           )}
@@ -128,8 +137,12 @@ const SubscriptionDetails = ({
           </Typography>
           {isLoading ? (
             <Skeleton variant="text" width={100} />
-          ) : isDateInvalid ? (
+          ) : isError ? (
             <ErrorIndicator entityName="subscription status" />
+          ) : isDateMissing ? (
+            <Typography variant="body2" color="text.secondary">
+              Not available
+            </Typography>
           ) : (
             <Typography variant="body2">
               {subscriptionStatus === SUBSCRIPTION_STATUS.EXPIRED
@@ -147,8 +160,12 @@ const SubscriptionDetails = ({
           </Typography>
           {isLoading ? (
             <Skeleton variant="text" width={80} />
-          ) : isDateInvalid ? (
+          ) : isError ? (
             <ErrorIndicator entityName="subscription details" />
+          ) : isDateMissing ? (
+            <Typography variant="body2" color="text.secondary">
+              Not available
+            </Typography>
           ) : (
             <Typography variant="body2">{endDate}</Typography>
           )}

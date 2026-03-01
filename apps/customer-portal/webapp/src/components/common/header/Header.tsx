@@ -14,12 +14,11 @@
 // specific language governing permissions and limitations
 // under the License.
 
-import { useState, useEffect, type JSX, useMemo, useCallback } from "react";
+import { useEffect, type JSX, useMemo, useCallback } from "react";
 import { Header as HeaderUI } from "@wso2/oxygen-ui";
 import { useNavigate, useLocation, useParams } from "react-router";
-import useGetProjects from "@api/useGetProjects";
+import useInfiniteProjects, { flattenProjectPages } from "@api/useGetProjects";
 import { useLogger } from "@hooks/useLogger";
-import type { ProjectListItem } from "@models/responses";
 import Brand from "@components/common/header/Brand";
 import Actions from "@components/common/header/Actions";
 import SearchBar from "@components/common/header/SearchBar";
@@ -47,18 +46,25 @@ export default function Header({ onToggleSidebar }: HeaderProps): JSX.Element {
   const { isLoading: isAuthLoading } = useAsgardeo();
 
   const isProjectHub = location.pathname === "/";
+
   const {
-    data: projectsResponse,
+    data,
     isLoading,
     isError,
-  } = useGetProjects({}, true);
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+  } = useInfiniteProjects({ pageSize: 50 });
 
-  const projects = useMemo(
-    () => projectsResponse?.projects || [],
-    [projectsResponse?.projects],
-  );
+  // Flatten all pages into a single projects array
+  const projects = useMemo(() => flattenProjectPages(data), [data]);
 
-  const projectFromUrl = projects.find((project) => project.id === projectId);
+  // Auto-fetch all pages on mount to populate dropdown
+  useEffect(() => {
+    if (hasNextPage && !isFetchingNextPage && !isLoading && !isError) {
+      fetchNextPage();
+    }
+  }, [hasNextPage, isFetchingNextPage, isLoading, isError, fetchNextPage]);
 
   useEffect(() => {
     if (isError) {
@@ -72,25 +78,10 @@ export default function Header({ onToggleSidebar }: HeaderProps): JSX.Element {
     }
   }, [projects.length, logger]);
 
-  const [selectedProject, setProject] = useState<ProjectListItem | undefined>(
-    projectFromUrl,
-  );
-
-  useEffect(() => {
-    if (projectId) {
-      const project = projects.find((p) => p.id === projectId);
-
-      if (project) {
-        if (project.id !== selectedProject?.id) {
-          setProject(project);
-        }
-      } else {
-        setProject(undefined);
-      }
-    } else if (selectedProject) {
-      setProject(undefined);
-    }
-  }, [projectId, selectedProject?.id, projects]);
+  const selectedProject = useMemo(() => {
+    if (!projectId) return undefined;
+    return projects.find((p) => p.id === projectId);
+  }, [projectId, projects]);
 
   /**
    * Handles the project change.
@@ -102,8 +93,6 @@ export default function Header({ onToggleSidebar }: HeaderProps): JSX.Element {
       const project = projects.find((p) => p.id === id);
       if (project) {
         logger.debug(`Switching to project: ${project.name} (${project.id})`);
-
-        setProject(project);
 
         const subPath = location.pathname.split("/").slice(2).join("/");
 

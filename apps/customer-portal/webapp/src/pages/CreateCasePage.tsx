@@ -14,15 +14,7 @@
 // specific language governing permissions and limitations
 // under the License.
 
-import {
-  Box,
-  Button,
-  CircularProgress,
-  Dialog,
-  DialogContent,
-  Typography,
-  Grid,
-} from "@wso2/oxygen-ui";
+import { Box, Button, Grid } from "@wso2/oxygen-ui";
 import { CircleCheck } from "@wso2/oxygen-ui-icons-react";
 import {
   useState,
@@ -571,13 +563,18 @@ export default function CreateCasePage(): JSX.Element {
       severityKey = parsedSeverity;
     }
 
-    const encodedAttachments: string[] = [];
+    const encodedAttachments: Array<{ file: string; name: string }> = [];
     if (attachments.length > 0) {
       setIsPreparingAttachments(true);
       try {
         for (const item of attachments) {
           const encodedAttachment = await fileToBase64Content(item.file);
-          encodedAttachments.push(encodedAttachment);
+          const attachmentName =
+            attachmentNamesRef.current.get(item.id) || item.file.name;
+          encodedAttachments.push({
+            file: encodedAttachment,
+            name: attachmentName,
+          });
         }
       } catch (error) {
         const message =
@@ -592,10 +589,10 @@ export default function CreateCasePage(): JSX.Element {
     }
 
     const payload: CreateCaseRequest = {
-      attachments: encodedAttachments,
-      caseType: isSecurityReport
+      ...(encodedAttachments.length > 0 && { attachments: encodedAttachments }),
+      type: isSecurityReport
         ? CaseType.SECURITY_REPORT_ANALYSIS
-        : CaseType.CASE,
+        : CaseType.DEFAULT_CASE,
       deploymentId: String(deploymentMatch.id),
       description: descriptionPlain,
       issueTypeKey,
@@ -804,30 +801,6 @@ export default function CreateCasePage(): JSX.Element {
         onClose={() => setIsAttachmentModalOpen(false)}
         onSelect={handleSelectAttachment}
       />
-
-      <Dialog
-        open={isSecurityReport && (isPreparingAttachments || isCreatePending)}
-        onClose={() => undefined}
-        maxWidth="xs"
-        fullWidth
-      >
-        <DialogContent
-          sx={{
-            py: 4,
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-            gap: 2,
-          }}
-        >
-          <CircularProgress size={28} />
-          <Typography variant="body2" color="text.secondary" textAlign="center">
-            {isPreparingAttachments
-              ? "Preparing report attachments..."
-              : "Submitting security report..."}
-          </Typography>
-        </DialogContent>
-      </Dialog>
     </Box>
   );
 }

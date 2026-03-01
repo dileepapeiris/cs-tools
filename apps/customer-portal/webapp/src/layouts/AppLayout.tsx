@@ -24,6 +24,10 @@ import GlobalNotificationBanner from "@components/common/notification-banner/Glo
 import Footer from "@components/common/footer/Footer";
 import Header from "@components/common/header/Header";
 import SideBar from "@components/common/side-nav-bar/SideBar";
+import {
+  getSidebarCollapsed,
+  setSidebarCollapsed,
+} from "@utils/settingsStorage";
 /**
  * AppLayout component.
  *
@@ -44,10 +48,15 @@ export default function AppLayout({ children }: AppLayoutProps): JSX.Element {
   }, [location.pathname]);
 
   const { state: shellState, actions: shellActions } = useAppShell({
-    initialCollapsed: false,
+    initialCollapsed: getSidebarCollapsed(),
   });
 
   const { isVisible } = useLoader();
+
+  // Persist sidebar collapsed state to localStorage
+  useEffect(() => {
+    setSidebarCollapsed(shellState.sidebarCollapsed);
+  }, [shellState.sidebarCollapsed]);
 
   const isProjectHub = location.pathname === "/";
   const isCaseDetailsPage = /\/[^/]+\/support\/cases\/[^/]+$/.test(

@@ -17,7 +17,9 @@
 import { useState, useEffect, type JSX, useMemo, useCallback } from "react";
 import { Header as HeaderUI } from "@wso2/oxygen-ui";
 import { useNavigate, useLocation, useParams } from "react-router";
-import useGetProjects from "@api/useGetProjects";
+import useInfiniteProjects, {
+  flattenProjectPages,
+} from "@api/useInfiniteProjects";
 import { useLogger } from "@hooks/useLogger";
 import type { ProjectListItem } from "@models/responses";
 import Brand from "@components/common/header/Brand";
@@ -47,16 +49,25 @@ export default function Header({ onToggleSidebar }: HeaderProps): JSX.Element {
   const { isLoading: isAuthLoading } = useAsgardeo();
 
   const isProjectHub = location.pathname === "/";
+
   const {
-    data: projectsResponse,
+    data,
     isLoading,
     isError,
-  } = useGetProjects({}, true);
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+  } = useInfiniteProjects({ pageSize: 50 });
 
-  const projects = useMemo(
-    () => projectsResponse?.projects || [],
-    [projectsResponse?.projects],
-  );
+  // Flatten all pages into a single projects array
+  const projects = useMemo(() => flattenProjectPages(data), [data]);
+
+  // Auto-fetch all pages on mount to populate dropdown
+  useEffect(() => {
+    if (hasNextPage && !isFetchingNextPage && !isLoading) {
+      fetchNextPage();
+    }
+  }, [hasNextPage, isFetchingNextPage, isLoading, fetchNextPage]);
 
   const projectFromUrl = projects.find((project) => project.id === projectId);
 

@@ -59,7 +59,13 @@ export default function useGetProjects(
         }
 
         const requestUrl = `${baseUrl}/projects/search`;
-        const body = {};
+        const body: SearchProjectsRequest = {
+          pagination: { offset, limit },
+        };
+
+        if (searchData?.filters) {
+          body.filters = searchData.filters;
+        }
 
         const response = await fetchFn(requestUrl, {
           method: "POST",

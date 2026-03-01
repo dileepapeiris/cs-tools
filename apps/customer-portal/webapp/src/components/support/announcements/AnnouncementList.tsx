@@ -14,13 +14,16 @@
 // specific language governing permissions and limitations
 // under the License.
 
-import { Box, Form, Typography } from "@wso2/oxygen-ui";
+import { Box, Chip, Form, Typography, alpha, useTheme } from "@wso2/oxygen-ui";
 import { Calendar, FileText } from "@wso2/oxygen-ui-icons-react";
-import type { JSX } from "react";
+import type { JSX, ReactElement } from "react";
 import type { CaseListItem } from "@models/responses";
 import {
   formatUtcToLocalNoTimezone,
   stripHtml,
+  getStatusColor,
+  getStatusIconElement,
+  resolveColorFromTheme,
 } from "@utils/support";
 import AllCasesListSkeleton from "@components/support/all-cases/AllCasesListSkeleton";
 
@@ -42,6 +45,8 @@ export default function AnnouncementList({
   isLoading,
   onCaseClick,
 }: AnnouncementListProps): JSX.Element {
+  const theme = useTheme();
+
   if (isLoading) {
     return <AllCasesListSkeleton compact />;
   }
@@ -67,19 +72,59 @@ export default function AnnouncementList({
   return (
     <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
       {cases.map((caseItem) => {
+        const statusLabel = caseItem.status?.label;
+        const statusColorPath = getStatusColor(statusLabel ?? undefined);
+        const resolvedStatusColor = resolveColorFromTheme(
+          statusColorPath,
+          theme,
+        );
+        const statusChipIcon = getStatusIconElement(statusLabel, 12);
+
         const cardContent = (
           <>
             <Form.CardHeader
               sx={{ p: 0 }}
               title={
-              <Typography
-                variant="body2"
-                fontWeight={500}
-                color="text.primary"
-                sx={{ mb: 1 }}
+              <Box
+                sx={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 1,
+                  flexWrap: "wrap",
+                }}
               >
-                {caseItem.number || "--"}
-              </Typography>
+                <Typography
+                  variant="body2"
+                  fontWeight={500}
+                  color="text.primary"
+                >
+                  {caseItem.number || "--"}
+                </Typography>
+                {statusLabel && (
+                  <Chip
+                    size="small"
+                    variant="outlined"
+                    label={statusLabel}
+                    icon={statusChipIcon as ReactElement}
+                    sx={{
+                      bgcolor: alpha(resolvedStatusColor, 0.1),
+                      color: resolvedStatusColor,
+                      height: 20,
+                      fontSize: "0.75rem",
+                      px: 0,
+                      "& .MuiChip-icon": {
+                        color: "inherit",
+                        ml: "6px",
+                        mr: "6px",
+                      },
+                      "& .MuiChip-label": {
+                        pl: 0,
+                        pr: "6px",
+                      },
+                    }}
+                  />
+                )}
+              </Box>
             }
           />
 

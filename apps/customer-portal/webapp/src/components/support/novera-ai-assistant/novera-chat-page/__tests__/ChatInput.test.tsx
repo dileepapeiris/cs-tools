@@ -46,8 +46,16 @@ vi.mock("@wso2/oxygen-ui", () => ({
 vi.mock("@wso2/oxygen-ui-icons-react", () => ({
   Send: () => <svg data-testid="icon-send" />,
   Sparkles: () => <svg data-testid="icon-sparkles" />,
-  FileText: () => <svg data-testid="icon-file-text" />,
 }));
+
+// Mock Tooltip component
+vi.mock("@wso2/oxygen-ui", async () => {
+  const actual: any = await vi.importActual("@wso2/oxygen-ui");
+  return {
+    ...actual,
+    Tooltip: ({ children }: any) => <div data-testid="tooltip">{children}</div>,
+  };
+});
 
 // Mock Editor as a simple input for testing
 vi.mock("@components/common/rich-text-editor/Editor", () => ({

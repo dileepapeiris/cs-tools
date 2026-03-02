@@ -41,7 +41,10 @@ export const getTimeCardStateColorPath = (
 ): string => {
   if (!state?.id) return "text.secondary";
 
-  switch (state.id) {
+  // Normalize state ID to match TIME_CARD_STATE constants (title case)
+  const normalizedId = state.id.charAt(0).toUpperCase() + state.id.slice(1).toLowerCase();
+
+  switch (normalizedId) {
     case TIME_CARD_STATE.APPROVED:
       return "success.main";
     case TIME_CARD_STATE.SUBMITTED:

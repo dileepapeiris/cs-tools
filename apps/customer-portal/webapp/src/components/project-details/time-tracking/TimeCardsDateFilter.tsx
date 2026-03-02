@@ -152,7 +152,7 @@ export default function TimeCardsDateFilter({
             >
               <MenuItem value="">All States</MenuItem>
               {timeCardStates.map((stateOption) => (
-                <MenuItem key={stateOption.id} value={stateOption.label}>
+                <MenuItem key={stateOption.id} value={stateOption.id}>
                   {stateOption.label}
                 </MenuItem>
               ))}

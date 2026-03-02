@@ -56,12 +56,13 @@ export default function ProjectTimeTracking({
   projectId,
 }: ProjectTimeTrackingProps): JSX.Element {
   const { startDate: defaultStart, endDate: defaultEnd } = useMemo(
-    getDefaultDateRange,
+    () => getDefaultDateRange(),
     [],
   );
   const [startDate, setStartDate] = useState(defaultStart);
   const [endDate, setEndDate] = useState(defaultEnd);
   const [state, setState] = useState("");
+  const [showLoadMore, setShowLoadMore] = useState(false);
   const autoFetchCountRef = useRef(0);
   const maxAutoFetches = 3;
 
@@ -92,8 +93,14 @@ export default function ProjectTimeTracking({
 
   // Auto-fetch pages with limit to prevent request bursts
   useEffect(() => {
-    if (!data || !hasNextPage) return;
-    if (autoFetchCountRef.current >= maxAutoFetches) return;
+    if (!data || !hasNextPage) {
+      setShowLoadMore(false);
+      return;
+    }
+    if (autoFetchCountRef.current >= maxAutoFetches) {
+      setShowLoadMore(true);
+      return;
+    }
     autoFetchCountRef.current += 1;
     void fetchNextPage();
   }, [data, hasNextPage, fetchNextPage]);
@@ -101,7 +108,14 @@ export default function ProjectTimeTracking({
   // Reset auto-fetch counter when filters change
   useEffect(() => {
     autoFetchCountRef.current = 0;
-  }, [startDate, endDate, state]);
+    setShowLoadMore(false);
+  }, [projectId, startDate, endDate, state]);
+
+  const handleLoadMore = () => {
+    setShowLoadMore(false);
+    autoFetchCountRef.current = 0;
+    void fetchNextPage();
+  };
 
   // Flatten all pages into a single array
   const timeCards = useMemo(
@@ -132,25 +146,50 @@ export default function ProjectTimeTracking({
       {isTimeCardsError ? (
         <TimeTrackingErrorState />
       ) : (
-        <Grid container spacing={3}>
-          {isTimeCardsLoading ? (
-            Array.from({ length: 7 }).map((_, index) => (
-              <Grid key={`skeleton-${index}`} size={12}>
-                <TimeTrackingCardSkeleton />
+        <>
+          <Grid container spacing={3}>
+            {isTimeCardsLoading ? (
+              Array.from({ length: 7 }).map((_, index) => (
+                <Grid key={`skeleton-${index}`} size={12}>
+                  <TimeTrackingCardSkeleton />
+                </Grid>
+              ))
+            ) : timeCards.length === 0 ? (
+              <Grid size={12}>
+                <EmptyState description="No time logs available." />
               </Grid>
-            ))
-          ) : timeCards.length === 0 ? (
-            <Grid size={12}>
-              <EmptyState description="No time logs available." />
-            </Grid>
-          ) : (
-            timeCards.map((card) => (
-              <Grid key={card.id} size={12}>
-                <TimeTrackingCard card={card} />
-              </Grid>
-            ))
+            ) : (
+              timeCards.map((card) => (
+                <Grid key={card.id} size={12}>
+                  <TimeTrackingCard card={card} />
+                </Grid>
+              ))
+            )}
+          </Grid>
+          {showLoadMore && (
+            <Box sx={{ display: "flex", justifyContent: "center", mt: 3 }}>
+              <Box
+                component="button"
+                onClick={handleLoadMore}
+                sx={{
+                  px: 3,
+                  py: 1.5,
+                  border: "1px solid",
+                  borderColor: "divider",
+                  borderRadius: 1,
+                  backgroundColor: "background.paper",
+                  cursor: "pointer",
+                  fontWeight: 500,
+                  "&:hover": {
+                    backgroundColor: "action.hover",
+                  },
+                }}
+              >
+                Load More Time Cards
+              </Box>
+            </Box>
           )}
-        </Grid>
+        </>
       )}
     </Box>
   );

@@ -35,7 +35,24 @@ vi.mock("@time-tracking/TimeTrackingStatCards", () => ({
 }));
 
 vi.mock("@time-tracking/TimeCardsDateFilter", () => ({
-  default: () => <div data-testid="date-filter">Date Filter</div>,
+  default: ({ state, onStateChange, startDate, endDate }: {
+    state: string;
+    onStateChange: (value: string) => void;
+    startDate: string;
+    endDate: string;
+  }) => (
+    <div data-testid="date-filter">
+      <span data-testid="filter-state">{state || "no-state"}</span>
+      <span data-testid="filter-start-date">{startDate}</span>
+      <span data-testid="filter-end-date">{endDate}</span>
+      <button
+        data-testid="change-state-btn"
+        onClick={() => onStateChange("Approved")}
+      >
+        Change State
+      </button>
+    </div>
+  ),
 }));
 
 vi.mock("@time-tracking/TimeTrackingCard", () => ({

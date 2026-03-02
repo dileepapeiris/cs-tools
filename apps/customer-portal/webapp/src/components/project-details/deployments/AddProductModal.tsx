@@ -54,6 +54,7 @@ const INITIAL_FORM = {
   versionId: "",
   cores: "",
   tps: "",
+  description: "",
 };
 
 /**
@@ -106,7 +107,7 @@ export default function AddProductModal({
 
   useEffect(() => {
     if (!open) {
-      setForm(INITIAL_FORM);
+      setTimeout(() => setForm(INITIAL_FORM), 0);
     }
   }, [open]);
 
@@ -130,7 +131,8 @@ export default function AddProductModal({
   );
 
   const handleTextChange =
-    (field: "cores" | "tps") => (event: ChangeEvent<HTMLInputElement>) => {
+    (field: "cores" | "tps" | "description") =>
+    (event: ChangeEvent<HTMLInputElement>) => {
       setForm((prev) => ({ ...prev, [field]: event.target.value }));
     };
 
@@ -146,6 +148,7 @@ export default function AddProductModal({
           projectId,
           cores: form.cores ? Number(form.cores) : undefined,
           tps: form.tps ? Number(form.tps) : undefined,
+          description: form.description || undefined,
         },
       });
       handleClose();
@@ -161,6 +164,7 @@ export default function AddProductModal({
     form.versionId,
     form.cores,
     form.tps,
+    form.description,
     deploymentId,
     projectId,
     postProduct,
@@ -302,13 +306,15 @@ export default function AddProductModal({
         <TextField
           id="product-description"
           label="Description"
-          placeholder="Optional description..."
+          placeholder="Enter Description..."
           fullWidth
           size="small"
           multiline
           rows={2}
           sx={{ mb: 2 }}
-          disabled
+          value={form.description}
+          onChange={handleTextChange("description")}
+          disabled={isSubmitting}
         />
 
         <Box sx={{ borderTop: 1, borderColor: "divider", pt: 2, mt: 2 }}>

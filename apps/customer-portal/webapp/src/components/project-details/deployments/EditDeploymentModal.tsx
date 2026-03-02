@@ -56,7 +56,8 @@ const INITIAL_FORM = {
 };
 
 /**
- * Modal for editing a deployment (name, type, description). Always sends active: true.
+ * Modal for editing a deployment (name, type, description).
+ * Only sends changed fields to the API (PATCH behavior).
  * Deployment type options come from useGetProjectFilters.
  *
  * @param {EditDeploymentModalProps} props - open, deployment, projectId, onClose, optional onSuccess/onError.
@@ -79,12 +80,7 @@ export default function EditDeploymentModal({
   const [form, setForm] = useState(INITIAL_FORM);
 
   const isSubmitting = patchDeployment.isPending;
-  const isValid =
-    form.name.trim() !== "" &&
-    form.typeKey !== "" &&
-    form.description.trim() !== "" &&
-    !!projectId &&
-    !!deployment?.id;
+  const isValid = !!projectId && !!deployment?.id;
 
   const handleClose = useCallback(() => {
     setForm(INITIAL_FORM);
@@ -123,16 +119,38 @@ export default function EditDeploymentModal({
   const handleSubmit = useCallback(async () => {
     if (!isValid || !deployment) return;
 
+    // Only send changed fields (PATCH behavior)
+    const body: Record<string, string | number | boolean | undefined> = {};
+
+    const newName = form.name.trim();
+    if (newName !== (deployment.name ?? "")) {
+      body.name = newName;
+    }
+
+    const newDescription = form.description.trim();
+    if (newDescription !== (deployment.description ?? "")) {
+      body.description = newDescription;
+    }
+
+    const newTypeKey = Number(form.typeKey);
+    const originalTypeKey = deployment.type?.id
+      ? Number(deployment.type.id)
+      : undefined;
+    if (newTypeKey !== originalTypeKey) {
+      body.typeKey = newTypeKey;
+    }
+
+    // If nothing changed, just close
+    if (Object.keys(body).length === 0) {
+      handleClose();
+      return;
+    }
+
     try {
       await patchDeployment.mutateAsync({
         projectId,
         deploymentId: deployment.id,
-        body: {
-          name: form.name.trim(),
-          description: form.description.trim(),
-          typeKey: Number(form.typeKey),
-          active: true,
-        },
+        body,
       });
       handleClose();
       onSuccess?.();
@@ -144,6 +162,9 @@ export default function EditDeploymentModal({
   }, [
     isValid,
     deployment,
+    deployment?.name,
+    deployment?.description,
+    deployment?.type?.id,
     form.name,
     form.description,
     form.typeKey,
@@ -198,7 +219,7 @@ export default function EditDeploymentModal({
         <Box sx={{ mt: 2, mb: 2 }}>
           <TextField
             id="edit-deployment-name"
-            label="Deployment Name *"
+            label="Deployment Name"
             placeholder="e.g., Production US-East"
             value={form.name}
             onChange={handleTextChange("name")}
@@ -221,7 +242,7 @@ export default function EditDeploymentModal({
               fullWidth
               size="small"
               id="edit-deployment-type"
-              label="Deployment Type *"
+              label="Deployment Type"
               value={form.typeKey}
               onChange={handleTypeChange}
               disabled={isSubmitting}
@@ -243,7 +264,7 @@ export default function EditDeploymentModal({
 
         <TextField
           id="edit-deployment-description"
-          label="Description *"
+          label="Description"
           placeholder="Describe this deployment environment..."
           value={form.description}
           onChange={handleTextChange("description")}

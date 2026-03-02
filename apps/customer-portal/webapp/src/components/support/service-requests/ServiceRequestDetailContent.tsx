@@ -461,27 +461,32 @@ export default function ServiceRequestDetailContent({
               Request Details
             </Typography>
             {requestDetailSections.length > 0 ? (
-              requestDetailSections.map((section, index) => (
-                <Box key={`${section.label}-${index}`} sx={{ mb: 1.5 }}>
-                  <Typography
-                    variant="caption"
-                    color="text.secondary"
-                    sx={{ display: "block", mb: 0.5 }}
-                  >
-                    {section.label}
-                  </Typography>
-                  <Typography
-                    variant="body2"
-                    color="text.primary"
-                    sx={{ whiteSpace: "pre-wrap" }}
-                  >
-                    {section.value}
-                  </Typography>
-                  {index < requestDetailSections.length - 1 && (
-                    <Divider sx={{ mt: 1.5 }} />
-                  )}
-                </Box>
-              ))
+              (() => {
+                const filtered = requestDetailSections.filter(
+                  (s) => !/^wso2\s*product$/i.test(s.label.trim()),
+                );
+                return filtered.map((section, index) => (
+                  <Box key={`${section.label}-${index}`} sx={{ mb: 1.5 }}>
+                    <Typography
+                      variant="caption"
+                      color="text.secondary"
+                      sx={{ display: "block", mb: 0.5 }}
+                    >
+                      {section.label}
+                    </Typography>
+                    <Typography
+                      variant="body2"
+                      color="text.primary"
+                      sx={{ whiteSpace: "pre-wrap" }}
+                    >
+                      {section.value}
+                    </Typography>
+                    {index < filtered.length - 1 && (
+                      <Divider sx={{ mt: 1.5 }} />
+                    )}
+                  </Box>
+                ));
+              })()
             ) : (
               <Typography
                 variant="body2"

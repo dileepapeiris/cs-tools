@@ -48,11 +48,9 @@ export interface VariableFormFieldsProps {
     deploymentDisplay: string;
     productDisplay: string;
   };
-  /** Attachments for case creation (files selected by user). */
   attachments?: Array<{ id: string; file: File }>;
   onAttachmentClick?: () => void;
   onAttachmentRemove?: (index: number) => void;
-  /** When user selects file(s) via attachment variable's file input. */
   onAttachmentAdd?: (file: File, variableLabel?: string) => void;
 }
 
@@ -62,7 +60,6 @@ const VARIABLE_TYPE_SELECT = "Select Box";
 const VARIABLE_TYPE_CHECKBOX = "Checkbox";
 const VARIABLE_TYPE_RADIO = "Radio Buttons";
 
-/** Description fields use the Rich Text Editor (RTE) per decommissioned portal. */
 function isDescriptionField(questionText: string): boolean {
   const normalized = (questionText ?? "")
     .replace(/^\s*\*?\s*/, "")
@@ -95,6 +92,9 @@ const CONTEXT_FIELD_PATTERNS: Array<{
   { pattern: /^wso2\s*product$/i, getValue: (c) => c.productDisplay },
   { pattern: /^environment$/i, getValue: (c) => c.deploymentDisplay },
 ];
+
+/** Context fields to hide from UI (display only Product, not WSO2 Product). */
+const CONTEXT_FIELDS_HIDDEN_FROM_DISPLAY = [/^wso2\s*product$/i];
 
 /** Fields hidden from customers but still sent in the payload (internal/system use). */
 const HIDDEN_FIELD_PATTERNS: RegExp[] = [
@@ -140,7 +140,6 @@ function isHiddenField(questionText: string): boolean {
 }
 
 
-/** Label with optional red asterisk for required fields. */
 function FieldLabel({
   questionText,
   isRequired = TYPABLE_FIELDS_ALL_REQUIRED,
@@ -207,7 +206,12 @@ export default function VariableFormFields({
         isContextField(v.questionText, contextValues),
       )
     : [];
-  const contextFieldsForDisplay = deduplicateVariables(allContextFields);
+  const contextFieldsForDisplay = deduplicateVariables(allContextFields).filter(
+    (v) =>
+      !CONTEXT_FIELDS_HIDDEN_FROM_DISPLAY.some((p) =>
+        p.test((v.questionText ?? "").trim().toLowerCase()),
+      ),
+  );
   const userFields = deduplicatedForDisplay.filter(
     (v) =>
       !isContextField(v.questionText, contextValues) &&
@@ -355,7 +359,6 @@ export default function VariableFormFields({
             value={displayValue}
             onChange={(e) => onChange(variable.id, e.target.value)}
             disabled={isContext}
-            placeholder="Enter path..."
             sx={{
               "& .MuiOutlinedInput-root": { borderRadius: 0 },
             }}

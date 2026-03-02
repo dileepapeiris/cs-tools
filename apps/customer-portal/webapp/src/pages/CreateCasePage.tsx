@@ -206,6 +206,7 @@ export default function CreateCasePage(): JSX.Element {
         environment?: string;
       };
     };
+    conversationId?: string;
   } | null;
 
   const STORAGE_KEY = `case_classification_data_${projectId}`;
@@ -652,6 +653,9 @@ export default function CreateCasePage(): JSX.Element {
       title,
       ...(relatedCase?.parentCaseId && {
         parentCaseId: relatedCase.parentCaseId,
+      }),
+      ...(locationState?.conversationId && {
+        conversationId: locationState.conversationId,
       }),
     };
 

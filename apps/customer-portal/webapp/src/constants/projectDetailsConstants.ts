@@ -236,6 +236,18 @@ export const TIME_TRACKING_BADGE_TYPES = {
 export type TimeTrackingBadgeType =
   (typeof TIME_TRACKING_BADGE_TYPES)[keyof typeof TIME_TRACKING_BADGE_TYPES];
 
+export const TIME_CARD_STATE = {
+  PENDING: "Pending",
+  SUBMITTED: "Submitted",
+  APPROVED: "Approved",
+  REJECTED: "Rejected",
+  PROCESSED: "Processed",
+  RECALLED: "Recalled",
+} as const;
+
+export type TimeCardState =
+  (typeof TIME_CARD_STATE)[keyof typeof TIME_CARD_STATE];
+
 export const DEPLOYMENT_STATUS = {
   HEALTHY: "Healthy",
   WARNING: "Warning",

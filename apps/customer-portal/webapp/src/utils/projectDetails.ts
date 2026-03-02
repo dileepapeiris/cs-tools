@@ -23,6 +23,7 @@ import {
   PROJECT_USER_STATUSES,
   TIME_TRACKING_BADGE_TYPES,
   type TimeTrackingBadgeType,
+  TIME_CARD_STATE,
   DEPLOYMENT_STATUS,
   PRODUCT_SUPPORT_STATUS,
   type ProjectStatusChipColor,
@@ -38,12 +39,24 @@ import {
 export const getTimeCardStateColorPath = (
   state: { id: string; label: string } | null | undefined,
 ): string => {
-  const normalized = state?.label?.toLowerCase();
-  if (normalized === "approved") return "success.main";
-  if (normalized === "submitted") return "info.main";
-  if (normalized === "rejected" || normalized === "draft")
-    return "warning.main";
-  return "text.secondary";
+  if (!state?.label) return "text.secondary";
+
+  switch (state.label) {
+    case TIME_CARD_STATE.APPROVED:
+      return "success.main";
+    case TIME_CARD_STATE.SUBMITTED:
+      return "info.main";
+    case TIME_CARD_STATE.REJECTED:
+      return "error.main";
+    case TIME_CARD_STATE.RECALLED:
+      return "warning.main";
+    case TIME_CARD_STATE.PENDING:
+      return "info.main";
+    case TIME_CARD_STATE.PROCESSED:
+      return "success.main";
+    default:
+      return "text.secondary";
+  }
 };
 
 /**
@@ -157,6 +170,7 @@ export const formatProjectDateTime = (dateString: string): string => {
     });
     return `${dateStr} at ${timeStr}`;
   } catch (error) {
+    console.error("[projectDetails] Failed to format date string:", error);
     return "";
   }
 };

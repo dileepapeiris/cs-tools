@@ -27,7 +27,6 @@ import {
   alpha,
   colors,
   Skeleton,
-  Tooltip,
 } from "@wso2/oxygen-ui";
 import {
   ArrowLeft,
@@ -45,7 +44,13 @@ import {
   Download,
   ExternalLink,
 } from "@wso2/oxygen-ui-icons-react";
+import ErrorStateIcon from "@components/common/error-state/ErrorStateIcon";
+import ErrorIndicator from "@components/common/error-indicator/ErrorIndicator";
 import useGetChangeRequestDetails from "@api/useGetChangeRequestDetails";
+import useGetCaseComments from "@api/useGetCaseComments";
+import ChangeRequestCommentInput from "@components/support/change-requests/ChangeRequestCommentInput";
+import { formatCommentDate } from "@utils/support";
+import { generateChangeRequestDetailsPdf } from "@utils/changeRequestDetailsPdf";
 import {
   formatImpactLabel,
   getChangeRequestStateIcon,
@@ -54,6 +59,7 @@ import {
   ChangeRequestStates,
   type ChangeRequestState,
 } from "@constants/supportConstants";
+import type { CaseComment } from "@models/responses";
 
 /**
  * State order for change request workflow
@@ -96,12 +102,38 @@ export default function ChangeRequestDetailsPage(): JSX.Element {
     data: changeRequest,
     isLoading,
     error,
+    isFetching,
   } = useGetChangeRequestDetails(changeRequestId || "");
+
+  const {
+    data: commentsData,
+    isLoading: isLoadingComments,
+    isError: isErrorComments,
+  } = useGetCaseComments(projectId || "", changeRequestId || "", {
+    offset: 0,
+    limit: 50,
+  });
+
+  const commentsSorted = useMemo(() => {
+    const list = commentsData?.comments ?? [];
+    return [...list].sort(
+      (a, b) =>
+        new Date(a.createdOn).getTime() - new Date(b.createdOn).getTime(),
+    );
+  }, [commentsData?.comments]);
+
+  const hasDisplayableContent = (comment: CaseComment): boolean => {
+    return comment.content?.trim().length > 0;
+  };
+
+  const commentsToShow = useMemo(
+    () => commentsSorted.filter(hasDisplayableContent),
+    [commentsSorted],
+  );
 
   // Workflow stages with dynamic state
   const { workflowStages, currentStateIndex } = useMemo(() => {
-    if (!changeRequest)
-      return { workflowStages: [], currentStateIndex: -1 };
+    if (!changeRequest) return { workflowStages: [], currentStateIndex: -1 };
 
     const currentState =
       (changeRequest.state?.label as ChangeRequestState) ||
@@ -221,8 +253,8 @@ export default function ChangeRequestDetailsPage(): JSX.Element {
     return <IconComponent size={12} />;
   };
 
-  // Loading state with skeleton
-  if (isLoading) {
+  // Loading state with skeleton (or if fetching/no data yet)
+  if (isLoading || (isFetching && !changeRequest)) {
     return (
       <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
         {/* Header Skeleton */}
@@ -255,14 +287,30 @@ export default function ChangeRequestDetailsPage(): JSX.Element {
 
         {/* Workflow Skeleton */}
         <Paper variant="outlined" sx={{ p: 3 }}>
-          <Skeleton variant="text" width={250} height={32} sx={{ mb: 2 }} />
-          <Stack spacing={2}>
+          <Box sx={{ mb: 2 }}>
+            <Skeleton variant="text" width={250} height={32} />
+            <Skeleton variant="text" width="60%" height={20} />
+          </Box>
+          <Stack spacing={0}>
             {[1, 2, 3, 4, 5].map((i) => (
               <Box key={i} sx={{ display: "flex", gap: 2 }}>
-                <Skeleton variant="circular" width={40} height={40} />
-                <Box sx={{ flex: 1 }}>
-                  <Skeleton variant="text" width="30%" />
-                  <Skeleton variant="text" width="60%" />
+                <Box
+                  sx={{
+                    display: "flex",
+                    flexDirection: "column",
+                    alignItems: "center",
+                  }}
+                >
+                  <Skeleton variant="circular" width={40} height={40} />
+                  {i < 5 && (
+                    <Box sx={{ width: 2, height: 64, mt: 0.5 }}>
+                      <Skeleton variant="rectangular" width={2} height={64} />
+                    </Box>
+                  )}
+                </Box>
+                <Box sx={{ flex: 1, pb: i < 5 ? 2 : 0 }}>
+                  <Skeleton variant="text" width="30%" height={20} />
+                  <Skeleton variant="text" width="60%" height={16} />
                 </Box>
               </Box>
             ))}
@@ -282,8 +330,8 @@ export default function ChangeRequestDetailsPage(): JSX.Element {
     );
   }
 
-  // Error state
-  if (error || !changeRequest) {
+  // Error state - only show error if we have an actual error and not loading
+  if (error && !isLoading && !isFetching) {
     return (
       <Stack spacing={3}>
         <Button
@@ -295,14 +343,92 @@ export default function ChangeRequestDetailsPage(): JSX.Element {
           Back to Change Requests
         </Button>
         <Paper variant="outlined" sx={{ p: 6, textAlign: "center" }}>
-          <Typography variant="h5" color="text.primary" sx={{ mb: 2 }}>
+          <ErrorStateIcon style={{ width: 200, height: "auto" }} />
+          <Typography variant="h6" color="text.primary" sx={{ mt: 3, mb: 1 }}>
             Error Loading Change Request
           </Typography>
-          <Typography variant="body1" color="text.secondary">
-            {error?.message || "Change request not found"}
+          <Typography variant="body2" color="text.secondary">
+            {error?.message || "Could not load change request details"}
           </Typography>
         </Paper>
       </Stack>
+    );
+  }
+
+  // Still loading or no data yet
+  if (!changeRequest) {
+    return (
+      <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
+        {/* Header Skeleton */}
+        <Paper variant="outlined" sx={{ p: 4 }}>
+          <Box
+            sx={{
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "flex-start",
+            }}
+          >
+            <Box sx={{ flex: 1 }}>
+              <Skeleton variant="text" width="60%" height={40} sx={{ mb: 1 }} />
+              <Stack
+                direction="row"
+                spacing={1.5}
+                sx={{ alignItems: "center" }}
+              >
+                <Skeleton variant="text" width={100} />
+                <Skeleton variant="text" width={150} />
+                <Skeleton variant="text" width={200} />
+              </Stack>
+            </Box>
+            <Stack direction="row" spacing={1}>
+              <Skeleton variant="rounded" width={100} height={24} />
+              <Skeleton variant="rounded" width={100} height={24} />
+            </Stack>
+          </Box>
+        </Paper>
+
+        {/* Workflow Skeleton */}
+        <Paper variant="outlined" sx={{ p: 3 }}>
+          <Box sx={{ mb: 2 }}>
+            <Skeleton variant="text" width={250} height={32} />
+            <Skeleton variant="text" width="60%" height={20} />
+          </Box>
+          <Stack spacing={0}>
+            {[1, 2, 3, 4, 5].map((i) => (
+              <Box key={i} sx={{ display: "flex", gap: 2 }}>
+                <Box
+                  sx={{
+                    display: "flex",
+                    flexDirection: "column",
+                    alignItems: "center",
+                  }}
+                >
+                  <Skeleton variant="circular" width={40} height={40} />
+                  {i < 5 && (
+                    <Box sx={{ width: 2, height: 64, mt: 0.5 }}>
+                      <Skeleton variant="rectangular" width={2} height={64} />
+                    </Box>
+                  )}
+                </Box>
+                <Box sx={{ flex: 1, pb: i < 5 ? 2 : 0 }}>
+                  <Skeleton variant="text" width="30%" height={20} />
+                  <Skeleton variant="text" width="60%" height={16} />
+                </Box>
+              </Box>
+            ))}
+          </Stack>
+        </Paper>
+
+        {/* Content Cards Skeleton */}
+        {[1, 2, 3, 4].map((i) => (
+          <Paper key={i} variant="outlined" sx={{ p: 3 }}>
+            <Skeleton variant="text" width={200} height={32} sx={{ mb: 2 }} />
+            <Skeleton variant="text" width="100%" />
+            <Skeleton variant="text" width="90%" />
+            <Skeleton variant="text" width="95%" />
+          </Paper>
+        ))}
+      </Box>
     );
   }
 
@@ -412,7 +538,7 @@ export default function ChangeRequestDetailsPage(): JSX.Element {
       <Paper variant="outlined">
         <Box sx={{ px: 3, pt: 3 }}>
           <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 0.5 }}>
-            <ChevronRight size={20} color={colors.purple[600]} />
+            <ChevronRight size={20} />
             <Typography variant="h6">Change Request Workflow</Typography>
           </Box>
           <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
@@ -646,7 +772,7 @@ export default function ChangeRequestDetailsPage(): JSX.Element {
                 Impact Description
               </Typography>
               <Typography variant="body2" color="text.secondary">
-                {changeRequest.impactDescription ||
+                {stripHtmlTags(changeRequest.impactDescription) ||
                   "No impact description available"}
               </Typography>
             </Box>
@@ -679,7 +805,7 @@ export default function ChangeRequestDetailsPage(): JSX.Element {
                         style={{ marginTop: 2 }}
                       />
                       <Typography variant="body2" color="text.primary">
-                        {changeRequest.serviceOutage ||
+                        {stripHtmlTags(changeRequest.serviceOutage) ||
                           "Service outage details not available"}
                       </Typography>
                     </Box>
@@ -702,7 +828,7 @@ export default function ChangeRequestDetailsPage(): JSX.Element {
 
         <Box sx={{ px: 3, py: 3 }}>
           <Typography variant="body2" color="text.secondary">
-            {changeRequest.communicationPlan ||
+            {stripHtmlTags(changeRequest.communicationPlan) ||
               "No communication plan available"}
           </Typography>
         </Box>
@@ -719,7 +845,8 @@ export default function ChangeRequestDetailsPage(): JSX.Element {
 
         <Box sx={{ px: 3, py: 3 }}>
           <Typography variant="body2" color="text.secondary">
-            {changeRequest.rollbackPlan || "No rollback plan available"}
+            {stripHtmlTags(changeRequest.rollbackPlan) ||
+              "No rollback plan available"}
           </Typography>
         </Box>
       </Paper>
@@ -735,7 +862,7 @@ export default function ChangeRequestDetailsPage(): JSX.Element {
 
         <Box sx={{ px: 3, py: 3 }}>
           <Typography variant="body2" color="text.secondary">
-            {changeRequest.testPlan || "No test plan available"}
+            {stripHtmlTags(changeRequest.testPlan) || "No test plan available"}
           </Typography>
         </Box>
       </Paper>
@@ -796,50 +923,130 @@ export default function ChangeRequestDetailsPage(): JSX.Element {
       </Paper>
 
       {/* Notes & Comments Card */}
-      <Paper
-        variant="outlined"
-        sx={{ opacity: 0.6, pointerEvents: "none" }}
-        aria-disabled="true"
-      >
-        <Box sx={{ px: 3, pt: 3 }}>
-          <Box
-            sx={{ display: "flex", alignItems: "center", gap: 1, mb: 0.5 }}
-            aria-hidden="true"
-          >
+      <Paper variant="outlined">
+        <Box sx={{ px: 3, pt: 3, pb: 2 }}>
+          <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 0.5 }}>
             <MessageSquare size={20} />
             <Typography variant="h6">Notes & Comments</Typography>
           </Box>
-          <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+          <Typography variant="body2" color="text.secondary">
             Track updates and communications related to this change request
           </Typography>
         </Box>
 
-        <Box sx={{ px: 3, py: 3 }}>
-          <Typography
-            variant="body2"
-            color="text.disabled"
-            sx={{ textAlign: "center", py: 3 }}
-          >
-            No notes or comments available
-          </Typography>
+        <Box
+          sx={{
+            maxHeight: 400,
+            overflow: "auto",
+            px: 3,
+            py: 2,
+          }}
+        >
+          {isLoadingComments ? (
+            <Stack spacing={2}>
+              {[1, 2, 3].map((i) => (
+                <Stack
+                  key={i}
+                  direction="row"
+                  spacing={1.5}
+                  alignItems="flex-start"
+                >
+                  <Skeleton variant="circular" width={32} height={32} />
+                  <Box sx={{ flex: 1 }}>
+                    <Skeleton variant="text" width="40%" height={20} />
+                    <Skeleton
+                      variant="rectangular"
+                      height={60}
+                      sx={{ mt: 1 }}
+                    />
+                  </Box>
+                </Stack>
+              ))}
+            </Stack>
+          ) : isErrorComments || !commentsData ? (
+            <Box
+              sx={{
+                display: "flex",
+                alignItems: "center",
+                gap: 1,
+                justifyContent: "center",
+                py: 3,
+              }}
+            >
+              <ErrorIndicator entityName="comments" size="small" />
+              <Typography variant="body2" color="text.secondary">
+                Unable to load comments.
+              </Typography>
+            </Box>
+          ) : commentsToShow.length === 0 ? (
+            <Typography
+              variant="body2"
+              color="text.secondary"
+              sx={{ textAlign: "center", py: 3 }}
+            >
+              No comments yet. Be the first to add one!
+            </Typography>
+          ) : (
+            <Stack spacing={2}>
+              {commentsToShow.map((comment) => {
+                // Strip HTML tags from content
+                const cleanContent =
+                  comment.content?.replace(/<[^>]*>/g, "")?.trim() ||
+                  "No content";
+
+                return (
+                  <Paper
+                    key={comment.id}
+                    sx={{
+                      p: 2,
+                    }}
+                  >
+                    <Box
+                      sx={{
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "space-between",
+                        mb: 1,
+                      }}
+                    >
+                      <Typography variant="body2" sx={{ fontWeight: 500 }}>
+                        {comment.createdBy || "Unknown"}
+                      </Typography>
+                      <Typography variant="caption" color="text.secondary">
+                        {formatCommentDate(comment.createdOn)}
+                      </Typography>
+                    </Box>
+                    <Typography variant="body2" color="text.secondary">
+                      {cleanContent}
+                    </Typography>
+                  </Paper>
+                );
+              })}
+            </Stack>
+          )}
         </Box>
+
+        <Divider />
+
+        <ChangeRequestCommentInput changeRequestId={changeRequestId || ""} />
       </Paper>
       {/* Action Buttons */}
       <Box sx={{ display: "flex", gap: 2 }}>
-        <Tooltip title="Coming soon">
-          <span style={{ flex: 1 }}>
-            <Button
-              variant="outlined"
-              startIcon={<Download size={18} />}
-              sx={{ width: "100%" }}
-              disabled
-            >
-              Download Change Request PDF
-            </Button>
-          </span>
-        </Tooltip>
         <Button
-          variant="outlined"
+          variant="contained"
+          startIcon={<Download size={18} />}
+          sx={{ flex: 1 }}
+          onClick={() =>
+            generateChangeRequestDetailsPdf(
+              changeRequest,
+              commentsData?.comments,
+            )
+          }
+        >
+          Download Change Request PDF
+        </Button>
+        <Button
+          variant="contained"
           startIcon={<ExternalLink size={18} />}
           sx={{ flex: 1 }}
           onClick={() => {

@@ -381,7 +381,7 @@ function ProductItemRow({
                 gridTemplateColumns: "1fr 1fr",
                 columnGap: 1,
                 rowGap: 1.5,
-                mb: 1.535,
+                mb: 1.5,
               }}
             >
               <Box

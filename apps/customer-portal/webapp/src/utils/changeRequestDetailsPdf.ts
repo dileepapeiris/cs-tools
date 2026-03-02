@@ -19,17 +19,19 @@ import autoTable from "jspdf-autotable";
 import type { ChangeRequestDetails, CaseComment } from "@models/responses";
 
 /**
- * Strips HTML tags from a string.
+ * Strips HTML tags from a string and returns "N/A" for empty values.
+ * This is specific to PDF generation where we want "N/A" for missing data.
  */
-function stripHtml(html: string | null | undefined): string {
+function stripHtmlOrNA(html: string | null | undefined): string {
   if (!html) return "N/A";
   return html.replace(/<[^>]*>/g, "").trim() || "N/A";
 }
 
 /**
- * Formats a date string for display.
+ * Returns the date string or "N/A" if not provided.
+ * Note: Does not format the date, just returns the raw value or "N/A".
  */
-function formatDate(dateStr: string | null | undefined): string {
+function getDateOrNA(dateStr: string | null | undefined): string {
   if (!dateStr) return "N/A";
   return dateStr;
 }
@@ -57,29 +59,29 @@ export function generateChangeRequestDetailsPdf(
   // Prepare all data for single table
   const tableData: string[][] = [
     ["Number", changeRequest.number || "N/A"],
-    ["Description", stripHtml(changeRequest.description)],
+    ["Description", stripHtmlOrNA(changeRequest.description)],
     ["Customer Project", changeRequest.project?.label || "N/A"],
     ["Environment", changeRequest.deployment?.label || "N/A"],
     ["State", changeRequest.state?.label || "N/A"],
     ["Service Request", changeRequest.case?.number || "N/A"],
     ["Created By", changeRequest.createdBy || "N/A"],
-    ["Created Date", formatDate(changeRequest.createdOn)],
-    ["Start Date", formatDate(changeRequest.startDate)],
-    ["End Date", formatDate(changeRequest.endDate)],
+    ["Created Date", getDateOrNA(changeRequest.createdOn)],
+    ["Start Date", getDateOrNA(changeRequest.startDate)],
+    ["End Date", getDateOrNA(changeRequest.endDate)],
     ["Type", changeRequest.type?.label || "N/A"],
     ["Assigned Engineer", changeRequest.assignedEngineer?.label || "N/A"],
     ["Assigned Team", changeRequest.assignedTeam?.label || "N/A"],
     ["Impact", changeRequest.impact?.label || "N/A"],
-    ["Service Outage Details", stripHtml(changeRequest.serviceOutage)],
-    ["Communication Plan", stripHtml(changeRequest.communicationPlan)],
-    ["Test Plan", stripHtml(changeRequest.testPlan)],
-    ["Rollback Plan", stripHtml(changeRequest.rollbackPlan)],
+    ["Service Outage Details", stripHtmlOrNA(changeRequest.serviceOutage)],
+    ["Communication Plan", stripHtmlOrNA(changeRequest.communicationPlan)],
+    ["Test Plan", stripHtmlOrNA(changeRequest.testPlan)],
+    ["Rollback Plan", stripHtmlOrNA(changeRequest.rollbackPlan)],
   ];
 
   // Add optional fields
   if (changeRequest.approvedBy) {
     tableData.push(["Approved By", changeRequest.approvedBy.label]);
-    tableData.push(["Approved On", formatDate(changeRequest.approvedOn)]);
+    tableData.push(["Approved On", getDateOrNA(changeRequest.approvedOn)]);
   }
 
   if (changeRequest.product) {
@@ -91,13 +93,13 @@ export function generateChangeRequestDetailsPdf(
   }
 
   if (changeRequest.justification) {
-    tableData.push(["Justification", stripHtml(changeRequest.justification)]);
+    tableData.push(["Justification", stripHtmlOrNA(changeRequest.justification)]);
   }
 
   if (changeRequest.impactDescription) {
     tableData.push([
       "Impact Description",
-      stripHtml(changeRequest.impactDescription),
+      stripHtmlOrNA(changeRequest.impactDescription),
     ]);
   }
 
@@ -106,7 +108,7 @@ export function generateChangeRequestDetailsPdf(
     const commentsText = comments
       .map(
         (comment) =>
-          `${comment.createdBy} - ${formatDate(comment.createdOn)}:\n${stripHtml(comment.content)}`,
+          `${comment.createdBy} - ${getDateOrNA(comment.createdOn)}:\n${stripHtmlOrNA(comment.content)}`,
       )
       .join("\n\n");
     tableData.push(["Notes & Comments", commentsText]);

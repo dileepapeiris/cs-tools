@@ -51,7 +51,7 @@ import ErrorIndicator from "@components/common/error-indicator/ErrorIndicator";
 import useGetChangeRequestDetails from "@api/useGetChangeRequestDetails";
 import useGetCaseComments from "@api/useGetCaseComments";
 import ChangeRequestCommentInput from "@components/support/change-requests/ChangeRequestCommentInput";
-import { formatCommentDate } from "@utils/support";
+import { formatCommentDate, hasDisplayableContent } from "@utils/support";
 import { generateChangeRequestDetailsPdf } from "@utils/changeRequestDetailsPdf";
 import {
   formatImpactLabel,
@@ -61,7 +61,6 @@ import {
   ChangeRequestStates,
   type ChangeRequestState,
 } from "@constants/supportConstants";
-import type { CaseComment } from "@models/responses";
 
 /**
  * State order for change request workflow
@@ -84,8 +83,8 @@ const STATE_ORDER = [
  * Strip HTML tags from a string
  */
 function stripHtmlTags(html: string | null | undefined): string {
-  if (!html) return "No description available";
-  return html.replace(/<[^>]*>/g, "").trim() || "No description available";
+  if (!html) return "";
+  return html.replace(/<[^>]*>/g, "").trim();
 }
 
 /**
@@ -110,6 +109,7 @@ export default function ChangeRequestDetailsPage(): JSX.Element {
   const {
     data: commentsData,
     isLoading: isLoadingComments,
+    isFetching: isFetchingComments,
     isError: isErrorComments,
   } = useGetCaseComments(projectId || "", changeRequestId || "", {
     offset: 0,
@@ -126,10 +126,6 @@ export default function ChangeRequestDetailsPage(): JSX.Element {
         new Date(a.createdOn).getTime() - new Date(b.createdOn).getTime(),
     );
   }, [commentsData?.comments]);
-
-  const hasDisplayableContent = (comment: CaseComment): boolean => {
-    return comment.content?.trim().length > 0;
-  };
 
   const commentsToShow = useMemo(
     () => commentsSorted.filter(hasDisplayableContent),
@@ -360,8 +356,8 @@ export default function ChangeRequestDetailsPage(): JSX.Element {
     );
   }
 
-  // Still loading or no data yet
-  if (!changeRequest) {
+  // Loading state
+  if (isLoading || isFetching) {
     return (
       <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
         {/* Header Skeleton */}
@@ -436,6 +432,39 @@ export default function ChangeRequestDetailsPage(): JSX.Element {
       </Box>
     );
   }
+
+  // Not found state
+  if (!changeRequest) {
+    return (
+      <Stack spacing={2}>
+        <Paper variant="outlined" sx={{ p: 4, textAlign: "center" }}>
+          <ErrorStateIcon style={{ width: 48, height: 48 }} />
+          <Typography variant="h6" sx={{ mt: 2, mb: 1 }}>
+            Change Request Not Found
+          </Typography>
+          <Typography variant="body2" color="text.secondary">
+            The change request you're looking for could not be found or you may not have access to it.
+          </Typography>
+          <Button
+            variant="contained"
+            startIcon={<ArrowLeft size={18} />}
+            sx={{ mt: 3 }}
+            onClick={() => navigate(`/${projectId}/change-requests`)}
+          >
+            Back to Change Requests
+          </Button>
+        </Paper>
+      </Stack>
+    );
+  }
+
+  // Compute stripped values for proper fallback rendering
+  const descriptionText = stripHtmlTags(changeRequest.description);
+  const impactText = stripHtmlTags(changeRequest.impactDescription);
+  const serviceOutageText = stripHtmlTags(changeRequest.serviceOutage);
+  const communicationPlanText = stripHtmlTags(changeRequest.communicationPlan);
+  const rollbackPlanText = stripHtmlTags(changeRequest.rollbackPlan);
+  const testPlanText = stripHtmlTags(changeRequest.testPlan);
 
   return (
     <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
@@ -749,7 +778,7 @@ export default function ChangeRequestDetailsPage(): JSX.Element {
                 Change Description
               </Typography>
               <Typography variant="body2" color="text.secondary">
-                {stripHtmlTags(changeRequest.description)}
+                {descriptionText || "No description available"}
               </Typography>
             </Box>
           </Stack>
@@ -777,8 +806,7 @@ export default function ChangeRequestDetailsPage(): JSX.Element {
                 Impact Description
               </Typography>
               <Typography variant="body2" color="text.secondary">
-                {stripHtmlTags(changeRequest.impactDescription) ||
-                  "No impact description available"}
+                {impactText || "No impact description available"}
               </Typography>
             </Box>
 
@@ -810,8 +838,7 @@ export default function ChangeRequestDetailsPage(): JSX.Element {
                         style={{ marginTop: 2 }}
                       />
                       <Typography variant="body2" color="text.primary">
-                        {stripHtmlTags(changeRequest.serviceOutage) ||
-                          "Service outage details not available"}
+                        {serviceOutageText || "Service outage details not available"}
                       </Typography>
                     </Box>
                   </Paper>
@@ -833,8 +860,7 @@ export default function ChangeRequestDetailsPage(): JSX.Element {
 
         <Box sx={{ px: 3, py: 3 }}>
           <Typography variant="body2" color="text.secondary">
-            {stripHtmlTags(changeRequest.communicationPlan) ||
-              "No communication plan available"}
+            {communicationPlanText || "No communication plan available"}
           </Typography>
         </Box>
       </Paper>
@@ -850,8 +876,7 @@ export default function ChangeRequestDetailsPage(): JSX.Element {
 
         <Box sx={{ px: 3, py: 3 }}>
           <Typography variant="body2" color="text.secondary">
-            {stripHtmlTags(changeRequest.rollbackPlan) ||
-              "No rollback plan available"}
+            {rollbackPlanText || "No rollback plan available"}
           </Typography>
         </Box>
       </Paper>
@@ -867,7 +892,7 @@ export default function ChangeRequestDetailsPage(): JSX.Element {
 
         <Box sx={{ px: 3, py: 3 }}>
           <Typography variant="body2" color="text.secondary">
-            {stripHtmlTags(changeRequest.testPlan) || "No test plan available"}
+            {testPlanText || "No test plan available"}
           </Typography>
         </Box>
       </Paper>
@@ -1040,7 +1065,7 @@ export default function ChangeRequestDetailsPage(): JSX.Element {
         <Button
           variant="contained"
           startIcon={
-            isLoadingComments || isPostingComment ? (
+            isLoadingComments || isFetchingComments || isPostingComment ? (
               <CircularProgress size={18} sx={{ color: "inherit" }} />
             ) : (
               <Download size={18} />
@@ -1053,9 +1078,9 @@ export default function ChangeRequestDetailsPage(): JSX.Element {
               commentsData?.comments,
             )
           }
-          disabled={isLoadingComments || isPostingComment}
+          disabled={isLoadingComments || isFetchingComments || isPostingComment}
         >
-          {isLoadingComments || isPostingComment
+          {isLoadingComments || isFetchingComments || isPostingComment
             ? "Downloading..."
             : "Download Change Request PDF"}
         </Button>

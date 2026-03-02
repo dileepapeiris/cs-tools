@@ -435,7 +435,7 @@ export const ALL_CONVERSATIONS_FILTER_DEFINITIONS: AllConversationsFilterDefinit
     {
       filterKey: "stateId",
       id: "state",
-      metadataKey: "statuses",
+      metadataKey: "conversationStates",
     },
   ];
 
@@ -522,11 +522,10 @@ export const ANNOUNCEMENT_STAT_CONFIGS: SupportStatConfig<AnnouncementStatKey>[]
  */
 export interface AnnouncementFilterValues {
   statusId?: string;
-  severityId?: string;
 }
 
 /**
- * Announcement filter definitions (status, severity - same as All Cases subset).
+ * Announcement filter definitions (status only).
  */
 export const ANNOUNCEMENT_FILTER_DEFINITIONS: Array<{
   filterKey: keyof AnnouncementFilterValues;
@@ -538,11 +537,6 @@ export const ANNOUNCEMENT_FILTER_DEFINITIONS: Array<{
     filterKey: "statusId",
     id: "status",
     metadataKey: "caseStates",
-  },
-  {
-    filterKey: "severityId",
-    id: "severity",
-    metadataKey: "severities",
   },
 ];
 

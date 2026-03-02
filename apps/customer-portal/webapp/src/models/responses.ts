@@ -1013,3 +1013,37 @@ export interface UpdateLevelEntry {
 
 // Response for POST /updates/levels/search (map keyed by update level string).
 export type UpdateLevelsSearchResponse = Record<string, UpdateLevelEntry>;
+
+// Catalog item within a catalog (from POST /deployments/products/:id/catalogs/search).
+export interface CatalogItem {
+  id: string;
+  label: string;
+}
+
+// Catalog with its items (from POST /deployments/products/:id/catalogs/search).
+export interface Catalog {
+  id: string;
+  name: string;
+  catalogItems: CatalogItem[];
+}
+
+// Response for POST /deployments/products/:id/catalogs/search.
+export interface CatalogSearchResponse {
+  catalogs: Catalog[];
+  totalRecords: number;
+  limit?: number;
+  offset?: number;
+}
+
+// Variable definition for a catalog item (from GET /catalogs/:catalogId/items/:itemId).
+export interface CatalogItemVariable {
+  id: string;
+  questionText: string;
+  order: number;
+  type: string;
+}
+
+// Response for GET /catalogs/:catalogId/items/:itemId.
+export interface CatalogItemVariablesResponse {
+  variables: CatalogItemVariable[];
+}

@@ -18,32 +18,40 @@ import { useMutation, type UseMutationResult } from "@tanstack/react-query";
 import { useAsgardeo } from "@asgardeo/react";
 import { useLogger } from "@hooks/useLogger";
 import { useAuthApiClient } from "@context/AuthApiContext";
-import type { CreateCaseRequest } from "@models/requests";
+import type {
+  CreateCaseRequest,
+  CreateServiceRequestPayload,
+} from "@models/requests";
 import type { CreateCaseResponse } from "@models/responses";
 
 /**
- * Posts a new support case to the backend.
+ * Posts a new support case or service request to the backend.
  *
- * @returns {UseMutationResult<CreateCaseResponse, Error, CreateCaseRequest>} Mutation result.
+ * @returns {UseMutationResult<CreateCaseResponse, Error, CreateCaseRequest | CreateServiceRequestPayload>} Mutation result.
  */
 export function usePostCase(): UseMutationResult<
   CreateCaseResponse,
   Error,
-  CreateCaseRequest
+  CreateCaseRequest | CreateServiceRequestPayload
 > {
   const logger = useLogger();
   const { isSignedIn, isLoading: isAuthLoading } = useAsgardeo();
   const fetchFn = useAuthApiClient();
 
-  return useMutation<CreateCaseResponse, Error, CreateCaseRequest>({
+  return useMutation<
+    CreateCaseResponse,
+    Error,
+    CreateCaseRequest | CreateServiceRequestPayload
+  >({
     mutationFn: async (
-      body: CreateCaseRequest,
+      body: CreateCaseRequest | CreateServiceRequestPayload,
     ): Promise<CreateCaseResponse> => {
       logger.debug("[usePostCase] Request payload:", {
         ...body,
-        description: body.description
-          ? `${body.description.slice(0, 80)}...`
-          : "",
+        description:
+          "description" in body && body.description
+            ? `${body.description.slice(0, 80)}...`
+            : "",
       });
 
       try {

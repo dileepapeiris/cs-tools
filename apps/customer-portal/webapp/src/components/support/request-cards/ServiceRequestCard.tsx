@@ -44,10 +44,7 @@ export default function ServiceRequestCard(): JSX.Element {
       onSecondaryClick={() => navigate("service-requests")}
       primaryButton={{
         label: "New Service Request",
-        onClick: () =>
-          navigate("chat/create-case", {
-            state: { caseType: "Service Request", skipChat: true },
-          }),
+        onClick: () => navigate("service-requests/create"),
         icon: Server,
       }}
     />

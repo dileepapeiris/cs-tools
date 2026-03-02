@@ -36,8 +36,6 @@ import { CaseType } from "@constants/supportConstants";
 import ServiceRequestsList from "@components/support/service-requests/ServiceRequestsList";
 import ServiceRequestsSearchBar from "@components/support/service-requests/ServiceRequestsSearchBar";
 
-const SERVICE_REQUEST_TYPE_LABEL = "Service Request";
-
 export type ServiceRequestStatusFilter =
   | "all"
   | "pending"
@@ -175,9 +173,7 @@ export default function ServiceRequestsPage(): JSX.Element {
   };
 
   const handleNewServiceRequest = () => {
-    navigate(`/${projectId}/support/chat/create-case`, {
-      state: { caseType: SERVICE_REQUEST_TYPE_LABEL },
-    });
+    navigate(`/${projectId}/support/service-requests/create`);
   };
 
   return (

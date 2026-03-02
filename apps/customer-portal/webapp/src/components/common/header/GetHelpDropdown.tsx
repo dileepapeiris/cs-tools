@@ -79,9 +79,7 @@ export default function GetHelpDropdown(): JSX.Element {
   const handleServiceRequest = () => {
     handleClose();
     if (projectId) {
-      navigate(`/${projectId}/support/chat/create-case?type=service_request`, {
-        state: { skipChat: true },
-      });
+      navigate(`/${projectId}/support/service-requests/create`);
     }
   };
 

@@ -50,4 +50,10 @@ export const ApiQueryKeys = {
   UPDATE_LEVELS_SEARCH: "update-levels-search",
   CHANGE_REQUESTS: "change-requests",
   CHANGE_REQUEST_DETAILS: "change-request-details",
+  CHANGE_REQUEST_COMMENTS: "change-request-comments",
+} as const;
+
+// Constants for API-related mutation keys.
+export const ApiMutationKeys = {
+  POST_COMMENT: ["postComment"],
 } as const;

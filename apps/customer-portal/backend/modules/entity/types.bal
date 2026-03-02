@@ -421,6 +421,8 @@ public type ProjectMetadataResponse record {|
     ChoiceListItem[] callRequestStates;
     # List of available change request states
     ChoiceListItem[] changeRequestStates;
+    # List of available time card states
+    ChoiceListItem[] timeCardStates;
     # List of available change request impacts
     ChoiceListItem[] changeRequestImpacts;
     # List of available conversation states
@@ -1164,7 +1166,7 @@ public type TimeCardSearchPayload record {|
         # End date for filtering time cards (ISO 8601 format)
         Date endDate?;
         # State of the time cards to filter (e.g., "Approved", "Submitted", etc.)
-        TimeCardState state?;
+        TimeCardState[] states?;
     } filters?;
     # Pagination details
     Pagination pagination?;
@@ -1205,7 +1207,7 @@ public type TimeCard record {|
     # Indicates if the time card has billable hours
     boolean hasBillable;
     # State information (e.g., "Approved", "Submitted")
-    string state;
+    ChoiceListItem? state;
     # User who approved the time card
     ReferenceTableItem? approvedBy;
     # Associated project

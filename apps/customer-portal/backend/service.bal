@@ -3253,8 +3253,8 @@ service http:InterceptableService / on new http:Listener(9090, listenerConf) {
     # + offset - Offset for pagination
     # + return - Comments response or error
     resource function get change\-requests/[entity:IdString id]/comments(http:RequestContext ctx, int? 'limit,
-            int? offset)
-        returns types:CommentsResponse|http:BadRequest|http:Unauthorized|http:Forbidden|http:InternalServerError {
+            int? offset) returns types:CommentsResponse|http:BadRequest|http:Unauthorized|
+        http:Forbidden|http:NotFound|http:InternalServerError {
 
         authorization:UserInfoPayload|error userInfo = ctx.getWithType(authorization:HEADER_USER_INFO);
         if userInfo is error {
@@ -3277,20 +3277,26 @@ service http:InterceptableService / on new http:Listener(9090, listenerConf) {
                 'limit, offset);
         if commentsResponse is error {
             if getStatusCode(commentsResponse) == http:STATUS_UNAUTHORIZED {
-                log:printWarn(string `User : ${userInfo .userId} is not authorized to access the customer portal!`);
+                log:printWarn(string `User : ${userInfo.userId} is not authorized to access the customer portal!`);
                 return <http:Unauthorized>{
                     body: {
                         message: ERR_MSG_UNAUTHORIZED_ACCESS
                     }
                 };
             }
-
             if getStatusCode(commentsResponse) == http:STATUS_FORBIDDEN {
                 log:printWarn(string `User: ${
                         userInfo.userId} is forbidden to access comments for change request with ID: ${id}!`);
                 return <http:Forbidden>{
                     body: {
                         message: "You're not authorized to access the comments for the requested change request."
+                    }
+                };
+            }
+            if getStatusCode(commentsResponse) == http:STATUS_NOT_FOUND {
+                return <http:NotFound>{
+                    body: {
+                        message: "The requested change request or its comments are not found!"
                     }
                 };
             }

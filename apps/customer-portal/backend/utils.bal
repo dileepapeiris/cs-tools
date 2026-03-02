@@ -586,7 +586,8 @@ public isolated function mapConversationResponse(entity:ConversationResponse res
 public isolated function getOngoingCasesCount(entity:ProjectCaseStatsResponse|error response) returns int? {
     if response is entity:ProjectCaseStatsResponse {
         types:ReferenceItem[] stateCount = from entity:ChoiceListItem item in response.stateCount
-            where item.id != entity:caseStateIds.closed && item.id != entity:caseStateIds.solutionProposed
+            where item.id.toString() != entity:caseStateIds.closed.toString()
+                && item.id.toString() != entity:caseStateIds.solutionProposed.toString()
             select {id: item.id.toString(), label: item.label, count: item.count};
         if stateCount.length() > 0 {
             int ongoingCasesCount = 0;

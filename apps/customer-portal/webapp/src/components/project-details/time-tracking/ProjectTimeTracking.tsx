@@ -61,9 +61,7 @@ export default function ProjectTimeTracking({
   );
   const [startDate, setStartDate] = useState(defaultStart);
   const [endDate, setEndDate] = useState(defaultEnd);
-  const [state, setState] = useState("");
-  const [showLoadMore, setShowLoadMore] = useState(false);
-  const autoFetchCountRef = useRef(0);
+  const [state, setState] = useState("");  const [showLoadMore, setShowLoadMore] = useState(false);  const autoFetchCountRef = useRef(0);
   const maxAutoFetches = 3;
 
   const { data: filters } = useGetProjectFilters(projectId);
@@ -93,22 +91,26 @@ export default function ProjectTimeTracking({
 
   // Auto-fetch pages with limit to prevent request bursts
   useEffect(() => {
-    if (!data || !hasNextPage) {
-      setShowLoadMore(false);
-      return;
-    }
+    if (!data || !hasNextPage) return;
     if (autoFetchCountRef.current >= maxAutoFetches) {
-      setShowLoadMore(true);
+      // Don't auto-fetch, let user click Load More
       return;
     }
     autoFetchCountRef.current += 1;
     void fetchNextPage();
   }, [data, hasNextPage, fetchNextPage]);
 
+  useEffect(() => {
+    if (data && hasNextPage && autoFetchCountRef.current >= maxAutoFetches) {
+      setShowLoadMore(true);
+    } else {
+      setShowLoadMore(false);
+    }
+  }, [data, hasNextPage]);
+
   // Reset auto-fetch counter when filters change
   useEffect(() => {
     autoFetchCountRef.current = 0;
-    setShowLoadMore(false);
   }, [projectId, startDate, endDate, state]);
 
   const handleLoadMore = () => {

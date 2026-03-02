@@ -30,7 +30,7 @@ import {
   X,
 } from "@wso2/oxygen-ui-icons-react";
 import type { JSX, ChangeEvent } from "react";
-import type { CaseMetadataResponse } from "@models/responses";
+import type { CaseMetadataResponse, ChangeRequestFilterValues } from "@models/responses";
 import ChangeRequestsFilters from "@components/support/change-requests/ChangeRequestsFilters";
 
 export interface ChangeRequestsSearchBarProps {
@@ -38,11 +38,7 @@ export interface ChangeRequestsSearchBarProps {
   onSearchChange: (value: string) => void;
   isFiltersOpen: boolean;
   onFiltersToggle: () => void;
-  filters: {
-    statusId?: string;
-    impactId?: string;
-    deploymentId?: string;
-  };
+  filters: ChangeRequestFilterValues;
   filterMetadata: CaseMetadataResponse | undefined;
   onFilterChange: (field: string, value: string) => void;
   onClearFilters: () => void;

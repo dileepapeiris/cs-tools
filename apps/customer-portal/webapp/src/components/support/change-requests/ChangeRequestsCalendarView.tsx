@@ -220,9 +220,17 @@ export default function ChangeRequestsCalendarView({
                 return (
                   <Box
                     key={item.id}
+                    component="button"
                     onClick={(e) => {
                       e.stopPropagation();
                       onChangeRequestClick?.(item);
+                    }}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter" || e.key === " ") {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        onChangeRequestClick?.(item);
+                      }
                     }}
                     sx={{
                       fontSize: "0.75rem",
@@ -237,8 +245,18 @@ export default function ChangeRequestsCalendarView({
                       "&:hover": {
                         opacity: 0.8,
                       },
+                      "&:focus": {
+                        outline: "2px solid",
+                        outlineColor: stateColor,
+                        outlineOffset: "2px",
+                      },
+                      textAlign: "left",
+                      width: "100%",
+                      display: "block",
+                      background: alpha(stateColor, 0.1),
                     }}
                     title={`${item.title} - ${item.state?.label || "No Status"}`}
+                    aria-label={`${item.number}: ${item.title} - ${item.state?.label || "No Status"}`}
                   >
                     <Box
                       sx={{
@@ -628,6 +646,7 @@ export default function ChangeRequestsCalendarView({
               size="small"
               onClick={handlePreviousMonth}
               sx={{ color: colors.grey[600] }}
+              aria-label="Previous month"
             >
               <ChevronLeft />
             </IconButton>
@@ -635,6 +654,7 @@ export default function ChangeRequestsCalendarView({
               size="small"
               onClick={handleNextMonth}
               sx={{ color: colors.grey[600] }}
+              aria-label="Next month"
             >
               <ChevronRight />
             </IconButton>

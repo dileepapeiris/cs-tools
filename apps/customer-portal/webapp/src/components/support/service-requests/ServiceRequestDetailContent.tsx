@@ -39,7 +39,7 @@ import {
   Send,
   User,
 } from "@wso2/oxygen-ui-icons-react";
-import useGetCasesFilters from "@api/useGetCasesFilters";
+import useGetProjectFilters from "@api/useGetProjectFilters";
 import { usePatchCase } from "@api/usePatchCase";
 import { useErrorBanner } from "@context/error-banner/ErrorBannerContext";
 import { useSuccessBanner } from "@context/success-banner/SuccessBannerContext";
@@ -166,7 +166,7 @@ export default function ServiceRequestDetailContent({
   });
   const postComment = usePostComment();
 
-  const { data: filterMetadata } = useGetCasesFilters(projectId ?? "");
+  const { data: filterMetadata } = useGetProjectFilters(projectId ?? "");
   const caseStates = filterMetadata?.caseStates;
   const patchCase = usePatchCase(projectId ?? "", caseId);
   const { showSuccess } = useSuccessBanner();

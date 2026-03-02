@@ -108,9 +108,6 @@ export default function ProjectTimeTracking({
           state={state}
           onStateChange={setState}
           timeCardStates={filters?.timeCardStates}
-          shownCount={timeCards.length}
-          totalCount={totalRecords}
-          isLoading={isTimeCardsLoading}
         />
       </Box>
 

@@ -36,13 +36,10 @@ export interface TimeCardsDateFilterProps {
   state: string;
   onStateChange: (value: string) => void;
   timeCardStates?: MetadataItem[];
-  shownCount: number;
-  totalCount: number;
-  isLoading?: boolean;
 }
 
 /**
- * TimeCardsDateFilter provides date range filters for time cards and shows count summary.
+ * TimeCardsDateFilter provides date range and state filters for time cards.
  *
  * @param {TimeCardsDateFilterProps} props - Date values, handlers, and counts.
  * @returns {JSX.Element} The rendered filter card.
@@ -55,9 +52,6 @@ export default function TimeCardsDateFilter({
   state,
   onStateChange,
   timeCardStates = [],
-  shownCount,
-  totalCount,
-  isLoading = false,
 }: TimeCardsDateFilterProps): JSX.Element {
   return (
     <Card
@@ -68,119 +62,122 @@ export default function TimeCardsDateFilter({
         gap: 3,
       }}
     >
-      <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
-        <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-          <Calendar size={16} style={{ color: "var(--oxygen-palette-text-secondary)" }} />
-          <Typography
-            variant="body2"
-            component="label"
-            sx={{ fontWeight: 500, color: "text.secondary" }}
+      <Box
+        sx={{
+          display: "flex",
+          alignItems: "flex-start",
+          gap: 4,
+          flexWrap: "wrap",
+        }}
+      >
+        {/* Date Range Filter */}
+        <Box sx={{ display: "flex", flexDirection: "column", gap: 2, flex: 1, minWidth: "300px" }}>
+          <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+            <Calendar size={16} style={{ color: "var(--oxygen-palette-text-secondary)" }} />
+            <Typography
+              variant="body2"
+              component="label"
+              sx={{ fontWeight: 500, color: "text.secondary" }}
+            >
+              Filter by Date Range:
+            </Typography>
+          </Box>
+          <Box
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              gap: 2,
+              flexWrap: "wrap",
+            }}
           >
-            Filter by Date Range:
-          </Typography>
-        </Box>
-        <Box
-          sx={{
-            display: "flex",
-            alignItems: "center",
-            gap: 2,
-            flexWrap: "wrap",
-          }}
-        >
-          <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-            <Typography
-              component="label"
-              htmlFor="time-cards-start-date"
-              variant="body2"
-              sx={{ fontWeight: 500, color: "text.secondary", whiteSpace: "nowrap" }}
-            >
-              From:
-            </Typography>
-            <TextField
-              id="time-cards-start-date"
-              type="date"
-              size="small"
-              value={startDate}
-              onChange={(e) => onStartDateChange(e.target.value)}
-              sx={{ minWidth: 200 }}
-              InputProps={{
-                startAdornment: (
-                  <InputAdornment position="start">
-                    <Calendar size={16} />
-                  </InputAdornment>
-                ),
-              }}
-            />
-          </Box>
-          <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-            <Typography
-              component="label"
-              htmlFor="time-cards-end-date"
-              variant="body2"
-              sx={{ fontWeight: 500, color: "text.secondary", whiteSpace: "nowrap" }}
-            >
-              To:
-            </Typography>
-            <TextField
-              id="time-cards-end-date"
-              type="date"
-              size="small"
-              value={endDate}
-              onChange={(e) => onEndDateChange(e.target.value)}
-              sx={{ minWidth: 200 }}
-              InputProps={{
-                startAdornment: (
-                  <InputAdornment position="start">
-                    <Calendar size={16} />
-                  </InputAdornment>
-                ),
-              }}
-            />
+            <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+              <Typography
+                component="label"
+                htmlFor="time-cards-start-date"
+                variant="body2"
+                sx={{ fontWeight: 500, color: "text.secondary", whiteSpace: "nowrap" }}
+              >
+                From:
+              </Typography>
+              <TextField
+                id="time-cards-start-date"
+                type="date"
+                size="small"
+                value={startDate}
+                onChange={(e) => onStartDateChange(e.target.value)}
+                sx={{ minWidth: 200 }}
+                InputProps={{
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <Calendar size={16} />
+                    </InputAdornment>
+                  ),
+                }}
+              />
+            </Box>
+            <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+              <Typography
+                component="label"
+                htmlFor="time-cards-end-date"
+                variant="body2"
+                sx={{ fontWeight: 500, color: "text.secondary", whiteSpace: "nowrap" }}
+              >
+                To:
+              </Typography>
+              <TextField
+                id="time-cards-end-date"
+                type="date"
+                size="small"
+                value={endDate}
+                onChange={(e) => onEndDateChange(e.target.value)}
+                sx={{ minWidth: 200 }}
+                InputProps={{
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <Calendar size={16} />
+                    </InputAdornment>
+                  ),
+                }}
+              />
+            </Box>
           </Box>
         </Box>
-      </Box>
 
-      <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
-        <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-          <Filter size={16} style={{ color: "var(--oxygen-palette-text-secondary)" }} />
-          <Typography
-            variant="body2"
-            component="label"
-            sx={{ fontWeight: 500, color: "text.secondary" }}
-          >
-            Filter by State:
-          </Typography>
-        </Box>
-        <Box
-          sx={{
-            display: "flex",
-            alignItems: "center",
-            gap: 2,
-            flexWrap: "wrap",
-          }}
-        >
-          <FormControl size="small" sx={{ minWidth: 200 }}>
-            <Select
-              value={state}
-              onChange={(e) => onStateChange(e.target.value as string)}
-              displayEmpty
+        {/* State Filter */}
+        <Box sx={{ display: "flex", flexDirection: "column", gap: 2, flex: 1, minWidth: "300px" }}>
+          <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+            <Filter size={16} style={{ color: "var(--oxygen-palette-text-secondary)" }} />
+            <Typography
+              variant="body2"
+              component="label"
+              sx={{ fontWeight: 500, color: "text.secondary" }}
             >
-              <MenuItem value="">All States</MenuItem>
-              {timeCardStates.map((stateOption) => (
-                <MenuItem key={stateOption.id} value={stateOption.label}>
-                  {stateOption.label}
-                </MenuItem>
-              ))}
-            </Select>
-          </FormControl>
-          <Typography
-            variant="body2"
-            sx={{ color: "text.secondary", ml: "auto" }}
+              Filter by State:
+            </Typography>
+          </Box>
+          <Box
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              gap: 2,
+              flexWrap: "wrap",
+            }}
           >
-            {isLoading
-              ? "Loading..."
-              : `Showing ${shownCount} of ${totalCount} time logs`}
-          </Typography>
+            <FormControl size="small" sx={{ minWidth: 200 }}>
+              <Select
+                value={state}
+                onChange={(e) => onStateChange(e.target.value as string)}
+                displayEmpty
+              >
+                <MenuItem value="">All States</MenuItem>
+                {timeCardStates.map((stateOption) => (
+                  <MenuItem key={stateOption.id} value={stateOption.label}>
+                    {stateOption.label}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+          </Box>
         </Box>
       </Box>
     </Card>

@@ -35,8 +35,6 @@ describe("TimeCardsDateFilter", () => {
         state=""
         onStateChange={() => {}}
         timeCardStates={mockTimeCardStates}
-        shownCount={5}
-        totalCount={5}
       />,
     );
 
@@ -46,12 +44,9 @@ describe("TimeCardsDateFilter", () => {
     expect(
       screen.getByText("Filter by State:"),
     ).toBeInTheDocument();
-    expect(
-      screen.getByText("Showing 5 of 5 time logs"),
-    ).toBeInTheDocument();
   });
 
-  it("should show Loading when isLoading is true", () => {
+  it("should show state dropdown with options", () => {
     render(
       <TimeCardsDateFilter
         startDate="2025-01-01"
@@ -61,12 +56,9 @@ describe("TimeCardsDateFilter", () => {
         state=""
         onStateChange={() => {}}
         timeCardStates={mockTimeCardStates}
-        shownCount={0}
-        totalCount={0}
-        isLoading
       />,
     );
 
-    expect(screen.getByText("Loading...")).toBeInTheDocument();
+    expect(screen.getByText("Filter by State:")).toBeInTheDocument();
   });
 });

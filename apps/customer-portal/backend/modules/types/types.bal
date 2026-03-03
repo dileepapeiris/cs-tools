@@ -138,10 +138,10 @@ public type CaseResponse record {|
     string? closeNotes?;
     # Indicates if the case is auto closed
     boolean? hasAutoClosed?;
-    # Associated change requests (only for service requests)
+    # Change requests (only for service requests)
     ReferenceItem[]? changeRequests?;
-    # Variables for service request (only for service requests)
-    entity:CaseResponseVariable[]? variables?;
+    # Variables for service request
+    entity:ServiceRequestVariable[]? variables?;
 |};
 
 # Reference item.

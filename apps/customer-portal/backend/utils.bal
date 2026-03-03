@@ -510,7 +510,7 @@ public isolated function mapCaseResponse(entity:CaseResponse response) returns t
     entity:ReferenceTableItem? catalogItem = response.catalogItem;
     entity:ReferenceTableItem? assignedTeam = response.assignedTeam;
     entity:ReferenceTableItem[]? changeRequests = response?.changeRequests;
-    entity:CaseResponseVariable[]? variables = response?.variables;
+    entity:ServiceRequestVariable[]? variables = response?.variables;
 
     return {
         id: response.id,

@@ -399,13 +399,13 @@ public type CaseResponse record {|
     boolean? hasAutoClosed?;
     # Associated change requests (only for service requests)
     ReferenceTableItem[]? changeRequests?;
-    # Variables for service request (only for service requests)
-    CaseResponseVariable[]? variables?;
+    # Variables for service request
+    ServiceRequestVariable[]? variables?;
     json...;
 |};
 
-# Case response for service request case type with variables.
-public type CaseResponseVariable record {|
+# Service request variables.
+public type ServiceRequestVariable record {|
     # Variable name
     string name;
     # Variable value

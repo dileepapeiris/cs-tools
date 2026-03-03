@@ -153,6 +153,8 @@ export interface PostDeploymentAttachmentRequest {
 export interface PatchDeploymentProductRequest {
   cores?: number;
   tps?: number;
+  description?: string;
+  active?: boolean;
 }
 
 // Request body for POST /deployments/:deploymentId/products.
@@ -162,6 +164,7 @@ export interface PostDeploymentProductRequest {
   projectId: string;
   cores?: number;
   tps?: number;
+  description?: string;
 }
 
 // Request body for POST /products/:productId/versions/search.

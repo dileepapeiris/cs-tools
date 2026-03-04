@@ -136,6 +136,7 @@ export function useGetChangeRequestsInfinite(
 ): UseInfiniteQueryResult<InfiniteData<ChangeRequestSearchResponse>, Error> {
   const logger = useLogger();
   const { isSignedIn, isLoading: isAuthLoading } = useAsgardeo();
+  const authFetch = useAuthApiClient();
   const pageSize = 10;
 
   return useInfiniteQuery<ChangeRequestSearchResponse, Error>({

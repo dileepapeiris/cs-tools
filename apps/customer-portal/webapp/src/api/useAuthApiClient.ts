@@ -33,31 +33,35 @@ export function useAuthApiClient() {
     // 1. Get the fresh token automatically
     const token = await getIdToken();
 
-    // 2. Format headers
-    const defaultHeaders: Record<string, string> = {
-      Authorization: `Bearer ${token}`,
-      "x-user-id-token": token,
-      Accept: "application/json",
-    };
+    const headers = new Headers(options?.headers);
 
-    // If method is POST, PUT, or PATCH, attach JSON Content-Type
-    const method = options?.method?.toUpperCase();
-    if (method === "POST" || method === "PUT" || method === "PATCH") {
-      defaultHeaders["Content-Type"] = "application/json";
+    headers.set("Authorization", `Bearer ${token}`);
+    headers.set("x-user-id-token", token);
+
+    // Default Accept header if not present
+    if (!headers.has("Accept")) {
+      headers.set("Accept", "application/json");
     }
 
-    // Include any overrides specified in individual calls
-    if (options?.headers) {
-      Object.assign(
-        defaultHeaders,
-        options.headers instanceof Headers
-          ? Object.fromEntries(options.headers.entries())
-          : options.headers,
-      );
+    // Smartly set Content-Type: application/json
+    const method = options?.method?.toUpperCase() || "GET";
+    const body = options?.body;
+
+    if (["POST", "PUT", "PATCH"].includes(method) && body) {
+      const isNonJsonType =
+        body instanceof FormData ||
+        body instanceof Blob ||
+        body instanceof ArrayBuffer ||
+        (typeof URLSearchParams !== "undefined" &&
+          body instanceof URLSearchParams);
+
+      if (!isNonJsonType && !headers.has("Content-Type")) {
+        headers.set("Content-Type", "application/json");
+      }
     }
 
     // 3. Execute the native fetch
-    return fetch(input, { ...options, headers: defaultHeaders });
+    return fetch(input, { ...options, headers });
   };
 
   return authFetch;

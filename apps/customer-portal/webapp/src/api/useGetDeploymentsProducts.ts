@@ -82,11 +82,8 @@ export function useGetDeploymentsProducts(
       logger.debug(
         `Fetching deployment products for deployment ID: ${deploymentId}`,
       );
-      const fetchFn = async (url: string, init?: RequestInit) => {
-        return authFetch(url, { ...init });
-      };
       const data = await fetchDeploymentProducts(deploymentId, {
-        fetchFn,
+        fetchFn: authFetch,
       });
       logger.debug(
         `Deployment products fetched for deployment ID: ${deploymentId}`,

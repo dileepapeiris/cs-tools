@@ -31,10 +31,11 @@ vi.mock("@asgardeo/react", () => ({
 }));
 
 // Globally mock useAuthApiClient to avoid unexpected native fetch executions inside UI component tests
+export const mockAuthFetch = vi.fn().mockResolvedValue({
+  ok: true,
+  json: () => Promise.resolve({}),
+});
+
 vi.mock("@api/useAuthApiClient", () => ({
-  useAuthApiClient: () =>
-    vi.fn().mockResolvedValue({
-      ok: true,
-      json: () => Promise.resolve({}),
-    }),
+  useAuthApiClient: () => mockAuthFetch,
 }));

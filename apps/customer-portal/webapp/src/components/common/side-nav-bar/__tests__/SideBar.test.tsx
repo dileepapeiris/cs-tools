@@ -59,7 +59,6 @@ vi.mock("@wso2/oxygen-ui", () => {
     Link: ({
       children,
       to,
-      component,
     }: {
       children: any;
       to: string;

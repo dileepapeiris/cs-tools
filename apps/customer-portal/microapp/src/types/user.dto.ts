@@ -5,3 +5,16 @@ export interface MeDTO {
   lastName: string;
   timeZone: string;
 }
+
+export type UsersDTO = UserDTO[];
+
+export interface UserDTO {
+  id: string;
+  email: string;
+  firstName: string;
+  lastName: string;
+  isCsAdmin: boolean;
+  isCsIntegrationUser: boolean;
+  isSecurityContact: boolean;
+  membershipStatus: string;
+}

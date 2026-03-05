@@ -5,3 +5,15 @@ export interface Me {
   lastName: string;
   timezone: string;
 }
+
+export interface User {
+  id: string;
+  email: string;
+  firstName: string;
+  lastName: string;
+  roles: Role[];
+  status: "invited" | "registered";
+  lastActive: Date;
+}
+
+export type Role = "Admin" | "Portal User" | "System User";

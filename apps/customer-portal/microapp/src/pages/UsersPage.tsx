@@ -18,9 +18,14 @@ import { Link, useLocation, useNavigate, useSearchParams } from "react-router-do
 import { Card, Grid, Stack, Typography, Button, Divider, useTheme, SearchBar } from "@wso2/oxygen-ui";
 import { Plus } from "@wso2/oxygen-ui-icons-react";
 import { MetricWidget } from "@components/features/dashboard";
-import { UserListItem } from "@components/features/users";
+import { UserListItem, UserListItemSkeleton } from "@components/features/users";
+import { useSuspenseQuery } from "@tanstack/react-query";
+import { users } from "@src/services/users";
+import { useProject } from "@context/project";
+import { ErrorBoundary } from "@components/core";
+import { Suspense } from "react";
 
-import { MOCK_METRICS, MOCK_ROLES, MOCK_USERS } from "@src/mocks/data/users";
+import { MOCK_METRICS, MOCK_ROLES } from "@src/mocks/data/users";
 
 export default function UsersPage() {
   const navigate = useNavigate();
@@ -29,7 +34,6 @@ export default function UsersPage() {
 
   const baseRoute = location.pathname;
   const searchValue = searchParams.get("search") ?? "";
-  const users = MOCK_USERS.filter((item) => item.name.toLowerCase().includes(searchValue));
 
   const updateParams = (updates: Record<string, string | null>) => {
     const next = new URLSearchParams(searchParams);
@@ -71,12 +75,37 @@ export default function UsersPage() {
         </Stack>
         <Divider />
         <Stack gap={2} pt={1}>
-          {users.map((props, index) => (
-            <UserListItem key={index} {...props} />
-          ))}
+          <ErrorBoundary fallback={<UsersListContentSkeleton />}>
+            <Suspense fallback={<UsersListContentSkeleton />}>
+              <UsersListContent />
+            </Suspense>
+          </ErrorBoundary>
         </Stack>
       </Card>
       <UserRolesInfo />
+    </>
+  );
+}
+
+function UsersListContent() {
+  const { projectId } = useProject();
+  const { data } = useSuspenseQuery(users.all(projectId!));
+
+  return (
+    <>
+      {data.map((props) => (
+        <UserListItem key={props.id} {...props} />
+      ))}
+    </>
+  );
+}
+
+function UsersListContentSkeleton() {
+  return (
+    <>
+      {Array.from({ length: 10 }).map((_, index) => (
+        <UserListItemSkeleton key={index} />
+      ))}
     </>
   );
 }

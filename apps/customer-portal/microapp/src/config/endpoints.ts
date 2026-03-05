@@ -27,6 +27,7 @@ export const PROJECT_CASES_ENDPOINT = (id: string) => `/projects/${id}/cases/sea
 export const PROJECT_CASES_FILTERS_ENDPOINT = (id: string) => `/projects/${id}/filters`;
 export const PROJECT_DEPLOYMENTS_ENDPOINT = (id: string) => `/projects/${id}/deployments`;
 export const PROJECT_DEPLOYMENT_PRODUCTS_ENDPOINT = (deploymentId: string) => `/deployments/${deploymentId}/products`;
+export const PROJECT_USERS_ENDPOINT = (id: string) => `/projects/${id}/contacts`; 
 export const CREATE_CASE_ENDPOINT = "/cases";
 export const CASE_CLASSIFICATION_ENDPOINT = "/cases/classify";
 export const CASE_STATS_ENDPOINT = (id: string) => `/projects/${id}/stats/cases`;

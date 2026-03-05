@@ -66,10 +66,10 @@ const mockProject: ProjectDetails = {
   id: "project-1",
   name: "Test Project",
   key: "TP",
-  type: "Subscription",
+  type: { id: "subscription", label: "Subscription" },
   createdOn: "2024-01-01",
   description: "Test Description",
-  hasSR: true,
+  hasSr: true,
   account: {
     id: "account-1",
     name: "Test Account",
@@ -101,10 +101,10 @@ describe("ContactInfoCard", () => {
   });
 
   it("should render only owner when technical owner is not provided", () => {
-    const projectWithoutTech = {
+    const projectWithoutTech: ProjectDetails = {
       ...mockProject,
       account: {
-        ...mockProject.account,
+        ...mockProject.account!,
         technicalOwnerEmail: null,
       },
     };
@@ -117,10 +117,10 @@ describe("ContactInfoCard", () => {
   });
 
   it("should show 'No contact information available' when no contacts provided", () => {
-    const projectWithoutContacts = {
+    const projectWithoutContacts: ProjectDetails = {
       ...mockProject,
       account: {
-        ...mockProject.account,
+        ...mockProject.account!,
         ownerEmail: null,
         technicalOwnerEmail: null,
       },

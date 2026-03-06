@@ -61,7 +61,6 @@ export default function Brand({
     >
       {/* brand logo */}
       <HeaderUI.BrandLogo>
-        <WSO2 />
         <img
           key={logoSrc}
           src={logoSrc}

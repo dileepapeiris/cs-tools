@@ -37,6 +37,7 @@ import {
 import useGetProjectFilters from "@api/useGetProjectFilters";
 import { usePatchCase } from "@api/usePatchCase";
 import { useErrorBanner } from "@context/error-banner/ErrorBannerContext";
+import { getUserFacingErrorMessage } from "@utils/errorMessages";
 import { useSuccessBanner } from "@context/success-banner/SuccessBannerContext";
 import type { AssignedEngineerValue } from "@utils/support";
 import {
@@ -262,8 +263,10 @@ export default function CaseDetailsActionRow({
                             },
                             onError: (err) => {
                               showError(
-                                err?.message ??
+                                getUserFacingErrorMessage(
+                                  err,
                                   "Failed to update case status. Please try again.",
+                                ),
                               );
                             },
                             onSettled: () => {

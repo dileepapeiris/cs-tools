@@ -46,6 +46,7 @@ import {
   stripCustomerPrefixFromReason,
   utcToDatetimeLocal,
 } from "@utils/support";
+import { getUserFacingErrorMessage } from "@utils/errorMessages";
 
 const DURATION_OPTIONS = [
   { value: 15, label: "15 minutes" },
@@ -201,11 +202,10 @@ export default function RequestCallModal({
     const utcTimes = [localToUtcIso(form.preferredDateTimeLocal)];
 
     const handleError = (error: Error) => {
-      const msg = error?.message ?? "";
-      const friendlyMsg =
-        /\b(?:cannot be past|date.*past|time.*past|in the past)\b/i.test(msg)
-          ? "The selected date and time cannot be in the past. Please choose a future date and time."
-          : msg || "Failed to save call request.";
+      const friendlyMsg = getUserFacingErrorMessage(
+        error,
+        "Failed to save call request.",
+      );
       setModalError(friendlyMsg);
       onError?.(friendlyMsg);
     };

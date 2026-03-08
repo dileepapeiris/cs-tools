@@ -34,6 +34,7 @@ import {
 } from "@wso2/oxygen-ui-icons-react";
 import { usePatchChangeRequest } from "@api/usePatchChangeRequest";
 import { useErrorBanner } from "@context/error-banner/ErrorBannerContext";
+import { getUserFacingErrorMessage } from "@utils/errorMessages";
 import { useSuccessBanner } from "@context/success-banner/SuccessBannerContext";
 import type { ChangeRequestDetails } from "@models/responses";
 
@@ -168,7 +169,7 @@ export default function ScheduledMaintenanceWindowCard({
           showSuccess("Planned start updated successfully");
         },
         onError: (err) => {
-          showError(err?.message ?? "Failed to update planned start");
+          showError(getUserFacingErrorMessage(err, "Failed to update planned start."));
         },
       },
     );

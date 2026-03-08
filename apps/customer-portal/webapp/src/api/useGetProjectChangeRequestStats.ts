@@ -18,6 +18,7 @@ import { useQuery, type UseQueryResult } from "@tanstack/react-query";
 import { useAsgardeo } from "@asgardeo/react";
 import { useAuthApiClient } from "@api/useAuthApiClient";
 import { useLogger } from "@hooks/useLogger";
+import { getUserFacingErrorMessage } from "@utils/errorMessages";
 import { ApiQueryKeys } from "@constants/apiConstants";
 import type {
   ChangeRequestStatsResponse,
@@ -119,7 +120,12 @@ export function useGetProjectChangeRequestStats(
         return mappedStats;
       } catch (error) {
         logger.error("[useGetProjectChangeRequestStats] Error:", error);
-        throw error;
+        throw new Error(
+          getUserFacingErrorMessage(
+            error,
+            "Failed to load change request statistics.",
+          ),
+        );
       }
     },
     enabled: !!projectId && isSignedIn && !isAuthLoading,

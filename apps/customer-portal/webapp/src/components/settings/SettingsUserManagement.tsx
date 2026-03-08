@@ -64,6 +64,8 @@ import type { ProjectContact } from "@models/responses";
 
 export interface SettingsUserManagementProps {
   projectId: string;
+  /** When false, hide Add User and Delete user buttons. Default true for backward compatibility. */
+  canAddOrRemoveUsers?: boolean;
 }
 
 /**
@@ -74,6 +76,7 @@ export interface SettingsUserManagementProps {
  */
 export default function SettingsUserManagement({
   projectId,
+  canAddOrRemoveUsers = true,
 }: SettingsUserManagementProps): JSX.Element {
   const theme = useTheme();
   const [searchQuery, setSearchQuery] = useState("");
@@ -282,15 +285,17 @@ export default function SettingsUserManagement({
             ),
           }}
         />
-        <Button
-          variant="contained"
-          color="warning"
-          startIcon={<Plus size={18} />}
-          onClick={() => setIsAddModalOpen(true)}
-          sx={{ whiteSpace: "nowrap" }}
-        >
-          Add User
-        </Button>
+        {canAddOrRemoveUsers && (
+          <Button
+            variant="contained"
+            color="warning"
+            startIcon={<Plus size={18} />}
+            onClick={() => setIsAddModalOpen(true)}
+            sx={{ whiteSpace: "nowrap" }}
+          >
+            Add User
+          </Button>
+        )}
       </Box>
 
       {/* Users table */}
@@ -301,7 +306,9 @@ export default function SettingsUserManagement({
               <TableCell>User</TableCell>
               <TableCell>Role</TableCell>
               <TableCell>Status</TableCell>
-              <TableCell align="right">Actions</TableCell>
+              {canAddOrRemoveUsers && (
+                <TableCell align="right">Actions</TableCell>
+              )}
             </TableRow>
           </TableHead>
           <TableBody>
@@ -328,13 +335,21 @@ export default function SettingsUserManagement({
               ))
             ) : error ? (
               <TableRow>
-                <TableCell colSpan={4} align="center" sx={{ py: 3 }}>
+                <TableCell
+                  colSpan={canAddOrRemoveUsers ? 4 : 3}
+                  align="center"
+                  sx={{ py: 3 }}
+                >
                   <ErrorIndicator entityName="users" size="medium" />
                 </TableCell>
               </TableRow>
             ) : filteredContacts.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={4} align="center" sx={{ py: 3 }}>
+                <TableCell
+                  colSpan={canAddOrRemoveUsers ? 4 : 3}
+                  align="center"
+                  sx={{ py: 3 }}
+                >
                   <Typography variant="body2" color="text.secondary">
                     No users found.
                   </Typography>
@@ -397,20 +412,22 @@ export default function SettingsUserManagement({
                       sx={{ typography: "caption" }}
                     />
                   </TableCell>
-                  <TableCell align="right">
-                    <Tooltip title="Remove user">
-                      <span>
-                        <IconButton
-                          size="small"
-                          color="error"
-                          aria-label="Remove user"
-                          onClick={() => setRemoveTarget(contact)}
-                        >
-                          <Trash2 size={16} />
-                        </IconButton>
-                      </span>
-                    </Tooltip>
-                  </TableCell>
+                  {canAddOrRemoveUsers && (
+                    <TableCell align="right">
+                      <Tooltip title="Remove user">
+                        <span>
+                          <IconButton
+                            size="small"
+                            color="error"
+                            aria-label="Remove user"
+                            onClick={() => setRemoveTarget(contact)}
+                          >
+                            <Trash2 size={16} />
+                          </IconButton>
+                        </span>
+                      </Tooltip>
+                    </TableCell>
+                  )}
                 </TableRow>
               ))
             )}

@@ -19,6 +19,7 @@ import { useAsgardeo } from "@asgardeo/react";
 import { useAuthApiClient } from "@api/useAuthApiClient";
 import { type UserDetails } from "@models/responses";
 import { useLogger } from "@hooks/useLogger";
+import { getUserFacingErrorMessage } from "@utils/errorMessages";
 
 /**
  * Hook to get user details.
@@ -62,7 +63,9 @@ const useGetUserDetails = (): UseQueryResult<UserDetails, Error> => {
         return data;
       } catch (error) {
         logger.error("[useGetUserDetails] Error:", error);
-        throw error;
+        throw new Error(
+          getUserFacingErrorMessage(error, "Failed to load user details."),
+        );
       }
     },
     enabled: isSignedIn && !isAuthLoading,

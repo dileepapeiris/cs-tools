@@ -18,6 +18,7 @@ import { useQuery, type UseQueryResult } from "@tanstack/react-query";
 import { useAsgardeo } from "@asgardeo/react";
 import { useAuthApiClient } from "@api/useAuthApiClient";
 import { useLogger } from "@hooks/useLogger";
+import { getUserFacingErrorMessage } from "@utils/errorMessages";
 import { ApiQueryKeys } from "@constants/apiConstants";
 import type { ProjectTimeTrackingStats } from "@models/responses";
 
@@ -100,7 +101,9 @@ export default function useGetTimeCardsStats({
         return data;
       } catch (error) {
         logger.error("[useGetTimeCardsStats] Error:", error);
-        throw error;
+        throw new Error(
+          getUserFacingErrorMessage(error, "Failed to load time card statistics."),
+        );
       }
     },
     enabled:

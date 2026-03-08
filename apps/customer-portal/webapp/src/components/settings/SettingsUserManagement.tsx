@@ -326,11 +326,13 @@ export default function SettingsUserManagement({
                   </TableCell>
                   <TableCell><Skeleton variant="rounded" width={70} height={24} /></TableCell>
                   <TableCell><Skeleton variant="rounded" width={60} height={24} /></TableCell>
-                  <TableCell>
-                    <Box sx={{ display: "flex", gap: 0.5, justifyContent: "flex-end" }}>
-                      <Skeleton variant="circular" width={32} height={32} />
-                    </Box>
-                  </TableCell>
+                  {canAddOrRemoveUsers && (
+                    <TableCell>
+                      <Box sx={{ display: "flex", gap: 0.5, justifyContent: "flex-end" }}>
+                        <Skeleton variant="circular" width={32} height={32} />
+                      </Box>
+                    </TableCell>
+                  )}
                 </TableRow>
               ))
             ) : error ? (

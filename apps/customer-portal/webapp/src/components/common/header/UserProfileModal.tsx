@@ -43,7 +43,7 @@ import {
   PHONE_COUNTRY_OPTIONS,
   toE164,
   validatePhoneE164,
-} from "@constants/phoneConstants";
+} from "@utils/phone";
 import { TIME_ZONE_OPTIONS } from "@constants/timeZoneConstants";
 
 export interface UserProfileModalProps {

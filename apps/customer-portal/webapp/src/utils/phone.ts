@@ -14,7 +14,7 @@
 // specific language governing permissions and limitations
 // under the License.
 
-import { getCountries, getCountryCallingCode, type CountryCode } from "react-phone-number-input";
+import { getCountries, getCountryCallingCode, type Country } from "react-phone-number-input";
 
 /** Country dial code and name for phone input. */
 export interface PhoneCountryOption {
@@ -51,7 +51,7 @@ function initializeCountryOptions(): PhoneCountryOption[] {
   return countries
     .map((countryCode: string) => {
       try {
-        const dialCode = getCountryCallingCode(countryCode as CountryCode);
+        const dialCode = getCountryCallingCode(countryCode as Country);
         if (!dialCode) return null;
 
         const displayName = new Intl.DisplayNames(["en"], {

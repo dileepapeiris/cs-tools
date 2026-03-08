@@ -21,6 +21,7 @@ import { usePostComment } from "@api/usePostComment";
 import { usePostAttachments } from "@api/usePostAttachments";
 import { useAsgardeo } from "@asgardeo/react";
 import { useErrorBanner } from "@context/error-banner/ErrorBannerContext";
+import { getUserFacingErrorMessage } from "@utils/errorMessages";
 import { stripHtml } from "@utils/support";
 import Editor from "@components/common/rich-text-editor/Editor";
 import UploadAttachmentModal from "@case-details-attachments/UploadAttachmentModal";
@@ -139,11 +140,12 @@ export default function ActivityCommentInput({
       }
       return true;
     } catch (error) {
-      const message =
-        error instanceof Error && error.message
-          ? error.message
-          : "Failed to upload attachments. Please try again.";
-      showError(message);
+      showError(
+        getUserFacingErrorMessage(
+          error,
+          "Failed to upload attachments. Please try again.",
+        ),
+      );
       return false;
     } finally {
       setIsUploadingAttachments(false);
@@ -176,11 +178,12 @@ export default function ActivityCommentInput({
           }
         },
         onError: (error: unknown) => {
-          const message =
-            error instanceof Error && error.message
-              ? error.message
-              : "Failed to post comment. Please try again.";
-          showError(message);
+          showError(
+            getUserFacingErrorMessage(
+              error,
+              "Failed to post comment. Please try again.",
+            ),
+          );
         },
       },
     );

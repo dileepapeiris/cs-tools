@@ -71,6 +71,7 @@ import {
   toPresentContinuousActionLabel,
   toPresentTenseActionLabel,
 } from "@utils/support";
+import { getUserFacingErrorMessage } from "@utils/errorMessages";
 import { CASE_STATUS_ACTIONS, CommentType } from "@constants/supportConstants";
 import ErrorIndicator from "@components/common/error-indicator/ErrorIndicator";
 import CaseDetailsAttachmentsPanel from "@case-details-attachments/CaseDetailsAttachmentsPanel";
@@ -294,7 +295,7 @@ export default function ServiceRequestDetailContent({
         },
         onError: (err) => {
           showError(
-            err?.message ?? "Failed to add comment. Please try again.",
+            getUserFacingErrorMessage(err, "Failed to add comment. Please try again."),
           );
         },
       },
@@ -902,8 +903,10 @@ export default function ServiceRequestDetailContent({
                                   },
                                   onError: (err) => {
                                     showError(
-                                      err?.message ??
+                                      getUserFacingErrorMessage(
+                                        err,
                                         "Failed to update service request status. Please try again.",
+                                      ),
                                     );
                                   },
                                   onSettled: () => {

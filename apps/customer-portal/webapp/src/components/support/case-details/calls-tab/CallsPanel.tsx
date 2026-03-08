@@ -30,6 +30,7 @@ import ErrorBanner from "@components/common/error-banner/ErrorBanner";
 import SuccessBanner from "@components/common/success-banner/SuccessBanner";
 import { CALL_REQUEST_STATE_CANCELLED } from "@constants/supportConstants";
 import { ERROR_BANNER_TIMEOUT_MS } from "@constants/errorBannerConstants";
+import { getUserFacingErrorMessage } from "@utils/errorMessages";
 
 export interface CallsPanelProps {
   projectId: string;
@@ -103,7 +104,7 @@ export default function CallsPanel({
         },
         onError: (error) => {
           handleCloseDeleteModal();
-          setErrorMessage(error.message || "Failed to cancel call request.");
+          setErrorMessage(getUserFacingErrorMessage(error, "Failed to cancel call request."));
         },
       },
     );

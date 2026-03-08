@@ -23,6 +23,10 @@ export interface ProjectListItem {
   key: string;
   createdOn: string;
   description: string;
+  type?: {
+    id: string;
+    label: string;
+  };
 }
 
 /** Account nested in project details response. */

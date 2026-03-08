@@ -34,6 +34,7 @@ import {
   isS0Case,
 } from "@utils/support";
 import { isS0SeverityLabel } from "@constants/dashboardConstants";
+import type { CaseListItem, CaseSearchResponse } from "@models/responses";
 
 const OUTSTANDING_STATUS_IDS = [1, 10, 18, 1003, 1006] as const;
 
@@ -164,22 +165,19 @@ const CasesTable = ({
     infiniteQuery.data,
   ]);
 
-  const paginatedData = useMemo(() => {
-    const filterS0 = (items: { severity?: { label?: string } }[]) =>
+  const paginatedData = useMemo((): CaseSearchResponse => {
+    const filterS0 = (items: CaseListItem[]): CaseListItem[] =>
       excludeS0 ? items.filter((c) => !isS0Case(c)) : items;
 
     if (showAll) {
       if (!infiniteQuery.data) {
-        return {
-          cases: [] as { severity?: { label?: string } }[],
-          totalRecords: 0,
-          offset: 0,
-          limit: 0,
-        };
+        return { cases: [], totalRecords: 0, offset: 0, limit: 0 };
       }
       const rawCases = infiniteQuery.data.pages.flatMap((p) => p.cases ?? []);
       const cases = filterS0(rawCases);
-      const totalRecords = excludeS0 ? cases.length : (infiniteQuery.data.pages[0]?.totalRecords ?? cases.length);
+      const totalRecords = excludeS0
+        ? cases.length
+        : (infiniteQuery.data.pages[0]?.totalRecords ?? cases.length);
       return {
         cases,
         totalRecords,
@@ -188,15 +186,12 @@ const CasesTable = ({
       };
     }
     const pageData = pageQuery.data;
-    const rawCases = pageData?.cases ?? [];
+    const rawCases = (pageData?.cases ?? []) as CaseListItem[];
     const cases = filterS0(rawCases);
-    const totalRecords = excludeS0 ? cases.length : (pageData?.totalRecords ?? 0);
-    return {
-      cases,
-      totalRecords,
-      offset,
-      limit,
-    };
+    const totalRecords = excludeS0
+      ? cases.length
+      : (pageData?.totalRecords ?? 0);
+    return { cases, totalRecords, offset, limit };
   }, [showAll, infiniteQuery.data, pageQuery.data, offset, limit, excludeS0]);
 
   const isFetchingCases = showAll

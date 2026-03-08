@@ -18,6 +18,7 @@ import { useQuery, type UseQueryResult } from "@tanstack/react-query";
 import { useAsgardeo } from "@asgardeo/react";
 import { useAuthApiClient } from "@api/useAuthApiClient";
 import { useLogger } from "@hooks/useLogger";
+import { getUserFacingErrorMessage } from "@utils/errorMessages";
 import { ApiQueryKeys } from "@constants/apiConstants";
 import type { ProductVulnerability } from "@models/responses";
 
@@ -67,7 +68,9 @@ export function useGetProductVulnerabilities(
         return data;
       } catch (error) {
         logger.error("[useGetProductVulnerabilities] Error:", error);
-        throw error;
+        throw new Error(
+          getUserFacingErrorMessage(error, "Failed to load product vulnerabilities."),
+        );
       }
     },
     enabled: !!vulnerabilityId && isSignedIn && !isAuthLoading,

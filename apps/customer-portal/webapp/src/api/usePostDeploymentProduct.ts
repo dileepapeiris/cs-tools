@@ -22,6 +22,7 @@ import {
 import { useAsgardeo } from "@asgardeo/react";
 import { useAuthApiClient } from "@api/useAuthApiClient";
 import { useLogger } from "@hooks/useLogger";
+import { getUserFacingErrorMessage } from "@utils/errorMessages";
 import { ApiQueryKeys } from "@constants/apiConstants";
 import type { PostDeploymentProductRequest } from "@models/requests";
 
@@ -89,7 +90,9 @@ export function usePostDeploymentProduct(): UseMutationResult<
         }
       } catch (error) {
         logger.error("[usePostDeploymentProduct] Error:", error);
-        throw error;
+        throw new Error(
+          getUserFacingErrorMessage(error, "Failed to add deployment product."),
+        );
       }
     },
     onSuccess: (_data, { deploymentId }) => {

@@ -18,6 +18,7 @@ import { useMutation, type UseMutationResult } from "@tanstack/react-query";
 import { useAsgardeo } from "@asgardeo/react";
 import { useAuthApiClient } from "@api/useAuthApiClient";
 import { useLogger } from "@hooks/useLogger";
+import { getUserFacingErrorMessage } from "@utils/errorMessages";
 import type { ConversationRequest } from "@models/requests";
 import type { ConversationResponse } from "@models/responses";
 
@@ -99,7 +100,9 @@ export function usePostConversations(): UseMutationResult<
           "[usePostConversations] Error:",
           error instanceof Error ? error.message : String(error),
         );
-        throw error;
+        throw new Error(
+          getUserFacingErrorMessage(error, "Failed to send conversation message."),
+        );
       }
     }
   });

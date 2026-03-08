@@ -15,10 +15,11 @@
 // under the License.
 
 import { ListingTable } from "@wso2/oxygen-ui";
-import { type JSX, useState, useMemo, useCallback } from "react";
+import { type JSX, useState, useMemo, useCallback, useEffect } from "react";
 import { useNavigate } from "react-router";
 import { useAsgardeo } from "@asgardeo/react";
 import { getNoveraChatEnabled } from "@utils/settingsStorage";
+import useGetProjectCases from "@api/useGetProjectCases";
 import { useGetProjectCasesPage } from "@api/useGetProjectCasesPage";
 import useGetProjectFilters from "@api/useGetProjectFilters";
 import { useGetDeployments } from "@api/useGetDeployments";
@@ -42,6 +43,8 @@ const CasesTable = ({ projectId }: CasesTableProps): JSX.Element => {
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5);
+  const [showAll, setShowAll] = useState(false);
+  const [isLoadingAll, setIsLoadingAll] = useState(false);
 
   const {
     data: filtersMetadata,
@@ -120,26 +123,67 @@ const CasesTable = ({ projectId }: CasesTableProps): JSX.Element => {
   );
 
   const offset = page * rowsPerPage;
-  const {
-    data: pageData,
-    isFetching: isFetchingCases,
-    isError,
-  } = useGetProjectCasesPage(projectId, caseSearchRequest, offset, rowsPerPage);
+  const limit = rowsPerPage;
+
+  const pageQuery = useGetProjectCasesPage(
+    projectId,
+    caseSearchRequest,
+    offset,
+    limit,
+    { enabled: !showAll },
+  );
+
+  const infiniteQuery = useGetProjectCases(projectId, caseSearchRequest, {
+    enabled: showAll,
+  });
+
+  useEffect(() => {
+    if (showAll && infiniteQuery.hasNextPage && !infiniteQuery.isFetchingNextPage && isLoadingAll) {
+      void infiniteQuery.fetchNextPage();
+    } else if (showAll && !infiniteQuery.hasNextPage && isLoadingAll) {
+      // All pages loaded
+      setIsLoadingAll(false);
+    }
+  }, [
+    showAll,
+    infiniteQuery.hasNextPage,
+    infiniteQuery.isFetchingNextPage,
+    infiniteQuery.fetchNextPage,
+    isLoadingAll,
+  ]);
 
   const paginatedData = useMemo(() => {
+    if (showAll && infiniteQuery.data) {
+      const cases = infiniteQuery.data.pages.flatMap((p) => p.cases ?? []);
+      const totalRecords = infiniteQuery.data.pages[0]?.totalRecords ?? cases.length;
+      return {
+        cases,
+        totalRecords,
+        offset: 0,
+        limit: cases.length,
+      };
+    }
+    const pageData = pageQuery.data;
     const cases = pageData?.cases ?? [];
     const totalRecords = pageData?.totalRecords ?? 0;
     return {
       cases,
       totalRecords,
       offset,
-      limit: rowsPerPage,
+      limit,
     };
-  }, [pageData, offset, rowsPerPage]);
+  }, [showAll, infiniteQuery.data, pageQuery.data, offset, limit]);
+
+  const isFetchingCases = showAll
+    ? isLoadingAll || infiniteQuery.isFetching || infiniteQuery.isFetchingNextPage
+    : pageQuery.isFetching;
+  const isError = showAll ? infiniteQuery.isError : pageQuery.isError;
 
   const handleFilterSearch = (newFilters: Record<string, any>) => {
     setFilters(newFilters);
     setPage(0);
+    setShowAll(false);
+    setIsLoadingAll(false);
   };
 
   const handleUpdateFilter = (field: string, value: any) => {
@@ -148,6 +192,8 @@ const CasesTable = ({ projectId }: CasesTableProps): JSX.Element => {
       [field]: value,
     }));
     setPage(0);
+    setShowAll(false);
+    setIsLoadingAll(false);
   };
 
   const handleRemoveFilter = (field: string) => {
@@ -155,9 +201,19 @@ const CasesTable = ({ projectId }: CasesTableProps): JSX.Element => {
     delete newFilters[field];
     setFilters(newFilters);
     setPage(0);
+    setShowAll(false);
+    setIsLoadingAll(false);
   };
 
   const handleClearFilters = () => {
+    setFilters({});
+    setPage(0);
+    setIsLoadingAll(false);
+  };
+
+  const handleAllCases = () => {
+    setShowAll(true);
+    setIsLoadingAll(true);
     setFilters({});
     setPage(0);
   };
@@ -222,7 +278,7 @@ const CasesTable = ({ projectId }: CasesTableProps): JSX.Element => {
         onUpdateFilter={handleUpdateFilter}
         onClearAll={handleClearFilters}
         onFilterClick={() => setIsFilterOpen(true)}
-        onAllCases={() => navigate(`/${projectId}/support/cases`)}
+        onAllCases={handleAllCases}
         onCreateCase={handleCreateCase}
       />
 
@@ -236,6 +292,7 @@ const CasesTable = ({ projectId }: CasesTableProps): JSX.Element => {
         onPageChange={handleChangePage}
         onRowsPerPageChange={handleChangeRowsPerPage}
         onCaseClick={(c) => navigate(`/${projectId}/support/cases/${c.id}`)}
+        showPagination={!showAll}
       />
 
       {/* Filter popover */}

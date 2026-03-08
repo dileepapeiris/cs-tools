@@ -58,8 +58,11 @@ import {
   mapSeverityToDisplay,
   resolveColorFromTheme,
   stripHtml,
+  hasSingleCodeWrapper,
   stripCodeWrapper,
+  stripAllCodeBlocks,
   convertCodeTagsToHtml,
+  trimLeadingBr,
   stripCustomerCommentAddedLabel,
   replaceInlineImageSources,
   hasDisplayableContent,
@@ -711,15 +714,18 @@ export default function ServiceRequestDetailContent({
                             dangerouslySetInnerHTML={{
                               __html: (() => {
                                 const raw = comment.content ?? "";
-                                const trimmed = raw.trim();
                                 const isFullCodeWrap =
-                                  trimmed.startsWith("[code]") &&
-                                  trimmed.endsWith("[/code]");
+                                  hasSingleCodeWrapper(raw);
+                                const codeBlockCount =
+                                  raw.match(/\[code\]/gi)?.length ?? 0;
                                 const afterCode = isFullCodeWrap
                                   ? stripCodeWrapper(raw)
-                                  : convertCodeTagsToHtml(raw);
+                                  : codeBlockCount > 1
+                                    ? stripAllCodeBlocks(raw)
+                                    : convertCodeTagsToHtml(raw);
+                                const trimmedBr = trimLeadingBr(afterCode);
                                 const withoutLabel =
-                                  stripCustomerCommentAddedLabel(afterCode);
+                                  stripCustomerCommentAddedLabel(trimmedBr);
                                 const withImages = replaceInlineImageSources(
                                   withoutLabel,
                                   comment.inlineAttachments,

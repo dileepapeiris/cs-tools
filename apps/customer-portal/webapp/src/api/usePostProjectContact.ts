@@ -22,6 +22,7 @@ import {
 import { useAsgardeo } from "@asgardeo/react";
 import { useAuthApiClient } from "@api/useAuthApiClient";
 import { useLogger } from "@hooks/useLogger";
+import { getUserFacingErrorMessage } from "@utils/errorMessages";
 import { ApiQueryKeys } from "@constants/apiConstants";
 import type { CreateProjectContactRequest } from "@models/requests";
 
@@ -81,7 +82,9 @@ export function usePostProjectContact(
         }
       } catch (error) {
         logger.error("[usePostProjectContact] Error:", error);
-        throw error;
+        throw new Error(
+          getUserFacingErrorMessage(error, "Failed to save project contact."),
+        );
       }
     },
     onSuccess: () => {

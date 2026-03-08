@@ -22,6 +22,7 @@ import {
 import { useAsgardeo } from "@asgardeo/react";
 import { useAuthApiClient } from "@api/useAuthApiClient";
 import { useLogger } from "@hooks/useLogger";
+import { getUserFacingErrorMessage } from "@utils/errorMessages";
 import { ApiQueryKeys } from "@constants/apiConstants";
 import type { TimeCardSearchResponse } from "@models/responses";
 import type { TimeCardSearchRequest } from "@models/requests";
@@ -107,7 +108,9 @@ export default function useSearchProjectTimeCards({
         return data;
       } catch (error) {
         logger.error("[useSearchProjectTimeCards] Error:", error);
-        throw error;
+        throw new Error(
+          getUserFacingErrorMessage(error, "Failed to search time cards."),
+        );
       }
     },
     initialPageParam: 0,

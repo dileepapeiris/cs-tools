@@ -117,7 +117,7 @@ service http:InterceptableService / on new http:Listener(9090, listenerConf) {
                 log:printWarn(string `User details not found for user: ${userInfo.userId}`);
                 return <http:NotFound>{
                     body: {
-                        message: "Failed to retrieve user information."
+                        message: "User information not found."
                     }
                 };
             }

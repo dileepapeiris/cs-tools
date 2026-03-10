@@ -14,7 +14,7 @@
 // specific language governing permissions and limitations
 // under the License.
 
-import { Button, Typography } from "@wso2/oxygen-ui";
+import { Button } from "@wso2/oxygen-ui";
 import { ArrowLeft } from "@wso2/oxygen-ui-icons-react";
 import { type JSX } from "react";
 

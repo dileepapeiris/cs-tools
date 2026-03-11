@@ -3,3 +3,5 @@ export interface Pagination {
   offset: number;
   limit: number;
 }
+
+export type PaginatedArray<T> = T[] & { pagination: Pagination };

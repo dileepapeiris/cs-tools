@@ -1,5 +1,5 @@
 import apiClient from "@src/services/apiClient";
-import { mutationOptions, queryOptions } from "@tanstack/react-query";
+import { infiniteQueryOptions, mutationOptions, queryOptions } from "@tanstack/react-query";
 import type {
   ChatDTO,
   ChatsDTO,
@@ -16,7 +16,7 @@ import {
   CHAT_INITIATE_ENDPOINT,
   PROJECT_CHATS_ENDPOINT,
 } from "@config/endpoints";
-import type { Comment, CommentsDTO } from "../types";
+import type { Comment, CommentsDTO, PaginatedArray } from "../types";
 import { toComment } from "./cases";
 
 const initiate = async (id: string, data: Omit<MessageDispatchDTO, "region" | "tier">): Promise<Message> => {
@@ -52,9 +52,16 @@ const getChat = async (id: string): Promise<Chat> => {
   return toChat(response);
 };
 
-const getAllChats = async (id: string, body: GetChatsRequestDTO = {}): Promise<Chat[]> => {
-  const cases = (await apiClient.post<ChatsDTO>(PROJECT_CHATS_ENDPOINT(id), body)).data.conversations;
-  return cases.map(toChat);
+const getAllChats = async (id: string, body: GetChatsRequestDTO = {}): Promise<PaginatedArray<Chat>> => {
+  const response = (await apiClient.post<ChatsDTO>(PROJECT_CHATS_ENDPOINT(id), body)).data;
+  const result = response.conversations.map(toChat) as PaginatedArray<Chat>;
+  result.pagination = {
+    totalRecords: response.totalRecords,
+    offset: response.offset,
+    limit: response.limit,
+  };
+
+  return result;
 };
 
 const getComments = async (id: string): Promise<Comment[]> => {
@@ -106,6 +113,18 @@ export const chats = {
     queryOptions({
       queryKey: ["chats", id, body],
       queryFn: () => getAllChats(id, body),
+    }),
+
+  paginated: (id: string, body: GetChatsRequestDTO = {}) =>
+    infiniteQueryOptions({
+      queryKey: ["chats", "paginated", id, body],
+      queryFn: ({ pageParam }) => getAllChats(id, { ...body, pagination: { ...body.pagination, offset: pageParam } }),
+      initialPageParam: 0,
+      getNextPageParam: (lastPage) => {
+        const { offset, limit, totalRecords } = lastPage.pagination;
+        const maxOffset = Math.ceil(totalRecords / limit);
+        return offset >= maxOffset ? undefined : offset + 1;
+      },
     }),
 
   comments: (id: string) => queryOptions({ queryKey: ["chat-comments", id], queryFn: () => getComments(id) }),

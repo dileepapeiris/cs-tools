@@ -1,7 +1,7 @@
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
-import { useEffect, useLayoutEffect, useState } from "react";
-import { Box, Grid, Skeleton, Stack, Typography, pxToRem } from "@wso2/oxygen-ui";
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
+import { Box, Divider, Grid, Skeleton, Stack, Typography, pxToRem } from "@wso2/oxygen-ui";
 import { BookOpen, MessageSquare } from "@wso2/oxygen-ui-icons-react";
 import { StatusChip } from "@components/features/support";
 import { InfoField, OverlineSlot, StickyCommentBar } from "@components/features/detail";
@@ -92,72 +92,74 @@ export default function ChatDetailPage() {
     );
   }, [comments]);
 
-  const AppBarSlot = () => (
-    <Stack direction="row" justifyContent="space-between" gap={1.5} mt={1}>
-      {data ? (
-        <>
-          <StatusChip id={data.statusId} size="small" />
+  const ref = useRef<HTMLSpanElement>(null);
+  const [overlineSlotVariant, setOverlineSlotVariant] = useState<"normal" | "shrunk">("normal");
 
-          <Stack direction="row" gap={3}>
-            <Stack direction="row" alignItems="center" gap={1}>
-              <Box color="text.secondary">
-                <MessageSquare size={pxToRem(14)} />
-              </Box>
-              <Typography variant="body2" color="text.secondary">
-                {data.count} messages
-              </Typography>
-            </Stack>
+  useEffect(() => {
+    const element = ref.current;
+    if (!element) return;
 
-            <Stack direction="row" alignItems="center" gap={1}>
-              <Box color="text.secondary">
-                <BookOpen size={pxToRem(14)} />
-              </Box>
-              <Typography variant="body2" color="text.secondary">
-                0 KB articles
-              </Typography>
-            </Stack>
-          </Stack>
-        </>
-      ) : (
-        <>
-          <Skeleton variant="text" width={50} height={35} />
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        const next = entry.isIntersecting ? "normal" : "shrunk";
+        setOverlineSlotVariant(next);
+      },
+      {
+        root: null,
+        rootMargin: "-80px 0px 0px 0px",
+        threshold: 1.0,
+      },
+    );
 
-          <Stack direction="row" gap={3}>
-            <Stack direction="row" alignItems="center" gap={1}>
-              <Box color="text.secondary">
-                <MessageSquare size={pxToRem(14)} />
-              </Box>
-              <Skeleton variant="text" width={100} height={35} />
-            </Stack>
+    observer.observe(element);
 
-            <Stack direction="row" alignItems="center" gap={1}>
-              <Box color="text.secondary">
-                <BookOpen size={pxToRem(14)} />
-              </Box>
-              <Skeleton variant="text" width={100} height={35} />
-            </Stack>
-          </Stack>
-        </>
-      )}
-    </Stack>
-  );
+    return () => observer.unobserve(element);
+  }, []);
 
   useLayoutEffect(() => {
-    layout.setTitleOverride(data?.description ?? <Skeleton variant="text" width="100%" height={35} />);
-    layout.setOverlineSlotOverride(<OverlineSlot type="chat" id={data?.number} />);
-    layout.setAppBarSlotsOverride(<AppBarSlot />);
+    layout.setTitleOverride(
+      <OverlineSlot variant={overlineSlotVariant} type="chat" id={data?.number} title={data?.description} />,
+    );
 
     return () => {
       layout.setTitleOverride(undefined);
-      layout.setOverlineSlotOverride(undefined);
-      layout.setAppBarSlotsOverride(undefined);
     };
-  }, [data]);
+  }, [data, overlineSlotVariant]);
+
+  useEffect(() => {
+    console.log("variant:", overlineSlotVariant);
+  }, [overlineSlotVariant]);
 
   return (
     <>
       <Stack gap={2} mb={10}>
-        <SectionCard title="Chat Information">
+        <Typography ref={ref} variant="h5" fontWeight="medium">
+          {data?.description}
+        </Typography>
+        <SectionCard>
+          <Stack direction="row" justifyContent="space-between" gap={1.5}>
+            <StatusChip id={data?.statusId} size="small" />
+            <Stack direction="row" gap={3}>
+              <Stack direction="row" alignItems="center" gap={1}>
+                <Box color="text.secondary">
+                  <MessageSquare size={pxToRem(14)} />
+                </Box>
+                <Typography variant="body2" color="text.secondary">
+                  {data?.count} messages
+                </Typography>
+              </Stack>
+
+              <Stack direction="row" alignItems="center" gap={1}>
+                <Box color="text.secondary">
+                  <BookOpen size={pxToRem(14)} />
+                </Box>
+                <Typography variant="body2" color="text.secondary">
+                  0 KB articles
+                </Typography>
+              </Stack>
+            </Stack>
+          </Stack>
+          <Divider sx={{ mt: 1, mb: 1 }} />
           <Grid spacing={1.5} container>
             <Grid size={6}>
               <InfoField label="Started" value={dayjs(data?.createdOn).format("MMM D, YYYY h:mm A")} />
@@ -182,6 +184,7 @@ export default function ChatDetailPage() {
             </Grid>
           </Grid>
         </SectionCard>
+
         <SectionCard title="Conversation">
           {isCommentsLoading ? (
             <MessagesListContentSkeleton />

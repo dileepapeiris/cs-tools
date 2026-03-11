@@ -1,5 +1,5 @@
 import apiClient from "@src/services/apiClient";
-import { mutationOptions, queryOptions } from "@tanstack/react-query";
+import { infiniteQueryOptions, mutationOptions, queryOptions } from "@tanstack/react-query";
 import { stripHtmlTags } from "@utils/others";
 import type {
   CaseSummary,
@@ -17,6 +17,7 @@ import type {
   CommentDTO,
   Comment,
   CreateCommentRequestDTO,
+  PaginatedArray,
 } from "@src/types";
 
 import {
@@ -29,9 +30,16 @@ import {
   PROJECT_CASES_FILTERS_ENDPOINT,
 } from "@config/endpoints";
 
-const getAllCases = async (id: string, body: GetCasesRequestDTO = {}): Promise<CaseSummary[]> => {
-  const cases = (await apiClient.post<CasesDTO>(PROJECT_CASES_ENDPOINT(id), body)).data.cases;
-  return cases.map(toCaseSummary);
+export const getAllCases = async (id: string, body: GetCasesRequestDTO = {}): Promise<PaginatedArray<CaseSummary>> => {
+  const response = (await apiClient.post<CasesDTO>(PROJECT_CASES_ENDPOINT(id), body)).data;
+  const result = response.cases.map(toCaseSummary) as PaginatedArray<CaseSummary>;
+  result.pagination = {
+    totalRecords: response.totalRecords,
+    offset: response.offset,
+    limit: response.limit,
+  };
+
+  return result;
 };
 
 const getCase = async (id: string): Promise<Case> => {
@@ -134,6 +142,18 @@ export const cases = {
     queryOptions({
       queryKey: ["cases", id, body],
       queryFn: () => getAllCases(id, body),
+    }),
+
+  paginated: (id: string, body: GetCasesRequestDTO = {}) =>
+    infiniteQueryOptions({
+      queryKey: ["cases", "paginated", id, body],
+      queryFn: ({ pageParam }) => getAllCases(id, { ...body, pagination: { ...body.pagination, offset: pageParam } }),
+      initialPageParam: 0,
+      getNextPageParam: (lastPage) => {
+        const { offset, limit, totalRecords } = lastPage.pagination;
+        const maxOffset = Math.ceil(totalRecords / limit);
+        return offset >= maxOffset ? undefined : offset + 1;
+      },
     }),
 
   filters: (id: string) =>

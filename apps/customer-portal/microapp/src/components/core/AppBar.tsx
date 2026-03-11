@@ -72,7 +72,6 @@ export function AppBar() {
     <>
       <MuiAppBar
         position="sticky"
-        color="transparent"
         elevation={0}
         sx={{
           backgroundColor: "background.paper",
@@ -80,7 +79,7 @@ export function AppBar() {
           flexDirection: "column",
           gap: 1,
           p: 1.5,
-          pt: 10,
+          pt: 7,
         }}
       >
         {config.showNotifications && (

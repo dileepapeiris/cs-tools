@@ -20,17 +20,17 @@ import {
   ItemCardExtendedSkeleton,
   type ItemCardProps,
 } from "@components/features/support";
-import { Stack } from "@wso2/oxygen-ui";
+import { InfiniteScroll } from "@components/shared";
+import { Skeleton, Stack, Typography } from "@wso2/oxygen-ui";
 import { useSearchParams } from "react-router-dom";
 import { useLayout } from "@context/layout";
-import { Suspense, useLayoutEffect } from "react";
-
-import { useSuspenseQuery } from "@tanstack/react-query";
+import { useLayoutEffect } from "react";
+import { useInfiniteQuery, useSuspenseQuery } from "@tanstack/react-query";
 import { cases } from "@src/services/cases";
 import { useProject } from "@context/project";
-import { ErrorBoundary } from "@components/core";
-import { chats } from "../services/chats";
-import { ITEM_DETAIL_PATHS } from "./SupportPage";
+import { chats } from "@src/services/chats";
+
+import { ITEM_DETAIL_PATHS } from "@pages/SupportPage";
 
 export default function AllItemsPage({ type }: { type: ItemCardProps["type"] }) {
   const [searchParams] = useSearchParams();
@@ -39,11 +39,7 @@ export default function AllItemsPage({ type }: { type: ItemCardProps["type"] }) 
 
   return (
     <Stack gap={2}>
-      <ErrorBoundary fallback={<ItemsListContentSkeleton />}>
-        <Suspense fallback={<ItemsListContentSkeleton />}>
-          <ItemsListContent type={type} filter={filter} search={search} />
-        </Suspense>
-      </ErrorBoundary>
+      <ItemsListContent type={type} filter={filter} search={search} />
     </Stack>
   );
 }
@@ -69,35 +65,79 @@ export function FilterAppBarSlot({ type }: { type: ItemCardProps["type"] | "noti
 }
 
 function ItemsListContent({ type, filter, search }: { type: ItemCardProps["type"]; filter: string; search: string }) {
-  const layout = useLayout();
+  switch (type) {
+    case "case":
+      return <CaseListContent filter={filter} />;
+    case "chat":
+      return <ChatListContent filter={filter} />;
+    default:
+      return null;
+  }
+}
+
+function CaseListContent({ filter }: { filter: string }) {
   const { projectId } = useProject();
+  const query = useInfiniteQuery(
+    cases.paginated(projectId!, filter !== "all" ? { filters: { statusIds: [Number(filter)] } } : undefined),
+  );
+  const total = query.data?.pages[0].pagination.totalRecords;
 
-  const caseQuery =
-    type === "case"
-      ? useSuspenseQuery(cases.all(projectId!, filter !== "all" ? { filters: { statusIds: [Number(filter)] } } : {}))
-      : null;
-
-  const chatQuery =
-    type === "chat"
-      ? useSuspenseQuery(chats.all(projectId!, filter !== "all" ? { filters: { stateKeys: [Number(filter)] } } : {}))
-      : null;
-
-  const items = type === "case" ? (caseQuery?.data ?? []) : type === "chat" ? (chatQuery?.data ?? []) : [];
-
-  useLayoutEffect(() => {
-    layout.setSubtitleSlotOverride(`${items.length} of ${items.length}`);
-
-    return () => {
-      layout.setSubtitleSlotOverride(null);
-    };
-  });
+  useSubtitleOverride(total, total);
 
   return (
-    <>
-      {items.map((item) => (
-        <ItemCardExtended key={item.id} type={type} to={ITEM_DETAIL_PATHS[type](item.id)} {...item} />
-      ))}
-    </>
+    <InfiniteScroll
+      {...query}
+      sentinel={<ItemsListContentSkeleton />}
+      tail={
+        <Typography variant="subtitle2" textAlign="center">
+          You're all caught up!
+        </Typography>
+      }
+    >
+      {(data) => (
+        <>
+          {data &&
+            data.pages.map((page) =>
+              page.map((item) => (
+                <ItemCardExtended key={item.id} type="case" to={ITEM_DETAIL_PATHS.case(item.id)} {...item} />
+              )),
+            )}
+        </>
+      )}
+    </InfiniteScroll>
+  );
+}
+
+function ChatListContent({ filter }: { filter: string }) {
+  const { projectId } = useProject();
+  const query = useInfiniteQuery(
+    chats.paginated(projectId!, filter !== "all" ? { filters: { stateKeys: [Number(filter)] } } : undefined),
+  );
+  const total = query.data?.pages[0].pagination.totalRecords;
+
+  useSubtitleOverride(total, total);
+
+  return (
+    <InfiniteScroll
+      {...query}
+      sentinel={<ItemsListContentSkeleton />}
+      tail={
+        <Typography variant="subtitle2" textAlign="center">
+          You're all caught up!
+        </Typography>
+      }
+    >
+      {(data) => (
+        <>
+          {data &&
+            data.pages.map((page) =>
+              page.map((item) => (
+                <ItemCardExtended key={item.id} type="chat" to={ITEM_DETAIL_PATHS.chat(item.id)} {...item} />
+              )),
+            )}
+        </>
+      )}
+    </InfiniteScroll>
   );
 }
 
@@ -109,4 +149,14 @@ function ItemsListContentSkeleton() {
       ))}
     </>
   );
+}
+
+function useSubtitleOverride(count?: number, total?: number) {
+  const layout = useLayout();
+  const data = count && total;
+
+  useLayoutEffect(() => {
+    layout.setSubtitleSlotOverride(data ? `${count} of ${total}` : <Skeleton variant="text" width={50} height={20} />);
+    return () => layout.setSubtitleSlotOverride(null);
+  }, [count, total]);
 }

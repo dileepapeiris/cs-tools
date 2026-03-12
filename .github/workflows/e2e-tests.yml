@@ -17,9 +17,6 @@
 name: Playwright E2E Tests
 
 on:
-  push:
-    branches:
-      - add-e2e-ui-testing-workflows
   workflow_dispatch: # This enables the "Run workflow" button
 
 jobs:

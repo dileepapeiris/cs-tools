@@ -17,6 +17,13 @@
 name: Playwright E2E Tests
 
 on:
+  push:
+    branches:
+      - add-e2e-ui-testing-workflows
+  pull_request:
+    branches:
+      - main
+      - add-e2e-ui-testing-workflows
   workflow_dispatch:
 
 jobs:

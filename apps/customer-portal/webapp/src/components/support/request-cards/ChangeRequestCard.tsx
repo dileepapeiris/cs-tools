@@ -30,7 +30,7 @@ import { CHANGE_REQUEST_BULLET_ITEMS } from "@constants/supportConstants";
 export default function ChangeRequestCard(): JSX.Element {
   const navigate = useNavigate();
   const { projectId } = useParams<{ projectId: string }>();
-  const base = projectId ? `/projects/${projectId}/support` : "support";
+  const base = `/projects/${projectId}/support`;
 
   return (
     <RequestCard
@@ -43,9 +43,7 @@ export default function ChangeRequestCard(): JSX.Element {
       infoBoxDescription="Structured workflow for planned infrastructure changes:"
       bulletItems={CHANGE_REQUEST_BULLET_ITEMS}
       secondaryButtonLabel="View All Change Requests"
-      onSecondaryClick={() =>
-        navigate(projectId ? `${base}/change-requests` : "change-requests")
-      }
+      onSecondaryClick={() => navigate(`${base}/change-requests`)}
     />
   );
 }

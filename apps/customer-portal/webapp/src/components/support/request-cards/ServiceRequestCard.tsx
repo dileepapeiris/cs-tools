@@ -30,7 +30,7 @@ import { SERVICE_REQUEST_BULLET_ITEMS } from "@constants/supportConstants";
 export default function ServiceRequestCard(): JSX.Element {
   const navigate = useNavigate();
   const { projectId } = useParams<{ projectId: string }>();
-  const base = projectId ? `/projects/${projectId}/support` : "support";
+  const base = `/projects/${projectId}/support`;
 
   return (
     <RequestCard
@@ -46,18 +46,16 @@ export default function ServiceRequestCard(): JSX.Element {
         {
           label: "View my requests",
           onClick: () =>
-            navigate(projectId ? `${base}/service-requests?createdByMe=true` : "service-requests?createdByMe=true"),
+            navigate(`${base}/service-requests?createdByMe=true`),
         },
         {
           label: "View all requests",
-          onClick: () =>
-            navigate(projectId ? `${base}/service-requests` : "service-requests"),
+          onClick: () => navigate(`${base}/service-requests`),
         },
       ]}
       primaryButton={{
         label: "New Service Request",
-        onClick: () =>
-          navigate(projectId ? `${base}/service-requests/create` : "service-requests/create"),
+        onClick: () => navigate(`${base}/service-requests/create`),
         icon: Server,
       }}
     />

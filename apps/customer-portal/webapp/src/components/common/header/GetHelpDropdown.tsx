@@ -87,7 +87,7 @@ export default function GetHelpDropdown(): JSX.Element {
     handleClose();
     if (projectId) {
       navigate(
-        `/${projectId}/support/security-report/create`,
+        `/projects/${projectId}/support/security-report/create`,
       );
     }
   };

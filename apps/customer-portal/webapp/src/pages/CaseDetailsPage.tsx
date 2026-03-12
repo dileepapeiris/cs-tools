@@ -87,7 +87,7 @@ export default function CaseDetailsPage(): JSX.Element {
 
     if (isSecurityReport) {
       navigate(
-        `/${projectId}/security-center?tab=${SecurityTab.VULNERABILITIES}`,
+        `/projects/${projectId}/security-center?tab=${SecurityTab.VULNERABILITIES}`,
       );
     } else {
       navigate(`/projects/${projectId}/support/cases`);

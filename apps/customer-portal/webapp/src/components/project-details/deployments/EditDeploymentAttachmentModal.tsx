@@ -160,6 +160,7 @@ export default function EditDeploymentAttachmentModal({
           textTransform: "capitalize",
           overflow: "hidden",
           textOverflow: "ellipsis",
+          whiteSpace: "nowrap",
         }}
       >
         Edit Document
@@ -198,7 +199,6 @@ export default function EditDeploymentAttachmentModal({
             multiline
             rows={3}
             disabled={isSubmitting}
-            sx={{ mt: 2 }}
           />
         </Box>
       </DialogContent>

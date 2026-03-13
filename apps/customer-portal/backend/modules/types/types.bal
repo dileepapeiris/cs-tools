@@ -147,6 +147,12 @@ public type CaseResponse record {|
     boolean? hasAutoClosed?;
     # Change requests (only for service requests)
     ReferenceItem[]? changeRequests?;
+    # Engagement payment type information
+    ReferenceItem[] engagementPaymentType?;
+    # Engagement start date
+    entity:Date? engagementStartDate?;
+    # Engagement end date
+    entity:Date? engagementEndDate?;
     # Variables for service request
     entity:ServiceRequestVariable[]? variables?;
 |};
@@ -246,6 +252,8 @@ public type ProjectFilterOptions record {|
     ReferenceItem[] timeCardStates;
     # List of available engagement types
     ReferenceItem[] engagementTypes;
+    # List of available engagement payment types
+    ReferenceItem[] engagementPaymentTypes;
     # Severity based allocation time mapping (severity ID to allocation time in minutes)
     map<int> severityBasedAllocationTime;
 |};
@@ -300,21 +308,21 @@ public type ProjectResponse record {|
         string? technicalOwnerEmail;
     |} account;
     # Query hour information
-    string? totalQueryHours;
+    decimal? totalQueryHours;
     # Consumed query hours
-    string? consumedQueryHours;
+    decimal? consumedQueryHours;
     # Remaining query hours
-    string? remainingQueryHours;
+    decimal? remainingQueryHours;
     # Go-live date
     entity:Date? goLiveDate;
     # Go-live plan date
     entity:Date? goLivePlanDate;
     # Onboarding hour information
-    string? totalOnboardingHours;
+    decimal? totalOnboardingHours;
     # Consumed onboarding hours
-    string? consumedOnboardingHours;
+    decimal? consumedOnboardingHours;
     # Remaining onboarding hours
-    string? remainingOnboardingHours;
+    decimal? remainingOnboardingHours;
     # Onboarding expiry date
     entity:Date? onboardingExpiryDate;
     # Onboarding status
@@ -332,8 +340,8 @@ public type ProjectsResponse record {|
 
 # Case statistics for a project.
 public type ProjectCaseStats record {|
-    # Total cases count(last 30d)
-    int totalCases;
+    # Total count(last 30d)
+    int totalCount;
     # Active case count (cases that are not in closed state)
     int activeCount;
     # Outstanding case count (cases that are not solution proposed or closed)

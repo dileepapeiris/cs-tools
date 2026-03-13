@@ -127,6 +127,8 @@ public isolated function getProjectFilters(entity:ProjectMetadataResponse projec
         select {id: item.id.toString(), label: item.label};
     types:ReferenceItem[] engagementTypes = from entity:ChoiceListItem item in projectMetadata.engagementTypes
         select {id: item.id.toString(), label: item.label};
+    types:ReferenceItem[] engagementPaymentTypes = from entity:ChoiceListItem item in projectMetadata.engagementPaymentTypes
+        select {id: item.id.toString(), label: item.label};
 
     return {
         caseStates,
@@ -141,6 +143,7 @@ public isolated function getProjectFilters(entity:ProjectMetadataResponse projec
         conversationStates,
         timeCardStates,
         engagementTypes,
+        engagementPaymentTypes,
         severityBasedAllocationTime: projectMetadata.severityBasedAllocationTime
     };
 }
@@ -388,7 +391,7 @@ public isolated function mapCaseStats(entity:ProjectCaseStatsResponse response) 
     select {id: item.id.toString(), label: item.label, count: item.count};
 
     return {
-        totalCases: response.totalCount,
+        totalCount: response.totalCount,
         averageResponseTime: response.averageResponseTime,
         resolvedCases: response.resolvedCount,
         changeRate: response.changeRate,
@@ -532,6 +535,7 @@ public isolated function mapCaseResponse(entity:CaseResponse response) returns t
     entity:ReferenceTableItem? catalogItem = response?.catalogItem;
     entity:ReferenceTableItem? assignedTeam = response.assignedTeam;
     entity:ReferenceTableItem[]? changeRequests = response?.changeRequests;
+    entity:ReferenceTableItem[]? engagementPaymentType = response.engagementPaymentType;
     entity:ServiceRequestVariable[]? variables = response?.variables;
     entity:ReferenceTableItem? product = response.product;
     entity:ChoiceListItem? engagementType = response.engagementType;
@@ -591,7 +595,11 @@ public isolated function mapCaseResponse(entity:CaseResponse response) returns t
             } : (),
         changeRequests: changeRequests != () ? from entity:ReferenceTableItem item in changeRequests
                 select {id: item.id, label: item.name} : (),
+        engagementPaymentType: engagementPaymentType != () ? from entity:ReferenceTableItem item in engagementPaymentType
+                select {id: item.id, label: item.name} : (),
         hasAutoClosed: response?.hasAutoClosed,
+        engagementStartDate: response?.engagementStartDate,
+        engagementEndDate: response?.engagementEndDate,
         variables
     };
 }

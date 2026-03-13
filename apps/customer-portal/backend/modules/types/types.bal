@@ -552,7 +552,6 @@ public type DeploymentsResponse record {|
     # Total records count
     int totalRecords;
     *entity:Pagination;
-    json...;
 |};
 
 # Deployed product data.

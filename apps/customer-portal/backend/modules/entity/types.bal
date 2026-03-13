@@ -143,21 +143,21 @@ public type ProjectResponse record {|
     # Account information
     Account account;
     # Query hour information
-    string? totalQueryHours;
+    decimal? totalQueryHours;
     # Consumed query hours
-    string? consumedQueryHours;
+    decimal? consumedQueryHours;
     # Remaining query hours
-    string? remainingQueryHours;
+    decimal? remainingQueryHours;
     # Go-live date
     Date? goLiveDate;
     # Go-live plan date
     Date? goLivePlanDate;
     # Onboarding hour information
-    string? totalOnboardingHours;
+    decimal? totalOnboardingHours;
     # Consumed onboarding hours
-    string? consumedOnboardingHours;
+    decimal? consumedOnboardingHours;
     # Remaining onboarding hours
-    string? remainingOnboardingHours;
+    decimal? remainingOnboardingHours;
     # Onboarding expiry date
     Date? onboardingExpiryDate;
     # Onboarding status
@@ -483,6 +483,12 @@ public type CaseResponse record {|
     ReferenceTableItem[]? changeRequests?;
     # Variables for service request
     ServiceRequestVariable[]? variables?;
+    # Engagement payment type information
+    ReferenceTableItem engagementPaymentType?;
+    # Engagement start date
+    Date? engagementStartDate?;
+    # Engagement end date
+    Date? engagementEndDate?;
     json...;
 |};
 
@@ -529,6 +535,8 @@ public type ProjectMetadataResponse record {|
     ReferenceTableItem[] caseTypes;
     # List of available engagement types
     ChoiceListItem[] engagementTypes;
+    # List of available engagement payment types
+    ChoiceListItem[] engagementPaymentTypes;
     # Severity based allocation time mapping (severity ID to allocation time in minutes)
     map<int> severityBasedAllocationTime;
     json...;
@@ -582,7 +590,7 @@ public type CasesTrend record {|
 
 # Project cases statistics response.
 public type ProjectCaseStatsResponse record {|
-    # Total case count
+    # Total count
     int totalCount;
     # Active case count (cases that are not in closed state)
     int activeCount;

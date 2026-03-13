@@ -127,6 +127,8 @@ public isolated function getProjectFilters(entity:ProjectMetadataResponse projec
         select {id: item.id.toString(), label: item.label};
     types:ReferenceItem[] engagementTypes = from entity:ChoiceListItem item in projectMetadata.engagementTypes
         select {id: item.id.toString(), label: item.label};
+    types:ReferenceItem[] engagementPaymentTypes = from entity:ChoiceListItem item in projectMetadata.engagementPaymentTypes
+        select {id: item.id.toString(), label: item.label};
 
     return {
         caseStates,
@@ -141,6 +143,7 @@ public isolated function getProjectFilters(entity:ProjectMetadataResponse projec
         conversationStates,
         timeCardStates,
         engagementTypes,
+        engagementPaymentTypes,
         severityBasedAllocationTime: projectMetadata.severityBasedAllocationTime
     };
 }
@@ -370,11 +373,8 @@ public isolated function mapProductVulnerabilityMetadataResponse(entity:Vulnerab
 # Map project case stats response to the desired structure.
 #
 # + response - Project case stats response from the entity service
-# + changeReqStats - Change request stats to be added to total interactions and active count
 # + return - Mapped project case stats response
-public isolated function mapCaseStats(entity:ProjectCaseStatsResponse response,
-        entity:ProjectChangeRequestStatsResponse? changeReqStats) returns types:ProjectCaseStats {
-
+public isolated function mapCaseStats(entity:ProjectCaseStatsResponse response) returns types:ProjectCaseStats {
     types:ReferenceItem[] stateCount = from entity:ChoiceListItem item in response.stateCount
         select {id: item.id.toString(), label: item.label, count: item.count};
     types:ReferenceItem[] severityCount = from entity:ChoiceListItem item in response.severityCount
@@ -391,12 +391,11 @@ public isolated function mapCaseStats(entity:ProjectCaseStatsResponse response,
     select {id: item.id.toString(), label: item.label, count: item.count};
 
     return {
-        totalInteractions: response.totalCount + (changeReqStats is () ? 0 : changeReqStats.totalCount),
-        totalCases: response.totalCount,
+        totalCount: response.totalCount,
         averageResponseTime: response.averageResponseTime,
         resolvedCases: response.resolvedCount,
         changeRate: response.changeRate,
-        activeCount: response.activeCount + (changeReqStats is () ? 0 : changeReqStats.activeCount),
+        activeCount: response.activeCount,
         outstandingCount: response.outstandingCount,
         stateCount,
         severityCount,
@@ -413,7 +412,7 @@ public isolated function mapCaseStats(entity:ProjectCaseStatsResponse response,
 # + response - Project case stats response from the entity service
 # + return - Count of open cases, or null if not available
 public isolated function getOpenCasesCountFromProjectCasesStats(entity:ProjectCaseStatsResponse response) returns int? {
-    types:ProjectCaseStats stats = mapCaseStats(response, ()); // Passing nil for changeReqStats as it's not needed for getting open cases count
+    types:ProjectCaseStats stats = mapCaseStats(response);
     types:ReferenceItem[] openCases = stats.stateCount.filter(stat => stat.id == stateIdOpen.toString());
     return openCases.length() > 0 ? openCases[0].count : ();
 }
@@ -536,6 +535,7 @@ public isolated function mapCaseResponse(entity:CaseResponse response) returns t
     entity:ReferenceTableItem? catalogItem = response?.catalogItem;
     entity:ReferenceTableItem? assignedTeam = response.assignedTeam;
     entity:ReferenceTableItem[]? changeRequests = response?.changeRequests;
+    entity:ReferenceTableItem? engagementPaymentType = response.engagementPaymentType;
     entity:ServiceRequestVariable[]? variables = response?.variables;
     entity:ReferenceTableItem? product = response.product;
     entity:ChoiceListItem? engagementType = response.engagementType;
@@ -595,7 +595,13 @@ public isolated function mapCaseResponse(entity:CaseResponse response) returns t
             } : (),
         changeRequests: changeRequests != () ? from entity:ReferenceTableItem item in changeRequests
                 select {id: item.id, label: item.name} : (),
+        engagementPaymentType: engagementPaymentType != () ? {
+                id: engagementPaymentType.id,
+                label: engagementPaymentType.name
+            } : (),
         hasAutoClosed: response?.hasAutoClosed,
+        engagementStartDate: response?.engagementStartDate,
+        engagementEndDate: response?.engagementEndDate,
         variables
     };
 }

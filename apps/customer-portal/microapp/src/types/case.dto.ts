@@ -4,7 +4,7 @@ export interface CasesDTO extends Pagination {
   cases: CaseSummaryDTO[];
 }
 
-interface CaseSummaryDTO {
+export interface CaseSummaryDTO {
   id: string;
   internalId: string;
   number: string;
@@ -77,7 +77,8 @@ export interface EntityReference {
 
 export interface GetCasesRequestDTO {
   filters?: {
-    caseTypeIds?: string[];
+    caseTypes?: string[];
+    createdByMe?: boolean;
     deploymentId?: string;
     issueId?: number;
     searchQuery?: string;

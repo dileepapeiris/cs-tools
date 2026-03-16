@@ -31,7 +31,15 @@ import {
 } from "@config/endpoints";
 
 export const getAllCases = async (id: string, body: GetCasesRequestDTO = {}): Promise<PaginatedArray<CaseSummary>> => {
-  const response = (await apiClient.post<CasesDTO>(PROJECT_CASES_ENDPOINT(id), body)).data;
+  const response = (
+    await apiClient.post<CasesDTO>(PROJECT_CASES_ENDPOINT(id), {
+      ...body,
+      filters: {
+        ...(body?.filters ?? {}),
+        caseTypes: ["default_case"],
+      },
+    })
+  ).data;
   const result = response.cases.map(toCaseSummary) as PaginatedArray<CaseSummary>;
   result.pagination = {
     totalRecords: response.totalRecords,
@@ -82,7 +90,7 @@ const createComment = async (id: string, body: CreateCommentRequestDTO): Promise
 };
 
 /* Mappers */
-function toCaseSummary(dto: CasesDTO["cases"][number]): CaseSummary {
+export function toCaseSummary(dto: CasesDTO["cases"][number]): CaseSummary {
   return {
     id: dto.id,
     internalId: dto.internalId,

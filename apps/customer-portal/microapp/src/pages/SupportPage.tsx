@@ -14,7 +14,7 @@
 // specific language governing permissions and limitations
 // under the License.
 
-import { Suspense, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { Button, Card, Grid, pxToRem, Stack, Tab, Tabs, Typography, useTheme } from "@wso2/oxygen-ui";
 import { MessageSquareQuote } from "@wso2/oxygen-ui-icons-react";
@@ -28,6 +28,7 @@ import { useProject } from "@context/project";
 import { ErrorBoundary } from "@components/core";
 import { chats } from "../services/chats";
 import { changeRequests } from "../services/changes";
+import { serviceRequests } from "../services/services";
 
 export const TAB_CONFIG = {
   case: { title: "Open Cases", subtitle: "Active support tickets" },
@@ -39,7 +40,7 @@ export const TAB_CONFIG = {
 export const ITEM_DETAIL_PATHS: Record<ItemCardProps["type"], (id: string) => string> = {
   case: (id) => `/cases/${id}`,
   chat: (id) => `/chats/${id}`,
-  // service: (id) => `/services/${id}`,
+  service: (id) => `/services/${id}`,
   change: (id) => `/changes/${id}`,
 };
 
@@ -101,7 +102,7 @@ export default function SupportPage() {
       <Tabs variant="fullWidth" sx={{ mt: 3 }} value={tab} onChange={(_, value) => setTab(value)}>
         <Tab label="Cases" value="case" disableRipple />
         <Tab label="Chats" value="chat" disableRipple />
-        {/* <Tab label="Services Requests" value="service" disableRipple /> */}
+        <Tab label="Services Requests" value="service" disableRipple />
         <Tab label="Change Requests" value="change" disableRipple />
       </Tabs>
       <Card component={Stack} p={2} mt={2} gap={0.5}>
@@ -119,7 +120,7 @@ function ItemsListContent({ tab }: { tab: ItemCardProps["type"] }) {
       return (
         <ErrorBoundary fallback={<ItemsListContentSkeleton tab="case" />}>
           <Suspense fallback={<ItemsListContentSkeleton tab="case" />}>
-            <CaseItemListContent />
+            <CaseItemListContent />;
           </Suspense>
         </ErrorBoundary>
       );
@@ -128,7 +129,16 @@ function ItemsListContent({ tab }: { tab: ItemCardProps["type"] }) {
       return (
         <ErrorBoundary fallback={<ItemsListContentSkeleton tab="chat" />}>
           <Suspense fallback={<ItemsListContentSkeleton tab="chat" />}>
-            <ChatItemListContent />
+            <ChatItemListContent />;
+          </Suspense>
+        </ErrorBoundary>
+      );
+
+    case "service":
+      return (
+        <ErrorBoundary fallback={<ItemsListContentSkeleton tab="service" />}>
+          <Suspense fallback={<ItemsListContentSkeleton tab="service" />}>
+            <ServiceRequestItemListContent />
           </Suspense>
         </ErrorBoundary>
       );
@@ -178,6 +188,18 @@ function ChangeRequestItemListContent() {
     <>
       {data.map((item) => (
         <ItemCard key={item.id} type="change" to={ITEM_DETAIL_PATHS["change"](item.id)} {...item} />
+      ))}
+    </>
+  );
+}
+
+function ServiceRequestItemListContent() {
+  const { projectId } = useProject();
+  const { data } = useSuspenseQuery(serviceRequests.all(projectId!, { pagination: { limit: 3 } }));
+  return (
+    <>
+      {data.map((item) => (
+        <ItemCard key={item.id} type="service" to={ITEM_DETAIL_PATHS["service"](item.id)} {...item} />
       ))}
     </>
   );

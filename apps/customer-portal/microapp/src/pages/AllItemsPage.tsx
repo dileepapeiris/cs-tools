@@ -32,6 +32,7 @@ import { chats } from "@src/services/chats";
 import { changeRequests } from "@src/services/changes";
 
 import { ITEM_DETAIL_PATHS } from "@pages/SupportPage";
+import { serviceRequests } from "../services/services";
 
 export default function AllItemsPage({ type }: { type: ItemCardProps["type"] }) {
   const [searchParams] = useSearchParams();
@@ -52,6 +53,7 @@ export function FilterAppBarSlot({ type }: { type: ItemCardProps["type"] | "noti
   const SEARCH_PLACEHOLDER_CONFIG: Record<typeof type, string> = {
     case: "Search cases by ID, title, or description...",
     chat: "Search chats by ID, title, or message...",
+    service: "Search Service Requests by ID, title, or description...",
     change: "Search Change Requests by ID, title, or description...",
     notifications: "Search Notifications",
   };
@@ -70,6 +72,8 @@ function ItemsListContent({ type, filter, search }: { type: ItemCardProps["type"
       return <CaseListContent filter={filter} />;
     case "chat":
       return <ChatListContent filter={filter} />;
+    case "service":
+      return <ServiceRequestsListContent filter={filter} />;
     case "change":
       return <ChangeRequestsListContent filter={filter} />;
     default:
@@ -167,7 +171,40 @@ function ChangeRequestsListContent({ filter }: { filter: string }) {
           {data &&
             data.pages.map((page) =>
               page.map((item) => (
-                <ItemCardExtended key={item.id} type="change" to={ITEM_DETAIL_PATHS.chat(item.id)} {...item} />
+                <ItemCardExtended key={item.id} type="change" to={ITEM_DETAIL_PATHS.change(item.id)} {...item} />
+              )),
+            )}
+        </>
+      )}
+    </InfiniteScroll>
+  );
+}
+
+function ServiceRequestsListContent({ filter }: { filter: string }) {
+  const { projectId } = useProject();
+  const query = useInfiniteQuery(
+    serviceRequests.paginated(projectId!, filter !== "all" ? { filters: { statusIds: [Number(filter)] } } : undefined),
+  );
+  const total = query.data?.pages[0].pagination.totalRecords;
+
+  useSubtitleOverride(total, total);
+
+  return (
+    <InfiniteScroll
+      {...query}
+      sentinel={<ItemsListContentSkeleton />}
+      tail={
+        <Typography variant="subtitle2" textAlign="center">
+          You're all caught up!
+        </Typography>
+      }
+    >
+      {(data) => (
+        <>
+          {data &&
+            data.pages.map((page) =>
+              page.map((item) => (
+                <ItemCardExtended key={item.id} type="service" to={ITEM_DETAIL_PATHS.service(item.id)} {...item} />
               )),
             )}
         </>

@@ -7,6 +7,7 @@ import { PriorityChip, StatusChip } from "./Chip";
 import type { CaseSummary, ChangeRequestSummary } from "@src/types";
 import type { Chat } from "@root/src/types/chat.model";
 import { stripHtmlTags } from "@root/src/utils/others";
+import type { ServiceRequestSummary } from "@root/src/types/service.model";
 
 import { TYPE_CONFIG } from "./config";
 
@@ -24,7 +25,7 @@ interface ChatItemCardExtendedProps extends BaseItemCardExtendedProps, Chat {
   type: "chat";
 }
 
-interface ServiceItemCardExtendedProps extends BaseItemCardExtendedProps {
+interface ServiceItemCardExtendedProps extends BaseItemCardExtendedProps, ServiceRequestSummary {
   type: "service";
 }
 
@@ -51,9 +52,10 @@ export function ItemCardExtended(props: ItemCardExtendedProps) {
             <Stack direction="row" alignItems="center" flexWrap="wrap" gap={1}>
               <Icon size={pxToRem(19)} color={color} />
               <Typography variant="subtitle2" color="text.secondary">
-                {(type === "case" || type === "chat" || type === "change") && props.number}
+                {props.number}
               </Typography>
-              {type === "case" && <PriorityChip size="small" id={props.severityId ?? "N/A"} />}
+              {(type === "case" || type === "service") && <PriorityChip size="small" id={props.severityId ?? "N/A"} />}
+              {type === "service" && <Chip size="small" label={props.issueType ?? "N/A"} />}
               {type === "change" && (
                 <>
                   <PriorityChip size="small" prefix="Impact" id={props.impactId ?? "N/A"} />
@@ -62,9 +64,7 @@ export function ItemCardExtended(props: ItemCardExtendedProps) {
               )}
             </Stack>
             <Stack direction="row" gap={2}>
-              {(type === "case" || type === "chat" || type === "change") && (
-                <StatusChip size="small" id={props.statusId ?? "N/A"} />
-              )}
+              <StatusChip size="small" id={props.statusId ?? "N/A"} />
               <Box color="text.secondary">
                 <ChevronRight size={pxToRem(18)} />
               </Box>
@@ -73,10 +73,10 @@ export function ItemCardExtended(props: ItemCardExtendedProps) {
 
           <Stack gap={0.2}>
             <Typography variant="body1" color="text.primary">
-              {(type === "case" || type === "change") && props.title}
+              {(type === "case" || type === "service" || type === "change") && props.title}
               {type === "chat" && props.description}
             </Typography>
-            {(type === "case" || type === "change") && (
+            {(type === "case" || type === "service" || type === "change") && (
               <Typography variant="subtitle2" color="text.secondary">
                 {stripHtmlTags(props.description)}
               </Typography>
@@ -110,6 +110,8 @@ export function ItemCardExtended(props: ItemCardExtendedProps) {
                       return "Assigned";
                     case "chat":
                       return "Messages";
+                    case "service":
+                      return "Requested By";
                     case "change":
                       return "Owner";
                   }
@@ -122,6 +124,8 @@ export function ItemCardExtended(props: ItemCardExtendedProps) {
                       return props.assigned ?? "N/A";
                     case "chat":
                       return props.count;
+                    case "service":
+                      return props.createdBy;
                     case "change":
                       return props.owner ?? "N/A";
                   }
@@ -136,6 +140,8 @@ export function ItemCardExtended(props: ItemCardExtendedProps) {
                       return "Created";
                     case "chat":
                       return "Started";
+                    case "service":
+                      return "Assignee";
                     case "change":
                       return "Priority";
                   }
@@ -148,6 +154,8 @@ export function ItemCardExtended(props: ItemCardExtendedProps) {
                       return dayjs(props.createdOn).fromNow();
                     case "chat":
                       return dayjs(props.createdOn).fromNow();
+                    case "service":
+                      return props.assignee ?? "N/A";
                     case "change":
                       return <PriorityChip size="small" id={props.impactId} />;
                   }
@@ -161,6 +169,7 @@ export function ItemCardExtended(props: ItemCardExtendedProps) {
               switch (type) {
                 case "case":
                 case "chat":
+                case "service":
                   return dayjs(props.createdOn).fromNow();
                 case "change":
                   return dayjs(props.updatedOn).fromNow();

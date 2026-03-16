@@ -19,7 +19,10 @@ import { useAsgardeo } from "@asgardeo/react";
 import { useAuthApiClient } from "@api/useAuthApiClient";
 import { useLogger } from "@hooks/useLogger";
 import { ApiQueryKeys } from "@constants/apiConstants";
-import type { DeploymentProductItem } from "@models/responses";
+import type {
+  DeploymentProductItem,
+  DeployedProductsResponse,
+} from "@models/responses";
 
 export type FetchFn = (url: string, init?: RequestInit) => Promise<Response>;
 
@@ -33,13 +36,16 @@ export interface FetchDeploymentProductsOptions {
  *
  * @param {string} deploymentId - The deployment ID.
  * @param {FetchDeploymentProductsOptions} options - fetchFn.
- * @returns {Promise<DeploymentProductItem[]>} Deployment products array.
+ * @returns {Promise<DeployedProductsResponse>} Deployment products response.
  */
 export async function fetchDeploymentProducts(
   deploymentId: string,
-  options: FetchDeploymentProductsOptions,
-): Promise<DeploymentProductItem[]> {
-  const { fetchFn } = options;
+  options: FetchDeploymentProductsOptions & {
+    offset?: number;
+    limit?: number;
+  },
+): Promise<DeployedProductsResponse> {
+  const { fetchFn, offset = 0, limit = 10 } = options;
 
   const baseUrl = window.config?.CUSTOMER_PORTAL_BACKEND_BASE_URL;
 
@@ -47,7 +53,11 @@ export async function fetchDeploymentProducts(
     throw new Error("CUSTOMER_PORTAL_BACKEND_BASE_URL is not configured");
   }
 
-  const requestUrl = `${baseUrl}/deployments/${deploymentId}/products`;
+  const searchParams = new URLSearchParams();
+  searchParams.set("offset", String(offset));
+  searchParams.set("limit", String(limit));
+
+  const requestUrl = `${baseUrl}/deployments/${deploymentId}/products?${searchParams.toString()}`;
 
   const response = await fetchFn(requestUrl, { method: "GET" });
 
@@ -57,7 +67,7 @@ export async function fetchDeploymentProducts(
     );
   }
 
-  const data: DeploymentProductItem[] = await response.json();
+  const data: DeployedProductsResponse = await response.json();
   return data;
 }
 
@@ -89,7 +99,7 @@ export function useGetDeploymentsProducts(
         `Deployment products fetched for deployment ID: ${deploymentId}`,
         data,
       );
-      return data;
+      return data.deployedProducts ?? [];
     },
     enabled: !!deploymentId && isSignedIn && !isAuthLoading,
     staleTime: 5 * 60 * 1000,

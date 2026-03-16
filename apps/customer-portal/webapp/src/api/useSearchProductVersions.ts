@@ -30,20 +30,20 @@ import type { ProductVersionsSearchRequest } from "@models/requests";
  *
  * @param {string} productId - The product ID.
  * @param {object} params - pagination (limit, offset).
- * @returns {UseQueryResult<ProductVersionItem[], Error>} The query result.
+ * @returns {UseQueryResult<ProductVersionsSearchResponse, Error>} The query result.
  */
 export function useSearchProductVersions(
   productId: string,
   params?: { limit?: number; offset?: number },
-): UseQueryResult<ProductVersionItem[], Error> {
+): UseQueryResult<ProductVersionsSearchResponse, Error> {
   const { limit = 10, offset = 0 } = params ?? {};
   const logger = useLogger();
   const { isSignedIn, isLoading: isAuthLoading } = useAsgardeo();
   const authFetch = useAuthApiClient();
 
-  return useQuery<ProductVersionItem[], Error>({
+  return useQuery<ProductVersionsSearchResponse, Error>({
     queryKey: [ApiQueryKeys.PRODUCT_VERSIONS_SEARCH, productId, limit, offset],
-    queryFn: async (): Promise<ProductVersionItem[]> => {
+    queryFn: async (): Promise<ProductVersionsSearchResponse> => {
       logger.debug(
         `Searching versions for product ${productId}, offset=${offset} limit=${limit}`,
       );
@@ -76,9 +76,8 @@ export function useSearchProductVersions(
         }
 
         const data: ProductVersionsSearchResponse = await response.json();
-        const versions = data?.versions ?? [];
-        logger.debug("[useSearchProductVersions] Data received:", versions);
-        return versions;
+        logger.debug("[useSearchProductVersions] Data received:", data);
+        return data;
       } catch (error) {
         logger.error("[useSearchProductVersions] Error:", error);
         throw error;

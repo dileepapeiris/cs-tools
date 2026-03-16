@@ -22,7 +22,10 @@ import {
   fetchDeploymentProducts,
   type FetchFn,
 } from "@api/useGetDeploymentsProducts";
-import type { DeploymentProductItem } from "@models/responses";
+import type {
+  DeploymentProductItem,
+  DeployedProductsResponse,
+} from "@models/responses";
 import { addApiHeaders } from "@utils/apiUtils";
 
 interface DeploymentForProducts {
@@ -44,8 +47,10 @@ export function useAllDeploymentProducts(
   isLoading: boolean;
 } {
   const { getIdToken } = useAsgardeo();
-  const deploymentIds =
-    projectDeployments?.map((d) => d.id).filter(Boolean) ?? [];
+  const deploymentList = Array.isArray(projectDeployments)
+    ? projectDeployments
+    : [];
+  const deploymentIds = deploymentList.map((d) => d.id).filter(Boolean);
 
   const results = useQueries({
     queries: deploymentIds.map((deploymentId) => ({
@@ -65,7 +70,8 @@ export function useAllDeploymentProducts(
     const map: Record<string, DeploymentProductItem[]> = {};
     deploymentIds.forEach((id, i) => {
       const res = results[i];
-      map[id] = (res?.data ?? []) as DeploymentProductItem[];
+      const payload = res?.data as DeployedProductsResponse | undefined;
+      map[id] = payload?.deployedProducts ?? [];
     });
     return map;
   }, [results, deploymentIds]);

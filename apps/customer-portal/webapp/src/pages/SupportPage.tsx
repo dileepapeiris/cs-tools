@@ -25,7 +25,6 @@ import OutstandingCasesList from "@components/support/support-overview-cards/Out
 import ChatHistoryList from "@components/support/support-overview-cards/ChatHistoryList";
 import { useGetProjectSupportStats } from "@api/useGetProjectSupportStats";
 import useGetProjectDetails from "@api/useGetProjectDetails";
-import useGetProjectFilters from "@api/useGetProjectFilters";
 import useGetProjectCases from "@api/useGetProjectCases";
 import { useSearchConversations } from "@api/useSearchConversations";
 import { useLogger } from "@hooks/useLogger";
@@ -35,7 +34,7 @@ import {
   CaseType,
 } from "@constants/supportConstants";
 import { PROJECT_TYPE_LABELS } from "@constants/projectDetailsConstants";
-import { getIncidentAndQueryIds, isS0Case } from "@utils/support";
+import { isS0Case } from "@utils/support";
 import type { ChatHistoryItem } from "@models/responses";
 
 /**
@@ -57,26 +56,13 @@ export default function SupportPage(): JSX.Element {
     isProjectLoaded &&
     project?.type?.label === PROJECT_TYPE_LABELS.MANAGED_CLOUD_SUBSCRIPTION;
 
-  const { data: filterMetadata } = useGetProjectFilters(projectId || "");
-
-  const { incidentId, queryId } = getIncidentAndQueryIds(
-    filterMetadata?.caseTypes,
-  );
-
-  const hasFilterIds = !!(incidentId || queryId);
-
   const {
     data: stats,
     isFetching,
     isError,
-  } = useGetProjectSupportStats(
-    projectId || "",
-    {
-      incidentId,
-      queryId,
-    },
-    hasFilterIds,
-  );
+  } = useGetProjectSupportStats(projectId || "", {
+    caseTypes: [CaseType.DEFAULT_CASE],
+  });
 
   const {
     data,

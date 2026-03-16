@@ -304,6 +304,9 @@ export const SUPPORT_OVERVIEW_CASES_LIMIT = 5;
 // Number of chat history items to show on support overview cards.
 export const SUPPORT_OVERVIEW_CHAT_LIMIT = 5;
 
+// Number of service requests / change requests to show on operations overview cards.
+export const OPERATIONS_OVERVIEW_LIST_LIMIT = 5;
+
 // Rich text editor constants
 export const RICH_TEXT_HISTORY_LIMIT = 50;
 export const RICH_TEXT_UNDO_DEBOUNCE_MS = 600;

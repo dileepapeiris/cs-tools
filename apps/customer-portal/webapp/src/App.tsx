@@ -79,7 +79,24 @@ export default function App(): JSX.Element {
                 {/* Project Details */}
                 <Route path="project-details" element={<ProjectDetails />} />
                 {/* Operations */}
-                <Route path="operations" element={<OperationsPage />} />
+                <Route path="operations">
+                  <Route index element={<OperationsPage />} />
+                  <Route path="service-requests">
+                    <Route index element={<ServiceRequestsPage />} />
+                    <Route path="create" element={<CreateServiceRequestPage />} />
+                    <Route
+                      path=":serviceRequestId"
+                      element={<ServiceRequestDetailsPage />}
+                    />
+                  </Route>
+                  <Route path="change-requests">
+                    <Route index element={<ChangeRequestsPage />} />
+                    <Route
+                      path=":changeRequestId"
+                      element={<ChangeRequestDetailsPage />}
+                    />
+                  </Route>
+                </Route>
                 {/* Support */}
                 <Route path="support">
                   <Route index element={<SupportPage />} />

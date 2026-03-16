@@ -194,7 +194,7 @@ export default function NoveraChatPage(): JSX.Element {
       projectId
     ) {
       navigate(
-        `/${projectId}/support/chat/${conversationResponse.conversationId}`,
+        `/projects/${projectId}/support/chat/${conversationResponse.conversationId}`,
         { replace: true },
       );
     }

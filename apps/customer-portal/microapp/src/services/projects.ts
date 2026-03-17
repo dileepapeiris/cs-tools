@@ -22,6 +22,8 @@ import type {
   Project,
   ProjectDeploymentDTO,
   ProjectDeploymentsDTO,
+  ProjectDTO,
+  ProjectInfo,
   ProjectsDTO,
   ProjectStatsDTO,
   ProjectStatus,
@@ -31,9 +33,11 @@ import {
   PROJECT_STATS_ENDPOINT,
   PROJECTS_ENDPOINT,
   PROJECT_DEPLOYMENT_PRODUCTS_ENDPOINT,
+  PROJECT_DETAILS_ENDPOINT,
 } from "@config/endpoints";
 import apiClient from "@src/services/apiClient";
 import { queryOptions } from "@tanstack/react-query";
+import { stripHtmlTags } from "@utils/others";
 
 const getAllProjects = async (): Promise<Project[]> => {
   const projects = (await apiClient.post<ProjectsDTO>(PROJECTS_ENDPOINT, {})).data.projects;
@@ -48,6 +52,11 @@ const getAllProjects = async (): Promise<Project[]> => {
   );
 
   return projectsWithStats;
+};
+
+const getProject = async (id: string): Promise<ProjectInfo> => {
+  const response = (await apiClient.get<ProjectDTO>(PROJECT_DETAILS_ENDPOINT(id))).data;
+  return mapProjectDTOToProject(response);
 };
 
 const getDeploymentsByProject = async (id: string): Promise<Deployment[]> => {
@@ -77,6 +86,18 @@ function mapProjectAndStatsDTOToProject(project: ProjectsDTO["projects"][number]
     },
     status: stats?.projectStats.slaStatus as ProjectStatus,
     type: "Regular", // TODO:
+  };
+}
+
+function mapProjectDTOToProject(project: ProjectDTO): ProjectInfo {
+  return {
+    id: project.id,
+    projectKey: project.key,
+    name: project.name,
+    createdOn: new Date(project.createdOn.replace(" ", "T")),
+    description: stripHtmlTags(project.description),
+    type: project.type?.label ?? "N/A",
+    agentEnabled: project.account.hasAgent,
   };
 }
 
@@ -111,6 +132,12 @@ export const projects = {
     queryOptions({
       queryKey: ["projects"],
       queryFn: getAllProjects,
+    }),
+
+  get: (id: string) =>
+    queryOptions({
+      queryKey: ["project", id],
+      queryFn: () => getProject(id),
     }),
 
   deployments: (id: string) =>

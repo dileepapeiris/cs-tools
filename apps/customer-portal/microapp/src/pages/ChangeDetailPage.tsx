@@ -18,13 +18,13 @@ import { useLayoutEffect, useState } from "react";
 import { Box, Card, Chip, colors, Grid, pxToRem, Stack, Typography } from "@wso2/oxygen-ui";
 import { InfoField, OverlineSlot, StakeholderItem, StickyCommentBar, TimelineEntry } from "@components/features/detail";
 import { PriorityChip, StatusChip } from "@components/features/support";
+import { Calendar, TriangleAlert, User, Users } from "@wso2/oxygen-ui-icons-react";
 import { ChecklistItem } from "@components/features/chat";
 import { SectionCard } from "@components/shared";
 import { Timeline } from "@components/ui";
 import { useLayout } from "@context/layout";
 
 import { MOCK_ACTIVITY_TIMELINE, MOCK_IMPLEMENTATION_STEPS, MOCK_STAKEHOLDERS } from "@src/mocks/data/change";
-import { Calendar, TriangleAlert, User, Users } from "@wso2/oxygen-ui-icons-react";
 
 export default function ChangeDetailPage() {
   const layout = useLayout();

@@ -15,6 +15,16 @@ export interface Project {
   type: ProjectType;
 }
 
+export interface ProjectInfo {
+  id: string;
+  projectKey: string;
+  name: string;
+  createdOn: Date;
+  description: string;
+  type: string;
+  agentEnabled: boolean;
+}
+
 export interface Deployment {
   id: string;
   name: string;

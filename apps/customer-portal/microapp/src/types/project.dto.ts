@@ -1,16 +1,43 @@
 import type { EntityReference, Pagination } from "@src/types";
 
 export interface ProjectsDTO extends Pagination {
-  projects: ProjectDTO[];
+  projects: ProjectSummaryDTO[];
 }
 
-interface ProjectDTO {
+export interface ProjectDTO {
   id: string;
-  name: string;
   key: string;
+  name: string;
   createdOn: string;
   description: string;
+  type: EntityReference | null;
+  sfId: string;
+  hasSr: boolean;
+  startDate: string | null;
+  endDate: string | null;
+  account: {
+    id: string;
+    hasAgent: boolean;
+    name: string;
+    activationDate: string | null;
+    deactivationDate: string | null;
+    supportTier: string | null;
+    region: string | null;
+    ownerEmail: string | null;
+    technicalOwnerEmail: string | null;
+  };
+  totalQueryHours: number;
+  consumedQueryHours: number;
+  remainingQueryHours: number;
+  goLiveDate: string | null;
+  goLivePlanDate: string | null;
+  totalOnboardingHours: number;
+  remainingOnboardingHours: number;
+  onboardingExpiryDate: string | null;
+  onboardingStatus: string | null;
 }
+
+type ProjectSummaryDTO = Pick<ProjectDTO, "id" | "name" | "key" | "createdOn" | "description">;
 
 export interface ProjectStatsDTO {
   projectStats: {

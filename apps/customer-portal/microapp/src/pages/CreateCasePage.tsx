@@ -231,6 +231,7 @@ export default function CreateCasePage() {
               required
               name="type"
               label="Issue Type"
+              placeholder="Select Issue Type"
               aiLabel={classified.has("type") ? "AI Classified" : undefined}
               options={issueTypeOptions}
               value={formik.values.type}
@@ -240,13 +241,14 @@ export default function CreateCasePage() {
               required
               name="severity"
               label="Severity Levels"
+              placeholder="Select Severity"
               aiLabel={classified.has("severity") ? "AI Classified" : undefined}
               options={severityLevelOptions}
               value={formik.values.severity}
               onChange={formik.handleChange}
             />
           </Stack>
-          <ConversationSummary messages={messages} />
+          {messages.length > 0 && <ConversationSummary messages={messages} />}
           <Button type="submit" variant="contained" sx={{ textTransform: "initial" }}>
             Create Case
           </Button>

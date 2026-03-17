@@ -48,7 +48,7 @@ export default function SupportPage() {
   const theme = useTheme();
   const [tab, setTab] = useState<ItemCardProps["type"]>("case");
 
-  const { projectId } = useProject();
+  const { projectId, noveraEnabled } = useProject();
   const project = useSuspenseQuery(projects.all()).data.find((project) => project.id === projectId);
 
   const metrics = [
@@ -90,7 +90,7 @@ export default function SupportPage() {
             </Stack>
             <Button
               component={Link}
-              to="/chat"
+              to={noveraEnabled ? "/chat" : "/create"}
               variant="contained"
               sx={{ textTransform: "initial", flexShrink: 0, height: 40 }}
             >

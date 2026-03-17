@@ -151,7 +151,7 @@ export function TextField({
           lineHeight: multiline ? 1.65 : undefined,
 
           "& .MuiOutlinedInput-root": {
-            bgcolor: "background.default",
+            bgcolor: "background.paper",
           },
         }}
         slotProps={{

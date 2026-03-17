@@ -165,68 +165,76 @@ export default function CaseDetailsActionRow({
         minHeight: 0,
       }}
     >
-      <Stack direction="row" spacing={1.5} alignItems="center">
-        {hasEngineer && (
-          <>
-            {isLoading ? (
-              <Skeleton variant="circular" width={18} height={18} />
-            ) : (
-              <Avatar
-                sx={{
-                  width: 18,
-                  height: 18,
-                  bgcolor: "primary.light",
-                  color: "primary.contrastText",
-                  fontSize: "0.6rem",
-                }}
-              >
-                {engineerInitials}
-              </Avatar>
-            )}
-
-            <Box>
+      <Box
+        sx={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          width: "100%",
+        }}
+      >
+        <Stack direction="row" spacing={1.5} alignItems="center">
+          {hasEngineer && (
+            <>
               {isLoading ? (
-                <Skeleton
-                  variant="text"
-                  width={90}
-                  height={14}
-                  sx={{ mb: 0.25 }}
-                />
+                <Skeleton variant="circular" width={18} height={18} />
               ) : (
+                <Avatar
+                  sx={{
+                    width: 18,
+                    height: 18,
+                    bgcolor: "primary.light",
+                    color: "primary.contrastText",
+                    fontSize: "0.6rem",
+                  }}
+                >
+                  {engineerInitials}
+                </Avatar>
+              )}
+
+              <Box>
+                {isLoading ? (
+                  <Skeleton
+                    variant="text"
+                    width={90}
+                    height={14}
+                    sx={{ mb: 0.25 }}
+                  />
+                ) : (
+                  <Typography
+                    variant="caption"
+                    color="text.primary"
+                    sx={{ lineHeight: 1.2 }}
+                  >
+                    {formatValue(assignedEngineer)}
+                  </Typography>
+                )}
                 <Typography
                   variant="caption"
-                  color="text.primary"
-                  sx={{ lineHeight: 1.2 }}
+                  color="text.secondary"
+                  sx={{ fontSize: "0.7rem", lineHeight: 1.2, display: "block" }}
                 >
-                  {formatValue(assignedEngineer)}
+                  Support Engineer
                 </Typography>
-              )}
+              </Box>
+
+              <Divider orientation="vertical" flexItem />
+            </>
+          )}
+
+          {!showOnlyEngineer && (
+            <Stack direction="row" spacing={1.5} alignItems="center">
+              <CirclePlay size={12} color={theme.palette.primary.main} />
               <Typography
                 variant="caption"
                 color="text.secondary"
-                sx={{ fontSize: "0.7rem", lineHeight: 1.2, display: "block" }}
+                sx={{ fontSize: "0.7rem" }}
               >
-                Support Engineer
+                Manage case status
               </Typography>
-            </Box>
-
-            {!showOnlyEngineer && (
-              <>
-                <Divider orientation="vertical" flexItem />
-                <Stack direction="row" spacing={1.5} alignItems="center">
-                  <CirclePlay size={12} color={theme.palette.primary.main} />
-                  <Typography
-                    variant="caption"
-                    color="text.secondary"
-                    sx={{ fontSize: "0.7rem" }}
-                  >
-                    Manage case status
-                  </Typography>
-                </Stack>
-              </>
-            )}
-          </>
-        )}
+            </Stack>
+          )}
+        </Stack>
 
         {!showOnlyEngineer && (
           <Stack direction="row" spacing={1} alignItems="center" flexWrap="wrap">
@@ -294,7 +302,7 @@ export default function CaseDetailsActionRow({
             })}
           </Stack>
         )}
-      </Stack>
+      </Box>
     </Paper>
   );
 }

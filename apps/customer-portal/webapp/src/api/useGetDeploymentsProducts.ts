@@ -99,7 +99,16 @@ export function useGetDeploymentsProducts(
         `Deployment products fetched for deployment ID: ${deploymentId}`,
         data,
       );
-      return data.deployedProducts ?? [];
+      
+      if (Array.isArray(data)) {
+        return data;
+      }
+
+      if (Array.isArray((data as any)?.deployedProducts)) {
+        return (data as any).deployedProducts;
+      }
+
+      return [];
     },
     enabled: !!deploymentId && isSignedIn && !isAuthLoading,
     staleTime: 5 * 60 * 1000,

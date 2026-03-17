@@ -72,9 +72,6 @@ export default function CaseDetailsContent({
 
   const isEngagementRoute = location.pathname.includes("/engagements/");
 
-  const isSecurityReportAnalysisUrl =
-    /(^|\/)security-report-analysis(\/|$)/.test(location.pathname);
-
   const statusLabel = data?.status?.label;
   const severityLabel = data?.severity?.label;
   const statusColorPath = getStatusColor(statusLabel ?? undefined);

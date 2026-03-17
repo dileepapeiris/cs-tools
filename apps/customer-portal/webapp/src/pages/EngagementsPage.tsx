@@ -22,7 +22,16 @@ import {
   type JSX,
   type ChangeEvent,
 } from "react";
-import { Box, Stack, Pagination } from "@wso2/oxygen-ui";
+import {
+  Box,
+  Stack,
+  Pagination,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
+  Typography,
+} from "@wso2/oxygen-ui";
 import { useGetProjectCasesStats } from "@api/useGetProjectCasesStats";
 import useGetProjectDetails from "@api/useGetProjectDetails";
 import useGetProjectFilters from "@api/useGetProjectFilters";
@@ -31,6 +40,7 @@ import { useLoader } from "@context/linear-loader/LoaderContext";
 import { CaseType } from "@constants/supportConstants";
 import { PROJECT_TYPE_LABELS } from "@constants/projectDetailsConstants";
 import type { AllCasesFilterValues } from "@models/responses";
+import { isS0Case } from "@utils/support";
 import AllCasesList from "@components/support/all-cases/AllCasesList";
 import AllCasesSearchBar from "@components/support/all-cases/AllCasesSearchBar";
 import EngagementsStatCards from "@components/support/engagements/EngagementsStatCards";
@@ -93,6 +103,9 @@ export default function EngagementsPage(): JSX.Element {
     data,
     isLoading: isCasesQueryLoading,
     isError: isCasesError,
+    hasNextPage,
+    fetchNextPage,
+    isFetchingNextPage,
   } = useGetProjectCases(projectId || "", engagementSearchRequest, {
     enabled: !!projectId,
   });
@@ -116,11 +129,25 @@ export default function EngagementsPage(): JSX.Element {
     hideLoader();
   }, [isInitialPageLoading, showLoader, hideLoader]);
 
-  const currentPageCases = useMemo(() => data?.pages?.[0]?.cases ?? [], [data]);
+  useEffect(() => {
+    if (!data) return;
+    const loadedPages = data.pages.length;
+    if (page > loadedPages && hasNextPage && !isFetchingNextPage) {
+      void fetchNextPage();
+    }
+  }, [page, data, hasNextPage, isFetchingNextPage, fetchNextPage]);
+
+  const currentPageCases = useMemo(() => {
+    if (!data || data.pages.length === 0) return [];
+    const pageIndex = Math.max(0, Math.min(page - 1, data.pages.length - 1));
+    return data.pages[pageIndex]?.cases ?? [];
+  }, [data, page]);
+
   const apiTotalRecords = data?.pages?.[0]?.totalRecords ?? 0;
 
   const filteredCases = useMemo(
-    () => (excludeS0 ? currentPageCases.filter((c) => c) : currentPageCases),
+    () =>
+      excludeS0 ? currentPageCases.filter((c) => !isS0Case(c)) : currentPageCases,
     [currentPageCases, excludeS0],
   );
 
@@ -175,6 +202,38 @@ export default function EngagementsPage(): JSX.Element {
         onClearFilters={handleClearFilters}
         excludeS0={excludeS0}
       />
+
+      <Box
+        sx={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+        }}
+      >
+        <Typography variant="body2" color="text.secondary">
+          Showing {paginatedCases.length} of {totalItems} engagements
+        </Typography>
+
+        <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+          <FormControl size="small" sx={{ minWidth: 180 }}>
+            <InputLabel id="sort-label">Sort</InputLabel>
+            <Select<"desc" | "asc">
+              labelId="sort-label"
+              id="sort"
+              value={sortOrder}
+              label="Sort"
+              onChange={(e) => handleSortChange(e.target.value as "desc" | "asc")}
+            >
+              <MenuItem value="desc">
+                <Typography variant="body2">Newest First</Typography>
+              </MenuItem>
+              <MenuItem value="asc">
+                <Typography variant="body2">Oldest First</Typography>
+              </MenuItem>
+            </Select>
+          </FormControl>
+        </Box>
+      </Box>
 
       <AllCasesList
         cases={paginatedCases}

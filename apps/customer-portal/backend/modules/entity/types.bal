@@ -824,8 +824,6 @@ public type DeployedProduct record {|
     string? releasedOn;
     # End of life date of the product
     string? endOfLifeOn;
-    # Update level of the product
-    string? updateLevel;
     json...;
 |};
 

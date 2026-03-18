@@ -14,7 +14,6 @@
 // specific language governing permissions and limitations
 // under the License.
 import ballerina/http;
-import ballerina/url;
 import ballerina/websocket;
 
 configurable string aiChatAgentBaseUrl = ?;

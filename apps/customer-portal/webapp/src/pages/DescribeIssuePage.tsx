@@ -128,7 +128,7 @@ export default function DescribeIssuePage(): JSX.Element {
   }, [projectId, navigate]);
 
   const isSubmitDisabled =
-    !projectId || !plainText.trim() || isSubmitting;
+    !projectId || !plainText.trim() || isSubmitting || isProductsLoading;
 
   return (
     <Box

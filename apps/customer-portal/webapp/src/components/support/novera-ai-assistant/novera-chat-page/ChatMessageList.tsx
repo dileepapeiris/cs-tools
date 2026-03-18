@@ -50,6 +50,7 @@ export default function ChatMessageList({
   const scrollRef = useRef<HTMLDivElement | null>(null);
   const pendingPrependRef = useRef(false);
   const prevScrollHeightRef = useRef(0);
+  const prevMessagesLengthRef = useRef(messages.length);
 
   const handleScroll = useCallback(() => {
     const node = scrollRef.current;
@@ -64,14 +65,24 @@ export default function ChatMessageList({
   useEffect(() => {
     const node = scrollRef.current;
     if (!node) return;
+    const prevLength = prevMessagesLengthRef.current;
+    const currLength = messages.length;
+
     // When older messages are prepended, keep the user's viewport anchored.
-    if (pendingPrependRef.current) {
+    if (pendingPrependRef.current && currLength > prevLength) {
       const newHeight = node.scrollHeight;
       const delta = newHeight - prevScrollHeightRef.current;
       node.scrollTop = delta;
       pendingPrependRef.current = false;
     }
-  }, [messages.length]);
+
+    // If fetch completed but no new messages were added, clear pending flag.
+    if (!isFetchingOlder && pendingPrependRef.current && currLength === prevLength) {
+      pendingPrependRef.current = false;
+    }
+
+    prevMessagesLengthRef.current = currLength;
+  }, [messages.length, isFetchingOlder]);
 
   return (
     <Box

@@ -286,8 +286,9 @@ export default function NoveraChatPage(): JSX.Element {
   }, []);
 
   useEffect(() => {
+    if (isFetchingNextPage) return;
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages]);
+  }, [messages, isFetchingNextPage]);
 
   const sendToApi = useCallback(
     async (userText: string) => {

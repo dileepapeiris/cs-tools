@@ -1,8 +1,7 @@
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
-import { Box, Divider, Grid, Skeleton, Stack, Typography, pxToRem } from "@wso2/oxygen-ui";
-import { BookOpen, MessageSquare } from "@wso2/oxygen-ui-icons-react";
+import { Grid, Skeleton, Stack, Typography } from "@wso2/oxygen-ui";
 import { StatusChip } from "@components/features/support";
 import { InfoField, OverlineSlot, StickyCommentBar } from "@components/features/detail";
 import {

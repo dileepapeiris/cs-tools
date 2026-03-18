@@ -35,6 +35,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useParams } from "react-router-dom";
 import { useProject } from "@context/project";
 import ms from "ms";
+import { stripHtmlTags } from "../utils/others";
 
 dayjs.extend(relativeTime);
 
@@ -119,13 +120,7 @@ export default function CaseDetailPage() {
         <SectionCard title="Case Information">
           <Grid spacing={1.5} container>
             <Grid size={12}>
-              <InfoField label="Description" value={data?.description} />
-            </Grid>
-            <Grid size={6}>
-              <InfoField label="Assignee" value={isLoading ? undefined : (data?.assigned ?? "N/A")} icon={Users} />
-            </Grid>
-            <Grid size={6}>
-              <InfoField label="Reporter" value={isLoading ? undefined : (data?.reporter ?? "N/A")} icon={User} />
+              <InfoField label="Description" value={data?.description ? stripHtmlTags(data.description) : undefined} />
             </Grid>
             <Grid size={6}>
               <InfoField
@@ -150,6 +145,12 @@ export default function CaseDetailPage() {
                   )
                 }
               />
+            </Grid>
+            <Grid size={6}>
+              <InfoField label="Assignee" value={isLoading ? undefined : (data?.assigned ?? "N/A")} icon={Users} />
+            </Grid>
+            <Grid size={6}>
+              <InfoField label="Reporter" value={isLoading ? undefined : (data?.reporter ?? "N/A")} icon={User} />
             </Grid>
             <Grid size={6}>
               <InfoField label="Category" value={isLoading || isFiltersLoading ? undefined : (issueType ?? "N/A")} />

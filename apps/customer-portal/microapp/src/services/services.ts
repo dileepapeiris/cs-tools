@@ -1,10 +1,10 @@
 import apiClient from "@src/services/apiClient";
 import type { GetCasesRequestDTO, PaginatedArray } from "@src/types";
 import { infiniteQueryOptions, queryOptions } from "@tanstack/react-query";
-import type { ServiceRequestSummary } from "@src/types/service.model";
-import type { ServiceRequestsDTO } from "@src/types/service.dto";
+import type { ServiceRequest, ServiceRequestSummary } from "@src/types/service.model";
+import type { ServiceRequestDTO, ServiceRequestsDTO } from "@src/types/service.dto";
 
-import { PROJECT_CASES_ENDPOINT } from "@config/endpoints";
+import { CASE_DETAILS_ENDPOINT, PROJECT_CASES_ENDPOINT } from "@config/endpoints";
 
 const getAllServiceRequests = async (
   id: string,
@@ -29,6 +29,11 @@ const getAllServiceRequests = async (
   return result;
 };
 
+const getServiceRequest = async (id: string): Promise<ServiceRequest> => {
+  const response = (await apiClient.get<ServiceRequestDTO>(CASE_DETAILS_ENDPOINT(id))).data;
+  return toServiceRequest(response);
+};
+
 /* Mappers */
 export function toServiceRequestSummary(dto: ServiceRequestsDTO["cases"][number]): ServiceRequestSummary {
   return {
@@ -46,8 +51,30 @@ export function toServiceRequestSummary(dto: ServiceRequestsDTO["cases"][number]
   };
 }
 
+export function toServiceRequest(dto: ServiceRequestDTO): ServiceRequest {
+  return {
+    id: dto.id,
+    internalId: dto.internalId,
+    number: dto.number,
+    createdOn: new Date(dto.createdOn.replace(" ", "T")),
+    updatedOn: new Date(dto.updatedOn.replace(" ", "T")),
+    createdBy: dto.createdBy,
+    title: dto.title,
+    description: dto.description ?? "",
+    assignee: dto.assignedTeam?.label,
+    issueType: dto.issueType?.label,
+    statusId: dto.status?.id,
+    severityId: dto.severity?.id,
+    deployment: dto.deployment?.label,
+    product: dto.deployedProduct?.label,
+    productVersion: dto.deployedProduct?.version ?? undefined,
+  };
+}
+
 /* Query Options */
 export const serviceRequests = {
+  get: (id: string) => queryOptions({ queryKey: ["service-request", id], queryFn: () => getServiceRequest(id) }),
+
   all: (id: string, body: GetCasesRequestDTO = {}) =>
     queryOptions({
       queryKey: ["service-requests", id, body],

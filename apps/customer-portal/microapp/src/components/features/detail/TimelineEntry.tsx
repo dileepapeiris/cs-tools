@@ -124,17 +124,10 @@ export function TimelineEntry({ timestamp, last = false, ...props }: TimelineEnt
               </Typography>
               <Typography variant="body2" color="text.secondary"></Typography>
             </Stack>
-            <Stack direction="row" alignItems="center" justifyContent="flex-end" gap={1}>
-              {progress && timestamp && (
-                <Box color="text.secondary">
-                  <Clock4 size={pxToRem(14)} />
-                </Box>
-              )}
-              <Typography variant="subtitle2" fontWeight="regular" color="text.disabled" flexShrink={0}>
-                {timestamp}
-              </Typography>
-            </Stack>
           </Stack>
+          <Typography variant="subtitle2" fontWeight="regular" color="text.disabled" flexShrink={0} mt={-1}>
+            {timestamp}
+          </Typography>
           {activity && props.comment && <Comment attachments={props.attachments}>{props.comment}</Comment>}
         </Stack>
       </TimelineContent>

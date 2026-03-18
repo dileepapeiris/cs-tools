@@ -49,9 +49,9 @@ export const MOCK_TIMELINE_DATA: Omit<ProgressTimelineEntryProps, "variant">[] =
     description: "Installing and configuring API Manager",
     timestamp: "Nov 18, 11:00 AM",
   },
-  { status: "pending", title: "Configuration", description: "Applying policies and settings" },
-  { status: "pending", title: "Testing & Validation", description: "Verify environment is working correctly" },
-  { status: "pending", title: "Handoff", description: "Environment ready for development team" },
+  // { status: "pending", title: "Configuration", description: "Applying policies and settings" },
+  // { status: "pending", title: "Testing & Validation", description: "Verify environment is working correctly" },
+  // { status: "pending", title: "Handoff", description: "Environment ready for development team" },
 ];
 
 export const MOCK_UPDATES = [

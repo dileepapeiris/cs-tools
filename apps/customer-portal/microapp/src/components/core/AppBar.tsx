@@ -27,6 +27,7 @@ import {
   useTheme,
   alpha,
   Skeleton,
+  Box,
 } from "@wso2/oxygen-ui";
 
 import { ProjectSelector } from "@components/features/projects";
@@ -111,9 +112,9 @@ export function AppBar() {
 
         {config.showProjectSelector && (
           <Button sx={{ justifyContent: "space-between", p: 0, mt: 2 }} onClick={openProjectSelector} disableRipple>
-            <Stack direction="row" sx={{ alignItems: "center" }} gap={1}>
+            <Stack direction="row" sx={{ alignItems: "center", flexGrow: 1, minWidth: 0, gap: 1 }}>
               <Folder color={theme.palette.text.secondary} size={pxToRem(18)} />
-              <Typography variant="body1" color="text.secondary" sx={{ textTransform: "initial" }}>
+              <Typography variant="body1" color="text.secondary" sx={{ textTransform: "initial" }} noWrap>
                 {project.name}
               </Typography>
             </Stack>

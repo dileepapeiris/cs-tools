@@ -14,7 +14,7 @@
 // specific language governing permissions and limitations
 // under the License.
 
-import { Suspense, useEffect, useState } from "react";
+import { Suspense, useState } from "react";
 import { Link } from "react-router-dom";
 import { Button, Card, Grid, pxToRem, Stack, Tab, Tabs, Typography, useTheme } from "@wso2/oxygen-ui";
 import { MessageSquareQuote } from "@wso2/oxygen-ui-icons-react";
@@ -120,7 +120,7 @@ function ItemsListContent({ tab }: { tab: ItemCardProps["type"] }) {
       return (
         <ErrorBoundary fallback={<ItemsListContentSkeleton tab="case" />}>
           <Suspense fallback={<ItemsListContentSkeleton tab="case" />}>
-            <CaseItemListContent />;
+            <CaseItemListContent />
           </Suspense>
         </ErrorBoundary>
       );
@@ -129,7 +129,7 @@ function ItemsListContent({ tab }: { tab: ItemCardProps["type"] }) {
       return (
         <ErrorBoundary fallback={<ItemsListContentSkeleton tab="chat" />}>
           <Suspense fallback={<ItemsListContentSkeleton tab="chat" />}>
-            <ChatItemListContent />;
+            <ChatItemListContent />
           </Suspense>
         </ErrorBoundary>
       );

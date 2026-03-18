@@ -29,11 +29,11 @@ export function ProjectPopoverItem({
       py={0.5}
       onClick={onClick}
     >
-      <Stack direction="row" gap={1}>
-        <Typography variant="subtitle1" fontWeight="medium" color="text.primary">
+      <Stack direction="row" justifyContent="space-between" alignItems="center" width="100%" gap={1}>
+        <Typography variant="subtitle1" fontWeight="medium" color="text.primary" textAlign="left">
           {name}
         </Typography>
-        {active && <Check color={theme.palette.primary.main} />}
+        {active && <Check style={{ flexShrink: 0 }} color={theme.palette.primary.main} />}
       </Stack>
       <Stack direction="row" alignItems="center" gap={1.5}>
         {status ? (

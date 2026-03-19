@@ -1,0 +1,104 @@
+// Copyright (c) 2026 WSO2 LLC. (https://www.wso2.com).
+//
+// WSO2 LLC. licenses this file to you under the Apache License,
+// Version 2.0 (the "License"); you may not use this file except
+// in compliance with the License.
+// You may obtain a copy of the License at
+//
+// http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing,
+// software distributed under the License is distributed on an
+// "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+// KIND, either express or implied.  See the License for the
+// specific language governing permissions and limitations
+// under the License.
+
+import { Grid } from "@wso2/oxygen-ui";
+import type { JSX } from "react";
+import { ActiveCasesChart } from "@components/dashboard/charts/ActiveCasesChart";
+import { CasesTrendChart } from "@components/dashboard/charts/CasesTrendChart";
+import { OutstandingIncidentsChart } from "@components/dashboard/charts/OutstandingIncidentsChart";
+
+interface ChartLayoutProps {
+  outstandingCases: {
+    low: number;
+    medium: number;
+    high: number;
+    critical: number;
+    catastrophic: number;
+    total: number;
+  };
+  activeCases: {
+    serviceRequests: number;
+    changeRequests: number;
+    total: number;
+  };
+  engagements: {
+    onboarding: number;
+    migration: number;
+    services: number;
+    improvements: number;
+    total: number;
+  };
+  isLoading?: boolean;
+  isErrorOutstanding?: boolean;
+  isErrorActiveCases?: boolean;
+  isErrorEngagements?: boolean;
+  excludeS0?: boolean;
+}
+
+/**
+ * ChartLayout component displays the three dashboard charts:
+ * outstanding support cases, outstanding operations, and outstanding engagements.
+ *
+ * @param {ChartLayoutProps} props - Component props
+ * @param {Object} props.outstandingCases - Severity counts for Outstanding Support Cases chart.
+ * @param {Object} props.activeCases - Counts for Outstanding Operations chart.
+ * @param {boolean} props.isLoading - Flag indicating if the data is loading.
+ * @returns {JSX.Element} The chart layout element.
+ */
+const ChartLayout = ({
+  outstandingCases,
+  activeCases,
+  isLoading,
+  isErrorOutstanding,
+  isErrorActiveCases,
+  isErrorEngagements,
+  excludeS0 = false,
+  engagements,
+}: ChartLayoutProps): JSX.Element => {
+  return (
+    <Grid container spacing={3} sx={{ mb: 3 }}>
+      {/* Outstanding Incidents */}
+      <Grid size={{ xs: 12, md: 4 }}>
+        <OutstandingIncidentsChart
+          data={outstandingCases}
+          isLoading={isLoading}
+          isError={isErrorOutstanding}
+          excludeS0={excludeS0}
+        />
+      </Grid>
+
+      {/* Active Cases */}
+      <Grid size={{ xs: 12, md: 4 }}>
+        <ActiveCasesChart
+          data={activeCases}
+          isLoading={isLoading}
+          isError={isErrorActiveCases}
+        />
+      </Grid>
+
+      {/* Cases Trend */}
+      <Grid size={{ xs: 12, md: 4 }}>
+        <CasesTrendChart
+          data={engagements}
+          isLoading={isLoading}
+          isError={isErrorEngagements}
+        />
+      </Grid>
+    </Grid>
+  );
+};
+
+export default ChartLayout;

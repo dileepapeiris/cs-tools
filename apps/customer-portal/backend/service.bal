@@ -4412,7 +4412,7 @@ isolated service / on new websocket:Listener(wsPort) {
         authorization:UserInfoPayload|error userInfo = authorization:getUserInfoFromRequest(req);
         if userInfo is error {
             log:printError("WebSocket upgrade rejected: authorization failed", userInfo);
-            return error websocket:UpgradeError("Unauthorized");
+            return error websocket:UpgradeError("WebSocket upgrade failed: invalid or missing authentication credentials");
         }
         return new WsProxyService(sessionId);
     }

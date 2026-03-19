@@ -127,7 +127,7 @@ export function useGetProjectChangeRequestStats(
       }
     },
     enabled,
-    staleTime: enabled ? 5 * 60 * 1000 : 0,
+    staleTime: 0,
     gcTime: enabled ? 10 * 60 * 1000 : 0,
     refetchOnMount: true,
     refetchOnWindowFocus: false,

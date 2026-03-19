@@ -308,7 +308,7 @@ export default function ChangeRequestsPage(): JSX.Element {
 
       {/* Stat cards */}
       <ChangeRequestsStatCards
-        isLoading={isStatsLoading}
+        isLoading={isStatsLoading || (!stats && !isStatsError)}
         isError={isStatsError}
         stats={stats}
       />

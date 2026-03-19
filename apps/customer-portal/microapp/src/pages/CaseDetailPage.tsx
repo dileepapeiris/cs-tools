@@ -35,7 +35,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useParams } from "react-router-dom";
 import { useProject } from "@context/project";
 import ms from "ms";
-import { stripHtmlTags } from "../utils/others";
+import { stripHtmlTags, useScrollControl } from "../utils/others";
 
 dayjs.extend(relativeTime);
 
@@ -111,6 +111,12 @@ export default function CaseDetailPage() {
       layout.setTitleOverride(undefined);
     };
   }, [data, overlineSlotVariant]);
+
+  const bottomRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [comments]);
 
   return (
     <>
@@ -231,6 +237,8 @@ export default function CaseDetailPage() {
         onSend={handleSend}
         loading={isSendingComment}
       />
+
+      <div ref={bottomRef} />
     </>
   );
 }

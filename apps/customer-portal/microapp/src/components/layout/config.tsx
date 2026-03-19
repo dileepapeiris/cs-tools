@@ -164,3 +164,10 @@ export const MAIN_LAYOUT_CONFIG: MainLayoutConfigType[] = [
     tabIndex: -1,
   },
 ];
+
+export const SCROLL_OVERRIDES: Array<{ path: string; position: "top" | "bottom" | number }> = [
+  { path: "/cases/:id", position: "bottom" },
+  { path: "/chats/:id", position: "bottom" },
+  { path: "/services/:id", position: "bottom" },
+  { path: "/changes/:id", position: "bottom" },
+];

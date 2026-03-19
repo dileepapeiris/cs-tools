@@ -78,6 +78,12 @@ export default function ServiceDetailPage() {
     };
   }, [data, overlineSlotVariant]);
 
+  const bottomRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [comments]);
+
   return (
     <>
       <Stack gap={2} mb={10}>
@@ -179,6 +185,8 @@ export default function ServiceDetailPage() {
         onSend={handleSend}
         loading={isSendingComment}
       />
+
+      <div ref={bottomRef} />
     </>
   );
 }

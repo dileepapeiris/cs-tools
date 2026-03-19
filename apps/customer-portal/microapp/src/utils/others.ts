@@ -14,7 +14,10 @@
 // specific language governing permissions and limitations
 // under the License.
 
+import { useEffect } from "react";
 import { STRING_OVERRIDES } from "../components/features/support/config";
+import { matchPath, useLocation } from "react-router-dom";
+import { SCROLL_OVERRIDES } from "../components/layout/config";
 
 export const stringAvatar = (name: string) => {
   if (!name) return "";
@@ -42,3 +45,22 @@ export const stripHtmlTags = (str: string): string => {
 export const overrideOrDefault = (s: string) => {
   return STRING_OVERRIDES[s] ?? s;
 };
+
+export function useScrollControl(position: "top" | "bottom" = "top", onRouteChange = true) {
+  const { pathname } = useLocation();
+
+  const scroll = () => {
+    const matched = SCROLL_OVERRIDES.find((o) => matchPath(o.path, pathname));
+    const pos = matched?.position ?? position;
+
+    if (pos === "top") window.scrollTo({ top: 0, behavior: "smooth" });
+    else if (pos === "bottom") window.scrollTo({ top: document.body.scrollHeight, behavior: "smooth" });
+    else window.scrollTo({ top: pos, behavior: "smooth" });
+  };
+
+  useEffect(() => {
+    if (onRouteChange) scroll();
+  }, [pathname, onRouteChange]);
+
+  return scroll;
+}

@@ -36,6 +36,7 @@ import ChangeDetailPage from "@pages/ChangeDetailPage";
 import EditUserPage from "@pages/EditUserPage";
 import { requestDeviceSafeAreaInsets } from "@components/microapp-bridge";
 import UpdateProfileSettingsPage from "./pages/UpdateProfileSettingsPage";
+import { useScrollControl } from "./utils/others";
 
 const App: React.FC = () => {
   useLayoutEffect(() => {
@@ -55,6 +56,7 @@ const App: React.FC = () => {
   return (
     <Router>
       <AppProvider>
+        <ScrollHandler />
         <Routes>
           <Route path="/select" element={<SelectProjectPage />} />
 
@@ -99,3 +101,8 @@ const App: React.FC = () => {
 };
 
 export default App;
+
+const ScrollHandler: React.FC = () => {
+  useScrollControl();
+  return null;
+};

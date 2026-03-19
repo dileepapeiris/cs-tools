@@ -44,8 +44,8 @@ function toMe(dto: MeDTO): Me {
 function toUser(dto: UserDTO): User {
   const roles: Role[] = [];
   if (dto.isCsAdmin) roles.push("Admin");
-  if (dto.isCsIntegrationUser) roles.push("System User");
-  if (dto.isSecurityContact) roles.push("Portal User");
+  if (dto.isSecurityContact) roles.push("System User");
+  else roles.push("Portal User");
 
   return {
     id: dto.id,

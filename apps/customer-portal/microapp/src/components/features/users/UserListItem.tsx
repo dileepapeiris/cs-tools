@@ -46,7 +46,7 @@ export function UserListItem({ firstName, lastName, email, roles }: User) {
               >
                 {`${firstName} ${lastName}`}
               </Typography>
-              {roles.length > 0 && <Chip size="small" label={capitalize(roles[0])} />}
+              {roles.length > 0 && roles[0] !== "Portal User" && <Chip size="small" label={capitalize(roles[0])} />}
             </Stack>
 
             <Stack direction="row" alignItems="center" gap={1}>

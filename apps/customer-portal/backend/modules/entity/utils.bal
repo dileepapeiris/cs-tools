@@ -83,23 +83,17 @@ public isolated function getAttachments(string idToken, string id, ReferenceType
 # + return - Error message if validation fails, nil otherwise
 public isolated function validateCallRequestUpdatePayload(CallRequestUpdatePayload payload) returns string? {
     int stateKey = payload.stateKey;
-
     string[]? utcTimes = payload.utcTimes;
     boolean hasUtcTimes = utcTimes !is () && utcTimes.length() > 0;
 
-    if stateKey == PENDING_ON_WSO2 {
-        if !hasUtcTimes {
-            return "At least one UTC time is required when the status is Pending on WSO2.";
-        }
-    }
-
-    if stateKey == PENDING_ON_WSO2 && (utcTimes is () || utcTimes.length() == 0) {
+    if stateKey == PENDING_ON_WSO2 && !hasUtcTimes {
         return "At least one UTC time is required when the status is Pending on WSO2.";
     } else if (stateKey == CUSTOMER_REJECTED || stateKey == CANCELED) && utcTimes !is () {
         return "UTC times should not be provided when the status is Customer Rejected or Canceled.";
-    } else {
-        return "Invalid state key. Allowed values are Pending on WSO2, Customer Rejected, or Canceled.";
+    } else if (stateKey != PENDING_ON_WSO2 && stateKey != CUSTOMER_REJECTED && stateKey != CANCELED) {
+        return "Provided state is invalid. Allowed values are Pending on WSO2, Customer Rejected, or Canceled.";
     }
+    return;
 }
 
 # Validate UTC times in the call request payloads.

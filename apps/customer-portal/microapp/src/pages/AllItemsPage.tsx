@@ -25,7 +25,7 @@ import { Skeleton, Stack, Typography } from "@wso2/oxygen-ui";
 import { useSearchParams } from "react-router-dom";
 import { useLayout } from "@context/layout";
 import { useLayoutEffect } from "react";
-import { useInfiniteQuery, useSuspenseQuery } from "@tanstack/react-query";
+import { useInfiniteQuery, useQuery, useSuspenseQuery } from "@tanstack/react-query";
 import { cases } from "@src/services/cases";
 import { useProject } from "@context/project";
 import { chats } from "@src/services/chats";
@@ -33,6 +33,8 @@ import { changeRequests } from "@src/services/changes";
 
 import { ITEM_DETAIL_PATHS } from "@pages/SupportPage";
 import { serviceRequests } from "../services/services";
+import type { GetCasesRequestDTO, GetChangeRequestsRquestDTO } from "../types";
+import type { GetChatsRequestDTO } from "../types/chat.dto";
 
 export default function AllItemsPage({ type }: { type: ItemCardProps["type"] }) {
   const [searchParams] = useSearchParams();
@@ -74,26 +76,38 @@ export function FilterAppBarSlot({ type }: { type: ItemCardProps["type"] }) {
 function ItemsListContent({ type, filter, search }: { type: ItemCardProps["type"]; filter: string; search: string }) {
   switch (type) {
     case "case":
-      return <CaseListContent filter={filter} />;
+      return <CaseListContent filter={filter} search={search} />;
     case "chat":
-      return <ChatListContent filter={filter} />;
+      return <ChatListContent filter={filter} search={search} />;
     case "service":
-      return <ServiceRequestsListContent filter={filter} />;
+      return <ServiceRequestsListContent filter={filter} search={search} />;
     case "change":
-      return <ChangeRequestsListContent filter={filter} />;
+      return <ChangeRequestsListContent filter={filter} search={search} />;
     default:
       return null;
   }
 }
 
-function CaseListContent({ filter }: { filter: string }) {
+function CaseListContent({ filter, search }: { filter: string; search: string }) {
   const { projectId } = useProject();
-  const query = useInfiniteQuery(
-    cases.paginated(projectId!, filter !== "all" ? { filters: { statusIds: [Number(filter)] } } : undefined),
-  );
-  const total = query.data?.pages[0].pagination.totalRecords;
 
-  useSubtitleOverride(total, total);
+  const filters: GetCasesRequestDTO["filters"] = {};
+
+  if (filter !== "all") {
+    filters.statusIds = [Number(filter)];
+  }
+
+  if (search) {
+    filters.searchQuery = search;
+  }
+
+  const totalQuery = useQuery(cases.all(projectId!));
+  const query = useInfiniteQuery(cases.paginated(projectId!, { filters }));
+
+  const total = totalQuery.data?.pagination.totalRecords;
+  const count = query.data?.pages[0].pagination.totalRecords;
+
+  useSubtitleOverride(count, total);
 
   return (
     <InfiniteScroll
@@ -119,14 +133,25 @@ function CaseListContent({ filter }: { filter: string }) {
   );
 }
 
-function ChatListContent({ filter }: { filter: string }) {
+function ChatListContent({ filter, search }: { filter: string; search: string }) {
   const { projectId } = useProject();
-  const query = useInfiniteQuery(
-    chats.paginated(projectId!, filter !== "all" ? { filters: { stateKeys: [Number(filter)] } } : undefined),
-  );
-  const total = query.data?.pages[0].pagination.totalRecords;
 
-  useSubtitleOverride(total, total);
+  const filters: GetChatsRequestDTO["filters"] = {};
+
+  if (filter !== "all") {
+    filters.stateKeys = [Number(filter)];
+  }
+
+  if (search) {
+    filters.searchQuery = search;
+  }
+  const totalQuery = useQuery(chats.all(projectId!));
+  const query = useInfiniteQuery(chats.paginated(projectId!, { filters }));
+
+  const total = totalQuery.data?.pagination.totalRecords;
+  const count = query.data?.pages[0].pagination.totalRecords;
+
+  useSubtitleOverride(count, total);
 
   return (
     <InfiniteScroll
@@ -152,14 +177,26 @@ function ChatListContent({ filter }: { filter: string }) {
   );
 }
 
-function ChangeRequestsListContent({ filter }: { filter: string }) {
+function ChangeRequestsListContent({ filter, search }: { filter: string; search: string }) {
   const { projectId } = useProject();
-  const query = useInfiniteQuery(
-    changeRequests.paginated(projectId!, filter !== "all" ? { filters: { stateKeys: [Number(filter)] } } : undefined),
-  );
-  const total = query.data?.pages[0].pagination.totalRecords;
 
-  useSubtitleOverride(total, total);
+  const filters: GetChangeRequestsRquestDTO["filters"] = {};
+
+  if (filter !== "all") {
+    filters.stateKeys = [Number(filter)];
+  }
+
+  if (search) {
+    filters.searchQuery = search;
+  }
+
+  const totalQuery = useQuery(changeRequests.all(projectId!));
+  const query = useInfiniteQuery(changeRequests.paginated(projectId!, { filters }));
+
+  const total = totalQuery.data?.pagination.totalRecords;
+  const count = query.data?.pages[0].pagination.totalRecords;
+
+  useSubtitleOverride(count, total);
 
   return (
     <InfiniteScroll
@@ -185,14 +222,26 @@ function ChangeRequestsListContent({ filter }: { filter: string }) {
   );
 }
 
-function ServiceRequestsListContent({ filter }: { filter: string }) {
+function ServiceRequestsListContent({ filter, search }: { filter: string; search: string }) {
   const { projectId } = useProject();
-  const query = useInfiniteQuery(
-    serviceRequests.paginated(projectId!, filter !== "all" ? { filters: { statusIds: [Number(filter)] } } : undefined),
-  );
-  const total = query.data?.pages[0].pagination.totalRecords;
 
-  useSubtitleOverride(total, total);
+  const filters: GetCasesRequestDTO["filters"] = {};
+
+  if (filter !== "all") {
+    filters.statusIds = [Number(filter)];
+  }
+
+  if (search) {
+    filters.searchQuery = search;
+  }
+
+  const totalQuery = useQuery(serviceRequests.all(projectId!));
+  const query = useInfiniteQuery(serviceRequests.paginated(projectId!, { filters }));
+
+  const total = totalQuery.data?.pagination.totalRecords;
+  const count = query.data?.pages[0].pagination.totalRecords;
+
+  useSubtitleOverride(count, total);
 
   return (
     <InfiniteScroll

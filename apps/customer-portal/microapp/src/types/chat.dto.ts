@@ -33,6 +33,7 @@ export interface ChatDTO {
 export interface GetChatsRequestDTO {
   filters?: {
     stateKeys?: number[];
+    searchQuery?: string;
   };
   pagination?: {
     limit?: number;

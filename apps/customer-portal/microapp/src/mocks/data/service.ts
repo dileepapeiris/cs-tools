@@ -27,31 +27,31 @@ export const MOCK_REQUIREMENTS = [
 export const MOCK_TIMELINE_DATA: Omit<ProgressTimelineEntryProps, "variant">[] = [
   {
     status: "completed",
-    title: "Request Submitted",
-    description: "Service request created and submitted",
-    timestamp: "Nov 18, 8:00 AM",
+    title: "New",
+    description: "Change request created",
+    fill: "green",
   },
   {
     status: "completed",
-    title: "Approval Received",
-    description: "Request approved by Manager - Jane Doe",
-    timestamp: "Nov 18, 9:30 AM",
+    title: "Assess",
+    description: "Technical assessment completed",
   },
   {
     status: "completed",
-    title: "Resource Allocation",
-    description: "Server resources provisioned",
-    timestamp: "Nov 18, 10:45 AM",
+    title: "authorize",
+    description: "internal authorization obtained",
   },
   {
     status: "active",
-    title: "Environment Setup",
-    description: "Installing and configuring API Manager",
-    timestamp: "Nov 18, 11:00 AM",
+    title: "Customer Approval",
+    description: "Customer approval received",
   },
-  // { status: "pending", title: "Configuration", description: "Applying policies and settings" },
-  // { status: "pending", title: "Testing & Validation", description: "Verify environment is working correctly" },
-  // { status: "pending", title: "Handoff", description: "Environment ready for development team" },
+  { status: "pending", title: "Scheduled", description: "Maintenance window scheduled" },
+  { status: "pending", title: "Implement", description: "Maintenance window scheduled" },
+  { status: "pending", title: "Review", description: "Maintenance window scheduled" },
+  { status: "pending", title: "Rollback", description: "Maintenance window scheduled" },
+  { status: "active", title: "Cancelled", description: "Maintenance window scheduled", end: true },
+  { status: "pending", title: "Closed", description: "Maintenance window scheduled" },
 ];
 
 export const MOCK_UPDATES = [

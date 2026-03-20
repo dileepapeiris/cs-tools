@@ -21,6 +21,8 @@ export interface ProgressTimelineEntryProps extends TimelineEntryBaseProps {
   title: string;
   description: string;
   status?: "completed" | "active" | "pending";
+  fill?: string;
+  end?: boolean;
 }
 
 export interface StepTimelineEntryProps extends TimelineEntryBaseProps {
@@ -43,14 +45,14 @@ export function TimelineEntry({ timestamp, last = false, ...props }: TimelineEnt
       case "progress":
         if (props.status === "completed")
           return (
-            <Box color="primary.contrastText" sx={{ fill: "primary.main" }}>
-              <CircleCheck size={pxToRem(24)} fill={theme.palette.primary.main} />
+            <Box color="primary.contrastText" sx={{ fill: props.fill ?? "primary.main" }}>
+              <CircleCheck size={pxToRem(24)} fill={props.fill ?? theme.palette.primary.main} />
             </Box>
           );
         if (props.status === "active")
           return (
-            <Box color="primary.contrastText" sx={{ fill: "primary.main" }}>
-              <CircleDot size={pxToRem(24)} fill={theme.palette.primary.main} />
+            <Box color="primary.contrastText" sx={{ fill: props.fill ?? "primary.main" }}>
+              <CircleDot size={pxToRem(24)} fill={props.fill ?? theme.palette.primary.main} />
             </Box>
           );
         return (
@@ -95,7 +97,9 @@ export function TimelineEntry({ timestamp, last = false, ...props }: TimelineEnt
           <TimelineConnector
             sx={{
               bgcolor:
-                progress && props.status !== "pending" && props.status !== undefined ? "primary.main" : undefined,
+                progress && props.status !== "pending" && !(props.end ?? false) && props.status !== undefined
+                  ? "primary.main"
+                  : undefined,
             }}
           />
         )}
@@ -177,6 +181,30 @@ export function ActivityTimelineEntrySkeleton({ last = false }: { last?: boolean
           <Typography variant="subtitle2" sx={{ minWidth: pxToRem(60) }}>
             <Skeleton variant="text" width="100%" height={20} />
           </Typography>
+        </Stack>
+      </TimelineContent>
+    </TimelineItem>
+  );
+}
+
+export function ProgressTimelineEntrySkeleton({ last = false }: { last?: boolean }) {
+  return (
+    <TimelineItem sx={{ minHeight: "auto" }}>
+      <TimelineSeparator>
+        <Box sx={{ py: 0.5 }}>
+          <Skeleton variant="circular" width={24} height={24} animation="wave" />
+        </Box>
+
+        {!last && <TimelineConnector sx={{ width: 2, bgcolor: "action.hover" }} />}
+      </TimelineSeparator>
+
+      <TimelineContent sx={{ p: 0, pb: last ? 0 : 3 }} ml={1.5}>
+        <Stack gap={1} alignItems="flex-start" sx={{ width: "100%" }}>
+          <Stack direction="column" sx={{ width: "100%" }}>
+            <Skeleton variant="text" width="40%" height={24} />
+
+            <Skeleton variant="text" width="85%" height={20} />
+          </Stack>
         </Stack>
       </TimelineContent>
     </TimelineItem>

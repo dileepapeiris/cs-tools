@@ -1,19 +1,33 @@
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
-import { Chip, Grid, Skeleton, Stack, Typography } from "@wso2/oxygen-ui";
-import { InfoField, OverlineSlot, StakeholderItem, StakeholderItemSkeleton } from "@components/features/detail";
+import { Chip, Grid, Skeleton, Stack, stepClasses, Typography } from "@wso2/oxygen-ui";
+import {
+  ActivityTimelineEntrySkeleton,
+  InfoField,
+  OverlineSlot,
+  ProgressTimelineEntrySkeleton,
+  StakeholderItem,
+  StakeholderItemSkeleton,
+  TimelineEntry,
+  type ProgressTimelineEntryProps,
+} from "@components/features/detail";
 import { PriorityChip, StatusChip } from "@components/features/support";
 import { User, Users } from "@wso2/oxygen-ui-icons-react";
 import { SectionCard } from "@components/shared";
 import { useLayout } from "@context/layout";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useSuspenseQuery } from "@tanstack/react-query";
 import { changeRequests } from "@src/services/changes";
 import { useParams } from "react-router-dom";
 import { stripHtmlTags } from "@utils/others";
+import { Timeline } from "../components/ui";
+import { useProject } from "../context/project";
+import { cases } from "../services/cases";
 
 export default function ChangeDetailPage() {
   const layout = useLayout();
   const { id } = useParams();
+  const { projectId } = useProject();
   const { data, isLoading } = useQuery(changeRequests.get(id!));
+  const { data: filters } = useSuspenseQuery(cases.filters(projectId!));
 
   const ref = useRef<HTMLSpanElement>(null);
   const [overlineSlotVariant, setOverlineSlotVariant] = useState<"normal" | "shrunk">("normal");
@@ -48,6 +62,9 @@ export default function ChangeDetailPage() {
       layout.setTitleOverride(undefined);
     };
   }, [data, overlineSlotVariant]);
+
+  const status = filters.changeRequestStates.find((type) => type.id === data?.statusId)?.label;
+  const statusIndex = TIMELINE_META.findIndex((entry) => entry.title === status);
 
   return (
     <>
@@ -162,6 +179,40 @@ export default function ChangeDetailPage() {
             </Grid>
           </Grid>
         </SectionCard>
+        <SectionCard title="Progress Timeline">
+          {data ? (
+            <Timeline>
+              {TIMELINE_META.map((step, index) => (
+                <TimelineEntry
+                  key={index}
+                  variant="progress"
+                  status={
+                    index >= TIMELINE_META.length - 3
+                      ? index === statusIndex
+                        ? "active"
+                        : "pending"
+                      : index === statusIndex
+                        ? "active"
+                        : index < statusIndex
+                          ? "completed"
+                          : "pending"
+                  }
+                  title={step.title}
+                  description={step.description}
+                  fill={index === 3 ? (data.hasCustomerApproved ? "green" : "red") : undefined}
+                  end={index > TIMELINE_META.length - 4}
+                  last={index === TIMELINE_META.length - 1}
+                />
+              ))}
+            </Timeline>
+          ) : (
+            <Timeline>
+              {TIMELINE_META.map((_, index) => (
+                <ProgressTimelineEntrySkeleton key={index} last={index === TIMELINE_META.length - 1} />
+              ))}
+            </Timeline>
+          )}
+        </SectionCard>
         <SectionCard title="Stakeholders">
           <Stack gap={1.5}>
             {data ? (
@@ -183,3 +234,50 @@ export default function ChangeDetailPage() {
     </>
   );
 }
+
+const TIMELINE_META: Omit<ProgressTimelineEntryProps, "variant">[] = [
+  {
+    title: "New",
+    description: "Change request created",
+  },
+  {
+    title: "Assess",
+    description: "Technical assessment completed",
+  },
+  {
+    title: "Authorize",
+    description: "Internal authorization obtained",
+  },
+  {
+    title: "Customer Approval",
+    description: "Customer approval received",
+  },
+  {
+    title: "Scheduled",
+    description: "Maintenance window scheduled",
+  },
+  {
+    title: "Implement",
+    description: "Change implementation",
+  },
+  {
+    title: "Review",
+    description: "Internal review",
+  },
+  {
+    title: "Customer Review",
+    description: "Customer validation",
+  },
+  {
+    title: "Rollback",
+    description: "Change rollback if needed",
+  },
+  {
+    title: "Closed",
+    description: "Change request completed",
+  },
+  {
+    title: "Canceled",
+    description: "Change request canceled",
+  },
+];

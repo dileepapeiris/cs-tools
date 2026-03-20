@@ -35,6 +35,7 @@ const OUTSTANDING_STATUS_IDS = [1, 10, 18, 1003, 1006] as const;
 
 const isClosedStatus = (label?: string): boolean =>
   label?.trim().toLowerCase() === "closed";
+
 interface CasesTableProps {
   projectId: string;
   excludeS0?: boolean;

@@ -22,7 +22,7 @@ import { useNavigate } from "react-router-dom";
 import { useProject } from "@context/project";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { projects } from "@src/services/projects";
-import { ErrorBoundary } from "@components/core";
+import { ErrorBoundary, ExitButton } from "@components/core";
 
 export default function SelectProjectPage() {
   return (
@@ -35,6 +35,9 @@ export default function SelectProjectPage() {
           alignItems="center"
         >
           <CircularProgress color="primary" />
+          <Stack direction="row" justifyContent="space-between" alignItems="center" mb={0.5}>
+            <ExitButton />
+          </Stack>
         </Stack>
       }
     >
@@ -47,6 +50,9 @@ export default function SelectProjectPage() {
             alignItems="center"
           >
             <CircularProgress color="primary" />
+            <Stack direction="row" justifyContent="space-between" alignItems="center" mb={0.5}>
+              <ExitButton />
+            </Stack>
           </Stack>
         }
       >
@@ -78,6 +84,9 @@ function SelectProjectContent() {
 
   return (
     <Box minHeight="100vh" px={2.5} py={5} mt="var(--safe-top)">
+      <Stack direction="row" justifyContent="space-between" alignItems="center" mb={0.5}>
+        <ExitButton />
+      </Stack>
       <Stack direction="row" justifyContent="center" alignItems="center" gap={1}>
         <Folder size={24} color={theme.palette.primary.main} />
         <Typography variant="h4" fontWeight="bold">

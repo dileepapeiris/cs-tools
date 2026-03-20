@@ -157,7 +157,7 @@ function BackButton({ onClick }: { onClick: () => void }) {
   );
 }
 
-function ExitButton() {
+export function ExitButton() {
   return (
     <IconButton
       disableRipple

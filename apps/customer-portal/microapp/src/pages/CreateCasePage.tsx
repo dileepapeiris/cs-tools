@@ -27,6 +27,7 @@ import type { CaseClassificationResponseDTO } from "@src/types";
 import { useEffect, useMemo, useState } from "react";
 import * as Yup from "yup";
 import { overrideOrDefault } from "../utils/others";
+import { useNotify } from "../context/snackbar";
 
 type CreateCaseFormValues = {
   project: string;
@@ -45,6 +46,7 @@ export default function CreateCasePage() {
   const classifications: CaseClassificationResponseDTO = location.state?.classifications;
   const queryClient = useQueryClient();
   const { projectId } = useProject();
+  const notify = useNotify();
 
   const [classified, setClassified] = useState<Set<keyof CreateCaseFormValues>>(new Set());
 
@@ -118,6 +120,9 @@ export default function CreateCasePage() {
       setTimeout(() => {
         navigate(`/cases/${id}`);
       }, 500);
+    },
+    onError: () => {
+      notify.error("Failed to create case. Please try again.");
     },
   });
 

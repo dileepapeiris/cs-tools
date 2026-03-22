@@ -1,20 +1,4 @@
-// Copyright (c) 2026 WSO2 LLC. (https://www.wso2.com).
-//
-// WSO2 LLC. licenses this file to you under the Apache License,
-// Version 2.0 (the "License"); you may not use this file except
-// in compliance with the License.
-// You may obtain a copy of the License at
-//
-// http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing,
-// software distributed under the License is distributed on an
-// "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
-// KIND, either express or implied.  See the License for the
-// specific language governing permissions and limitations
-// under the License.
-
-import { useState } from "react";
+import { useLayoutEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   AppBar as MuiAppBar,
@@ -39,6 +23,7 @@ import { ArrowLeft, ChevronDown, Folder, Grip } from "@wso2/oxygen-ui-icons-reac
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { projects } from "@src/services/projects";
 import { goToMyAppsScreen } from "../microapp-bridge";
+import { useThemeMode } from "@root/src/context/theme";
 
 export function AppBar() {
   const theme = useTheme();
@@ -52,6 +37,19 @@ export function AppBar() {
   const [projectSelectorAnchor, setProjectSelectorAnchor] = useState<HTMLButtonElement | null>(null);
   const isProjectSelectorOpen = Boolean(projectSelectorAnchor);
 
+  const ref = useRef<HTMLDivElement>(null);
+
+  useLayoutEffect(() => {
+    if (!ref.current) return;
+
+    const observer = new ResizeObserver(([entry]) => {
+      document.documentElement.style.setProperty("--app-bar-height", `${entry.contentRect.height}px`);
+    });
+
+    observer.observe(ref.current);
+    return () => observer.disconnect();
+  }, []);
+
   const navigateBack = () => navigate(-1);
 
   const openProjectSelector = (event: React.MouseEvent<HTMLButtonElement>) => {
@@ -63,6 +61,8 @@ export function AppBar() {
     setProjectSelectorAnchor(null);
   };
 
+  const mode = useThemeMode();
+
   if (!project) return null;
 
   const statusChipColorVariant = project.status ? PROJECT_STATUS_META[project.status].color : "default";
@@ -70,10 +70,11 @@ export function AppBar() {
   return (
     <>
       <MuiAppBar
+        ref={ref}
         position="sticky"
         elevation={0}
         sx={{
-          backgroundColor: "background.paper",
+          backgroundColor: `${mode === "light" ? "white" : "black"} !important`,
           display: "flex",
           flexDirection: "column",
           gap: 1,

@@ -65,12 +65,22 @@ export default function ProfilePage() {
         />
         <SettingListItem
           name="Phone"
-          value={data ? "+1 (555) 123-4567" : <Skeleton variant="text" width="100%" height={25} />}
+          value={data ? "Not Configured" : <Skeleton variant="text" width="100%" height={25} />}
           icon={Phone}
         />
         <SettingListItem
           name="Timezone"
-          value={data?.timezone ?? <Skeleton variant="text" width="100%" height={25} />}
+          value={
+            data ? (
+              data.timezone === "--None--" ? (
+                "Not Configured"
+              ) : (
+                data.timezone
+              )
+            ) : (
+              <Skeleton variant="text" width="100%" height={25} />
+            )
+          }
           icon={Clock4}
         />
       </SectionCard>

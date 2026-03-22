@@ -25,7 +25,7 @@ import { useQuery, useSuspenseQuery } from "@tanstack/react-query";
 import { cases } from "@src/services/cases";
 import { projects } from "@src/services/projects";
 import { useProject } from "@context/project";
-import { ErrorBoundary } from "@components/core";
+import { ErrorBoundary, Fab } from "@components/core";
 import { chats } from "../services/chats";
 import { changeRequests } from "../services/changes";
 import { serviceRequests } from "../services/services";
@@ -126,6 +126,9 @@ export default function SupportPage() {
           <ItemsListContent tab={tab} />
         </ItemListView>
       </Card>
+
+      {/* Floating Action Button */}
+      <Fab />
     </>
   );
 }

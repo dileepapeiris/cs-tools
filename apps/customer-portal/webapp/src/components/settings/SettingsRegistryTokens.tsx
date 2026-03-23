@@ -19,7 +19,6 @@ import {
   Alert,
   Box,
   Button,
-  Card,
   Chip,
   Grid,
   IconButton,
@@ -30,6 +29,7 @@ import {
   MenuItem,
   Paper,
   Skeleton,
+  StatCard,
   Table,
   TableBody,
   TableCell,
@@ -38,7 +38,6 @@ import {
   TableRow,
   TextField,
   Typography,
-  alpha,
   useTheme,
 } from "@wso2/oxygen-ui";
 import {
@@ -222,27 +221,19 @@ export default function SettingsRegistryTokens({
       value: stats.total,
       label: "Total Tokens",
       icon: KeyRound,
-      color: theme.palette.warning.main,
-      bgColor: alpha(theme.palette.warning.main, 0.08),
-      borderColor: alpha(theme.palette.warning.main, 0.25),
+      iconColor: theme.palette.warning.main,
     },
     {
       value: stats.active,
       label: "Active Tokens",
-      subLabel: `${stats.revokedOrExpired} revoked/expired`,
       icon: CheckCircle,
-      color: theme.palette.success.main,
-      bgColor: alpha(theme.palette.success.main, 0.08),
-      borderColor: alpha(theme.palette.success.main, 0.25),
+      iconColor: theme.palette.success.main,
     },
     {
       value: stats.expiringSoon,
       label: "Expiring Soon",
-      subLabel: "Next 7 days",
       icon: AlertCircle,
-      color: theme.palette.error.main,
-      bgColor: alpha(theme.palette.error.main, 0.08),
-      borderColor: alpha(theme.palette.error.main, 0.25),
+      iconColor: theme.palette.error.main,
     },
   ];
 
@@ -280,73 +271,21 @@ export default function SettingsRegistryTokens({
           const Icon = card.icon;
           return (
             <Grid key={card.label} size={{ xs: 12, sm: 4 }}>
-              <Card
-                sx={{
-                  p: 2,
-                  height: "100%",
-                  border: "1px solid",
-                  borderColor: card.borderColor,
-                  bgcolor: card.bgColor,
-                }}
-              >
-                <Box
-                  sx={{
-                    display: "flex",
-                    alignItems: "center",
-                    gap: 1.5,
-                  }}
-                >
-                  <Box
-                    sx={{
-                      width: 44,
-                      height: 44,
-                      borderRadius: "50%",
-                      bgcolor: alpha(card.color, 0.15),
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      color: card.color,
-                    }}
-                  >
-                    {isLoading ? (
-                      <Skeleton variant="circular" width={22} height={22} />
-                    ) : (
-                      <Icon size={22} />
-                    )}
-                  </Box>
-                  <Box>
-                    <Typography variant="h4" sx={{ lineHeight: 1.2 }}>
-                      {isLoading ? (
-                        <Skeleton variant="text" width={28} height={32} />
-                      ) : error ? (
-                        DASH
-                      ) : (
-                        card.value
-                      )}
-                    </Typography>
-                    <Typography variant="body2" color="text.secondary">
-                      {isLoading ? (
-                        <Skeleton variant="text" width={80} height={16} />
-                      ) : (
-                        card.label
-                      )}
-                    </Typography>
-                    {card.subLabel && (
-                      <Typography
-                        variant="caption"
-                        color="text.secondary"
-                        sx={{ display: "block" }}
-                      >
-                        {isLoading ? (
-                          <Skeleton variant="text" width={100} height={14} />
-                        ) : (
-                          card.subLabel
-                        )}
-                      </Typography>
-                    )}
-                  </Box>
-                </Box>
-              </Card>
+              {isLoading ? (
+                <Skeleton variant="rectangular" height={100} sx={{ borderRadius: 1 }} />
+              ) : error ? (
+                <StatCard
+                  label={card.label}
+                  value={DASH}
+                  icon={<Icon color={card.iconColor} />}
+                />
+              ) : (
+                <StatCard
+                  label={card.label}
+                  value={card.value.toString()}
+                  icon={<Icon color={card.iconColor} />}
+                />
+              )}
             </Grid>
           );
         })}

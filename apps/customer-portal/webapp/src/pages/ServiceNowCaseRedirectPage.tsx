@@ -42,6 +42,11 @@ export default function ServiceNowCaseRedirectPage(): JSX.Element {
   const { data, isLoading, isError } = useGetCaseDetails(undefined, caseId);
 
   useEffect(() => {
+    if (!caseId) {
+      showError("No case ID provided in the URL.");
+      void navigate("/", { replace: true });
+      return;
+    }
     if (isLoading) {
       showLoader();
       return () => hideLoader();

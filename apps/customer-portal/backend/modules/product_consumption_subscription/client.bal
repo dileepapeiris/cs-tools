@@ -16,7 +16,7 @@
 import ballerina/http;
 
 configurable string productConsumptionBaseUrl = ?;
-configurable ClientAuthConfig clientCredentialsOauth2Config = ?;
+configurable ClientCredentialsOauth2Config clientCredentialsOauth2Config = ?;
 
 @display {
     label: "Product Consumption Subscription",

@@ -49,9 +49,7 @@ interface CasesListProps {
   rowsPerPage: number;
   onPageChange: (event: unknown, newPage: number) => void;
   onRowsPerPageChange: (event: ChangeEvent<HTMLInputElement>) => void;
-  /** When provided, case title is clickable and navigates to case details. */
   onCaseClick?: (caseItem: CaseListItem) => void;
-  /** When false, hide pagination controls (e.g. when showing all). */
   showPagination?: boolean;
 }
 
@@ -103,7 +101,7 @@ const CasesList = ({
             ) : data?.cases.length === 0 ? (
               <TableRow>
                 <TableCell colSpan={5} align="center">
-                  No cases found.
+                  No cases found , Try adjusting your filters or search query.
                 </TableCell>
               </TableRow>
             ) : (

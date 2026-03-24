@@ -4528,25 +4528,31 @@ isolated service / on new websocket:Listener(wsPort) {
     # Upgrade an HTTP request to WebSocket for a given chat session.
     #
     # + req - The HTTP request containing JWT headers for authentication
-    # + sessionId - Conversation/session ID to route to the upstream Python agent
+    # + sessionId - Account/project ID passed as a query parameter
     # + return - WebSocket service or upgrade error
-    isolated resource function get [string sessionId](http:Request req) returns websocket:Service|websocket:UpgradeError {
+    isolated resource function get ws(http:Request req, string sessionId) returns websocket:Service|websocket:UpgradeError {
         authorization:UserInfoPayload|error userInfo = authorization:getUserInfoFromRequest(req);
         if userInfo is error {
             return error websocket:UpgradeError(ERR_MSG_USER_INFO_HEADER_NOT_FOUND);
         }
-        return new WsProxyService(sessionId);
+        log:printInfo(string `WebSocket upgrade for account/project: ${sessionId}`);
+        return new WsProxyService(sessionId, userInfo);
     }
 }
 
 # AI chat agent related service functions that interact with the upstream AI chat agent through the client module.
 isolated service class WsProxyService {
     *websocket:Service;
-    private final string sessionId;
+    private final string projectId;
+    private final string idToken;
+    private final string userEmail;
+    private string? conversationId = ();
     private boolean streaming = false;
 
-    isolated function init(string sessionId) {
-        self.sessionId = sessionId;
+    isolated function init(string projectId, authorization:UserInfoPayload userInfo) {
+        self.projectId = projectId;
+        self.idToken = userInfo.idToken;
+        self.userEmail = userInfo.email;
     }
 
     # Handles incoming WebSocket text messages from the browser client.
@@ -4578,16 +4584,125 @@ isolated service class WsProxyService {
             check caller->writeTextMessage(busyPayload.toJsonString());
             return;
         }
-        error? err = ai_chat_agent:streamChat(self.sessionId, data, caller);
+
+        log:printDebug(string `Received message for project: ${self.projectId}, payload: ${data}`);
+        string? existingConversationId;
+        lock {
+            existingConversationId = self.conversationId;
+        }
+        if existingConversationId is () {
+
+            string clientConvId = (parsed is map<json> ? (parsed["conversationId"] ?: "").toString() : "");
+            log:printDebug(string `Parsed conversationId from payload: '${clientConvId}'`);
+            if clientConvId.length() > 0 {
+                lock {
+                    self.conversationId = clientConvId;
+                }
+                log:printInfo(string `Resuming existing conversation: ${clientConvId} for project: ${self.projectId}`);
+            } else {
+                string userMessage = (parsed is map<json> ? (parsed["message"] ?: "").toString() : data);
+                log:printInfo(string `Creating new conversation for project: ${self.projectId}`);
+                entity:ConversationCreateResponse|error conversationResponse = entity:createConversation(
+                        self.idToken,
+                        {
+                            projectId: self.projectId,
+                            initialMessage: userMessage
+                        });
+                if conversationResponse is error {
+                    lock {
+                        self.streaming = false;
+                    }
+                    log:printError("Failed to create a new conversation.", conversationResponse);
+                    json errorPayload = {"type": "error", "message": "Failed to create a new conversation."};
+                    check caller->writeTextMessage(errorPayload.toJsonString());
+                    return;
+                }
+                string convId = conversationResponse.conversation.id;
+                lock {
+                    self.conversationId = convId;
+                }
+                log:printDebug(string `Created conversation with ID: ${convId} for project: ${self.projectId}`);
+                json createdEvent = {"type": "conversation_created", "conversationId": convId};
+                check caller->writeTextMessage(createdEvent.toJsonString());
+            }
+        }
+
+        string conversationId;
+        lock {
+            conversationId = self.conversationId ?: "";
+        }
+        string sessionId = string `${self.projectId}:${conversationId}`;
+        string userMessage = (parsed is map<json> ? (parsed["message"] ?: "").toString() : data);
+        string enrichedPayload;
+
+        if parsed is map<json> {
+            parsed["conversationId"] = conversationId;
+            enrichedPayload = parsed.toJsonString();
+        } else {
+            enrichedPayload = data;
+        }
+
+        log:printInfo(string `Streaming chat for session: ${sessionId}`);
+        json|error result = ai_chat_agent:streamChat(sessionId, enrichedPayload, caller);
         lock {
             self.streaming = false;
         }
-        if err is error {
-            log:printError("WebSocket proxy stream error", err);
-            json errorPayload = {"type": "error", "message": err.message()};
+        if result is error {
+            log:printError("WebSocket proxy stream error", result);
+            json errorPayload = {"type": "error", "message": result.message()};
             error? writeErr = caller->writeTextMessage(errorPayload.toJsonString());
             if writeErr is error {
                 log:printError("Failed to send error to caller (client disconnected)", writeErr);
+            }
+            return;
+        }
+        if result is map<json> {
+            entity:CommentCreateResponse|error userCommentResponse = entity:createComment(self.idToken,
+                    {
+                        referenceId: conversationId,
+                        referenceType: entity:CONVERSATION,
+                        content: userMessage,
+                        'type: entity:COMMENTS,
+                        createdBy: self.userEmail
+                    });
+            if userCommentResponse is error {
+                log:printError("Failed to save user message as comment.", userCommentResponse);
+            } else {
+                log:printDebug(string `Saved user message as comment for conversation ID: ${conversationId}`);
+            }
+
+            string responseMessage = (result["message"] ?: "").toString();
+            if responseMessage.length() > 0 {
+                entity:CommentCreateResponse|error agentCommentResponse = entity:createComment(self.idToken,
+                        {
+                            referenceId: conversationId,
+                            referenceType: entity:CONVERSATION,
+                            content: responseMessage,
+                            'type: entity:COMMENTS,
+                            createdBy: entity:CHAT_SENT_AGENT
+                        });
+                if agentCommentResponse is error {
+                    log:printError("Failed to save chat response as comment.", agentCommentResponse);
+                } else {
+                    log:printDebug(string `Saved AI agent response as comment for conversation ID: ${
+                            conversationId}`);
+                }
+            }
+
+            // Update conversation state if issue is resolved
+            json resolvedVal = result["resolved"] ?: ();
+            if resolvedVal is boolean && resolvedVal {
+                log:printInfo(string `Issue resolved for conversation ID: ${conversationId}, updating state`);
+                entity:ConversationUpdateResponse|error conversationUpdateResponse =
+                        entity:updateConversation(self.idToken, conversationId,
+                        {stateKey: entity:RESOLVED});
+                if conversationUpdateResponse is error {
+                    string customError = "Failed to update conversation state to resolved.";
+                    log:printError(customError, conversationUpdateResponse);
+                } else {
+                    log:printDebug(string `Updated conversation state to resolved for conversation ID: ${
+                            conversationId}`);
+                }
             }
         }
     }

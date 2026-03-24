@@ -462,7 +462,7 @@ public isolated function mapProductVersionsResponse(entity:ProductVersionsRespon
             releaseDate: version.releaseDate,
             supportEolDate: version.supportEolDate,
             earliestPossibleSupportEolDate: version.earliestPossibleSupportEolDate,
-            product: product != () ? {id: product.id, label: product.name} : ()
+            product: product != () ? {id: product.id, label: product.name, abbreviation: product?.abbreviation} : ()
         };
     return {versions, totalRecords: response.totalRecords, 'limit: response.'limit, offset: response.offset};
 }

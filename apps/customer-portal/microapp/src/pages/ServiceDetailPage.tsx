@@ -31,7 +31,7 @@ export default function ServiceDetailPage() {
   const mutation = useMutation({
     ...cases.createComment(id!),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["comments", id] });
+      queryClient.invalidateQueries({ queryKey: cases.comments(id!).queryKey });
       setComment("");
     },
   });

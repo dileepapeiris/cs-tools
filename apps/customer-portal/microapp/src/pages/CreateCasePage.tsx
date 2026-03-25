@@ -183,8 +183,12 @@ export default function CreateCasePage() {
                 formik.handleChange(e);
                 formik.setFieldValue("deployment", "");
                 formik.setFieldValue("product", "");
-                classified.delete("deployment");
-                classified.delete("product");
+                setClassified((prev) => {
+                  const next = new Set(prev);
+                  next.delete("deployment");
+                  next.delete("product");
+                  return next;
+                });
               }}
               startAdornment={
                 <InputAdornment position="start">
@@ -203,8 +207,12 @@ export default function CreateCasePage() {
               onChange={(e) => {
                 formik.handleChange(e);
                 formik.setFieldValue("product", "");
-                classified.delete(e.target.name as keyof CreateCaseFormValues);
-                classified.delete("product");
+                setClassified((prev) => {
+                  const next = new Set(prev);
+                  next.delete(e.target.name as keyof CreateCaseFormValues);
+                  next.delete("product");
+                  return next;
+                });
               }}
               disabled={!formik.values.project || deploymentQuery.isLoading}
               error={formik.touched.deployment && Boolean(formik.errors.deployment)}
@@ -220,7 +228,11 @@ export default function CreateCasePage() {
               value={formik.values.product}
               onChange={(e) => {
                 formik.handleChange(e);
-                classified.delete(e.target.name as keyof CreateCaseFormValues);
+                setClassified((prev) => {
+                  const next = new Set(prev);
+                  next.delete(e.target.name as keyof CreateCaseFormValues);
+                  return next;
+                });
               }}
               disabled={!formik.values.deployment || productQuery.isLoading}
               error={formik.values.deployment ? formik.touched.product && Boolean(formik.errors.product) : false}
@@ -246,7 +258,11 @@ export default function CreateCasePage() {
               value={formik.values.title}
               onChange={(e) => {
                 formik.handleChange(e);
-                classified.delete(e.target.name as keyof CreateCaseFormValues);
+                setClassified((prev) => {
+                  const next = new Set(prev);
+                  next.delete(e.target.name as keyof CreateCaseFormValues);
+                  return next;
+                });
               }}
               error={formik.touched.title && Boolean(formik.errors.title)}
               helperText={formik.touched.title && formik.errors.title ? formik.errors.title : undefined}
@@ -261,7 +277,11 @@ export default function CreateCasePage() {
               value={formik.values.description}
               onChange={(e) => {
                 formik.handleChange(e);
-                classified.delete(e.target.name as keyof CreateCaseFormValues);
+                setClassified((prev) => {
+                  const next = new Set(prev);
+                  next.delete(e.target.name as keyof CreateCaseFormValues);
+                  return next;
+                });
               }}
               error={formik.touched.description && Boolean(formik.errors.description)}
               helperText={
@@ -278,7 +298,11 @@ export default function CreateCasePage() {
               value={formik.values.type}
               onChange={(e) => {
                 formik.handleChange(e);
-                classified.delete(e.target.name as keyof CreateCaseFormValues);
+                setClassified((prev) => {
+                  const next = new Set(prev);
+                  next.delete(e.target.name as keyof CreateCaseFormValues);
+                  return next;
+                });
               }}
               error={formik.touched.type && Boolean(formik.errors.type)}
               helperText={formik.touched.type && formik.errors.type ? formik.errors.type : undefined}
@@ -293,7 +317,11 @@ export default function CreateCasePage() {
               value={formik.values.severity}
               onChange={(e) => {
                 formik.handleChange(e);
-                classified.delete(e.target.name as keyof CreateCaseFormValues);
+                setClassified((prev) => {
+                  const next = new Set(prev);
+                  next.delete(e.target.name as keyof CreateCaseFormValues);
+                  return next;
+                });
               }}
               error={formik.touched.severity && Boolean(formik.errors.severity)}
               helperText={formik.touched.severity && formik.errors.severity ? formik.errors.severity : undefined}

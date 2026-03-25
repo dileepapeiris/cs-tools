@@ -30,8 +30,9 @@ const editContact = async (
   await apiClient.patch(USER_ACTIONS_ENDPOINT(id, email), body);
 };
 
-const editMe = async (body: Partial<EditMeDTO>): Promise<void> => {
-  await apiClient.patch(USERS_ME_ENDPOINT, body);
+const editMe = async (body: Partial<EditMeDTO>): Promise<Partial<EditMeDTO>> => {
+  const response = await apiClient.patch(USERS_ME_ENDPOINT, body);
+  return response.data;
 };
 
 /* Mappers */
@@ -41,6 +42,7 @@ function toMe(dto: MeDTO): Me {
     email: dto.email,
     firstName: dto.firstName,
     lastName: dto.lastName,
+    phoneNumber: dto.phoneNumber ?? undefined,
     timezone: dto.timeZone,
   };
 }

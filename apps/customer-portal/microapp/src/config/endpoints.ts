@@ -46,3 +46,4 @@ export const CHAT_DETAILS_ENDPOINT = (id: string) => `/conversations/${id}`;
 export const CHANGE_REQUEST_DETAILS_ENDPOINT = (id: string) => `/change-requests/${id}`;
 export const CHANGE_REQUEST_STATS_ENDPOINT = (id: string) => `/projects/${id}/stats/change-requests`;
 export const USER_ACTIONS_ENDPOINT = (id: string, email: string) => `/projects/${id}/contacts/${email}`;
+export const METADATA_ENDPOINT = "/metadata";

@@ -15,13 +15,12 @@ import {
 import { Link, useNavigate } from "react-router-dom";
 import { SectionCard } from "@components/shared";
 import { Clock, Phone } from "@wso2/oxygen-ui-icons-react";
-import { useMutation, useSuspenseQuery } from "@tanstack/react-query";
-import { cases } from "../services/cases";
-import { useProject } from "../context/project";
+import { useMutation, useQueryClient, useSuspenseQueries } from "@tanstack/react-query";
 import { users } from "../services/users";
 import { useFormik } from "formik";
 import { useNotify } from "../context/snackbar";
 import * as Yup from "yup";
+import { metadata } from "../services/metadata";
 
 type UpdateProfileFormValues = {
   phoneNumber: string;
@@ -31,16 +30,26 @@ type UpdateProfileFormValues = {
 export default function UpdateProfileSettingsPage() {
   const notify = useNotify();
   const navigate = useNavigate();
-  const { projectId } = useProject();
-  const { data: filters } = useSuspenseQuery(cases.filters(projectId!));
-  const { data: me } = useSuspenseQuery(users.me());
+  const queryClient = useQueryClient();
+
+  const [{ data: me }, { data: meta }] = useSuspenseQueries({
+    queries: [users.me(), metadata.get()],
+  });
 
   const mutation = useMutation({
     ...users.editMe(),
-    onSuccess: () => {
-      setTimeout(() => {
-        navigate("/profile");
-      }, 500);
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: users.me().queryKey });
+
+      const updatedMe = queryClient.getQueryData(users.me().queryKey);
+
+      const normalizedTimezone = updatedMe?.timezone === "--None--" ? "" : (updatedMe?.timezone ?? "");
+      const normalizedPhone = updatedMe?.phoneNumber ?? "";
+
+      const isUpdated = normalizedPhone === formik.values.phoneNumber && normalizedTimezone === formik.values.timeZone;
+
+      if (isUpdated) navigate("/profile");
+      else notify.error("Failed to update profile. Please try again.");
     },
     onError: () => {
       notify.error("Failed to update profile. Please try again.");
@@ -49,14 +58,18 @@ export default function UpdateProfileSettingsPage() {
 
   const formik = useFormik<UpdateProfileFormValues>({
     initialValues: {
-      phoneNumber: "",
+      phoneNumber: me.phoneNumber ?? "",
       timeZone: me.timezone !== "--None--" ? me.timezone : "",
     },
     validationSchema: updatetProfileValidationSchema,
     validateOnBlur: true,
     validateOnChange: true,
-    onSubmit: (values) => {
-      mutation.mutate({ phoneNumber: values.phoneNumber, timeZone: values.timeZone });
+    onSubmit: async (values, { setSubmitting }) => {
+      try {
+        await mutation.mutateAsync({ phoneNumber: values.phoneNumber, timeZone: values.timeZone });
+      } finally {
+        setSubmitting(false);
+      }
     },
   });
 
@@ -114,7 +127,7 @@ export default function UpdateProfileSettingsPage() {
                   }}
                   error={formik.touched.timeZone && Boolean(formik.errors.timeZone)}
                 >
-                  {filters.timeZones.map((item) => (
+                  {meta.timeZones.map((item) => (
                     <MenuItem value={item.label}>{item.label}</MenuItem>
                   ))}
                 </Select>

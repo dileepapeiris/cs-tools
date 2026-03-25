@@ -18,21 +18,23 @@
 //       All displayed data (names, avatars, dates, etc.) will be replaced
 //       with dynamic values in the future.
 
-import { useLayoutEffect, type ReactNode } from "react";
+import { useEffect, useLayoutEffect, type ReactNode } from "react";
 import { Card, Divider, Skeleton, Stack, Switch, Typography, colors } from "@wso2/oxygen-ui";
 import { Bell, BookOpen, Bot, Clock4, Lock, Mail, Phone, User } from "@wso2/oxygen-ui-icons-react";
 import { useLayout } from "@context/layout";
 import { SettingListItem } from "@components/features/settings";
 import { Avatar } from "@components/features/users";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { users } from "@src/services/users";
 import { useProject } from "../context/project";
 import { projects } from "../services/projects";
 import { useNotify } from "../context/snackbar";
+import { metadata } from "../services/metadata";
 
 export default function ProfilePage() {
   const layout = useLayout();
   const notify = useNotify();
+  const queryClient = useQueryClient();
   const { projectId, noveraEnabled } = useProject();
   const { data } = useQuery(users.me());
   const name = data ? data?.firstName + " " + data?.lastName : undefined;
@@ -58,6 +60,12 @@ export default function ProfilePage() {
     </Stack>
   );
 
+  const prefetch = () => {
+    queryClient.prefetchQuery(metadata.get());
+  };
+
+  useEffect(prefetch, []);
+
   useLayoutEffect(() => {
     layout.setAppBarSlotsOverride(<AppBarSlot />);
 
@@ -77,7 +85,7 @@ export default function ProfilePage() {
         />
         <SettingListItem
           name="Phone"
-          value={data ? "Not Configured" : <Skeleton variant="text" width="100%" height={25} />}
+          value={data?.phoneNumber ?? (data ? "Not Configured" : <Skeleton variant="text" width="100%" height={25} />)}
           icon={Phone}
         />
         <SettingListItem

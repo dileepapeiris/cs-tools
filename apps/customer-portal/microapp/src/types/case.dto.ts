@@ -61,7 +61,6 @@ export interface CasesFiltersDTO {
   changeRequestStates: EntityReference[];
   changeRequestImpacts: EntityReference[];
   caseTypes: EntityReference[];
-  timeZones: EntityReference[];
   severityBasedAllocationTime: {
     "0": number;
     "10": number;

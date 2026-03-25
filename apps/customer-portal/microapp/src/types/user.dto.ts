@@ -3,6 +3,7 @@ export interface MeDTO {
   email: string;
   firstName: string;
   lastName: string;
+  phoneNumber: string | null;
   timeZone: string;
 }
 

@@ -2,6 +2,7 @@ import { Box, Card, Stack, Typography, useTheme, pxToRem, colors, Divider, Skele
 import { ArrowUpRight, Circle, CircleCheck, CircleDot, Paperclip } from "@wso2/oxygen-ui-icons-react";
 import { TimelineConnector, TimelineContent, TimelineItem, TimelineSeparator } from "@mui/lab";
 import type { Attachment } from "@root/src/types";
+import type { ReactNode } from "react";
 
 interface TimelineEntryBaseProps {
   timestamp?: string;
@@ -10,7 +11,7 @@ interface TimelineEntryBaseProps {
 export interface ActivityTimelineEntryProps extends TimelineEntryBaseProps {
   variant: "activity";
   author?: string;
-  title?: string;
+  title?: string | ReactNode;
   description?: string;
   comment?: string;
   attachments?: Attachment[];

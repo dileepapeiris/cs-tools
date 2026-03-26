@@ -18,16 +18,17 @@ import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { User, Users } from "@wso2/oxygen-ui-icons-react";
-import { Grid, Skeleton, Stack, Typography } from "@wso2/oxygen-ui";
+import { Box, colors, Grid, pxToRem, Skeleton, Stack, Typography } from "@wso2/oxygen-ui";
 import {
   ActivityTimelineEntrySkeleton,
+  CommentSkeleton,
   InfoField,
   OverlineSlot,
   StickyCommentBar,
   TimelineEntry,
 } from "@components/features/detail";
 import { PriorityChip, StatusChip } from "@components/features/support";
-import { SectionCard } from "@components/shared";
+import { RichText, SectionCard } from "@components/shared";
 import { Timeline } from "@components/ui";
 import { useLayout } from "@context/layout";
 import { cases } from "@src/services/cases";
@@ -35,7 +36,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useParams } from "react-router-dom";
 import { useProject } from "@context/project";
 import ms from "ms";
-import { stripHtmlTags } from "../utils/others";
+import { Comment } from "@components/features/detail";
 
 dayjs.extend(relativeTime);
 
@@ -126,9 +127,6 @@ export default function CaseDetailPage() {
         </Typography>
         <SectionCard title="Case Information">
           <Grid spacing={1.5} container>
-            <Grid size={12}>
-              <InfoField label="Description" value={data?.description ? stripHtmlTags(data.description) : undefined} />
-            </Grid>
             <Grid size={6}>
               <InfoField
                 label="Status"
@@ -208,26 +206,23 @@ export default function CaseDetailPage() {
           </Grid>
         </SectionCard>
         <SectionCard title="Activity Timeline">
-          <Timeline>
+          <Stack gap={2} pt={1}>
             {comments ? (
-              comments.map((props, index) => (
-                <TimelineEntry
-                  key={index}
-                  variant="activity"
-                  title={props.content}
-                  author={props.createdBy}
-                  timestamp={dayjs(props.createdOn).fromNow()}
-                  last={index === comments.length - 1}
-                />
-              ))
+              <>
+                {comments.map(({ id, content, createdOn, createdBy }) => (
+                  <Comment key={id} author={createdBy} timestamp={dayjs(createdOn).fromNow()}>
+                    <RichText dangerouslySetInnerHTML={{ __html: content }} />
+                  </Comment>
+                ))}
+              </>
             ) : (
               <>
-                {Array.from({ length: 10 }).map((_, index) => (
-                  <ActivityTimelineEntrySkeleton key={index} />
+                {Array.from({ length: 5 }).map((_, index) => (
+                  <CommentSkeleton key={index} />
                 ))}
               </>
             )}
-          </Timeline>
+          </Stack>
         </SectionCard>
       </Stack>
       <StickyCommentBar

@@ -1,14 +1,16 @@
-import { Card, Skeleton, Stack, Typography } from "@wso2/oxygen-ui";
+import type { ReactNode } from "react";
+import { Box, Card, Skeleton, Stack, Typography } from "@wso2/oxygen-ui";
+
 interface CommentProps {
-  children: string;
+  children: string | ReactNode;
   author: string;
   timestamp: string;
 }
 
 export function Comment({ children, author, timestamp }: CommentProps) {
   return (
-    <Card component={Stack} p={1} gap={1.5} sx={{ bgcolor: "background.default" }}>
-      <Stack direction="row" justifyContent="space-between">
+    <Card component={Stack} sx={{ bgcolor: "background.default" }}>
+      <Stack direction="row" justifyContent="space-between" p={1}>
         <Typography variant="body2" fontWeight="medium">
           {author}
         </Typography>
@@ -16,7 +18,9 @@ export function Comment({ children, author, timestamp }: CommentProps) {
           {timestamp}
         </Typography>
       </Stack>
-      <Typography variant="body2">{children}</Typography>
+      <Box bgcolor="background.paper" p={1}>
+        <Typography variant="body2">{children}</Typography>
+      </Box>
     </Card>
   );
 }

@@ -118,7 +118,7 @@ function toCase(dto: CaseDTO): Case {
     createdOn: new Date(dto.createdOn.replace(" ", "T")),
     updatedOn: new Date(dto.updatedOn.replace(" ", "T")),
     title: dto.title,
-    description: stripHtmlTags(dto.description) ?? "",
+    description: dto.description ?? "",
     assigned: dto.assignedEngineer?.label,
     statusId: dto.status?.id,
     severityId: dto.severity?.id,
@@ -137,7 +137,7 @@ function toCase(dto: CaseDTO): Case {
 export function toComment(dto: CommentDTO): Comment {
   return {
     id: dto.id,
-    content: stripHtmlTags(dto.content),
+    content: dto.content,
     createdOn: new Date(dto.createdOn.replace(" ", "T")),
     createdBy: dto.createdBy,
     attachments: dto.inlineAttachments.map((attachment) => ({

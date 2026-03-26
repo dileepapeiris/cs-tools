@@ -18,3 +18,4 @@ export * from "./TabPanel";
 export * from "./SectionCard";
 export * from "./InfiniteScroll";
 export * from "./EmptyState";
+export * from "./RichText";

@@ -5,7 +5,7 @@ import { Comment, CommentSkeleton, InfoField, OverlineSlot, StickyCommentBar } f
 import { PriorityChip, StatusChip } from "@components/features/support";
 import { useLayout } from "@context/layout";
 
-import { SectionCard } from "@components/shared";
+import { RichText, SectionCard } from "@components/shared";
 import { useParams } from "react-router-dom";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { serviceRequests } from "../services/services";
@@ -167,7 +167,7 @@ export default function ServiceDetailPage() {
               <>
                 {comments.map(({ id, content, createdOn, createdBy }) => (
                   <Comment key={id} author={createdBy} timestamp={dayjs(createdOn).fromNow()}>
-                    {stripHtmlTags(content)}
+                    <RichText dangerouslySetInnerHTML={{ __html: content }} />
                   </Comment>
                 ))}
               </>

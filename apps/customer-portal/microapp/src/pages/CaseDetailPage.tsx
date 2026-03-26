@@ -18,18 +18,10 @@ import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { User, Users } from "@wso2/oxygen-ui-icons-react";
-import { Box, colors, Grid, pxToRem, Skeleton, Stack, Typography } from "@wso2/oxygen-ui";
-import {
-  ActivityTimelineEntrySkeleton,
-  CommentSkeleton,
-  InfoField,
-  OverlineSlot,
-  StickyCommentBar,
-  TimelineEntry,
-} from "@components/features/detail";
+import { Grid, Skeleton, Stack, Typography } from "@wso2/oxygen-ui";
+import { CommentSkeleton, InfoField, OverlineSlot, StickyCommentBar } from "@components/features/detail";
 import { PriorityChip, StatusChip } from "@components/features/support";
 import { RichText, SectionCard } from "@components/shared";
-import { Timeline } from "@components/ui";
 import { useLayout } from "@context/layout";
 import { cases } from "@src/services/cases";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";

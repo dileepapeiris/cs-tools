@@ -24,6 +24,7 @@ import { useQuery } from "@tanstack/react-query";
 import { projects } from "@src/services/projects";
 import { goToMyAppsScreen } from "../microapp-bridge";
 import { useThemeMode } from "@root/src/context/theme";
+import { ConfirmDialog } from "../shared/ConfirmDialog";
 
 export function AppBar() {
   const theme = useTheme();
@@ -159,21 +160,35 @@ function BackButton({ onClick }: { onClick: () => void }) {
 }
 
 export function ExitButton() {
+  const [open, setOpen] = useState(false);
+
   return (
-    <IconButton
-      disableRipple
-      color="error"
-      sx={{
-        gap: 1,
-        position: "absolute",
-        top: "var(--safe-top)",
-        left: 10,
-        p: 0,
-      }}
-      onClick={goToMyAppsScreen}
-    >
-      <Grip size={pxToRem(20)} />
-      <Typography>Go to Apps</Typography>
-    </IconButton>
+    <>
+      <IconButton
+        disableRipple
+        color="error"
+        sx={{
+          gap: 1,
+          position: "absolute",
+          top: "var(--safe-top)",
+          left: 10,
+          p: 0,
+        }}
+        onClick={() => setOpen(true)}
+      >
+        <Grip size={pxToRem(20)} />
+        <Typography>Go to Apps</Typography>
+      </IconButton>
+
+      <ConfirmDialog
+        open={open}
+        title="Return to Apps"
+        description="Are you sure you want to leave this application?"
+        confirmColor="error"
+        confirmLabel="Leave"
+        onClose={() => setOpen(false)}
+        onConfirm={goToMyAppsScreen}
+      />
+    </>
   );
 }

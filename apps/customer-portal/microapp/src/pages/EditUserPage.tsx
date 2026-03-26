@@ -38,6 +38,7 @@ import { useMutation, useQueryClient, useSuspenseQuery } from "@tanstack/react-q
 import { users } from "../services/users";
 import { projects } from "../services/projects";
 import { useNotify } from "../context/snackbar";
+import { ConfirmDialog } from "../components/shared/ConfirmDialog";
 
 export default function EditUserPage({ mode = "invite" }: { mode?: "invite" | "edit" }) {
   const location = useLocation();
@@ -323,23 +324,41 @@ function UserSummaryCard({ firstName, lastName, email }: { firstName: string; la
 }
 
 function DangerZone({ isPending, onDelete }: { isPending: boolean; onDelete: () => void }) {
+  const [open, setOpen] = useState(false);
+
   return (
-    <Card component={Stack} sx={{ bgcolor: colors.red[50], p: 1.5 }}>
-      <Typography variant="body2" fontWeight="medium" color="error">
-        Danger Zone
-      </Typography>
-      <Typography variant="subtitle2" color="text.secondary">
-        Send an email invitation directly to a user to join this project. The invitation link will be valid for 7 days.
-      </Typography>
-      <Button
-        variant="contained"
-        color="error"
-        startIcon={isPending ? <CircularProgress size={16} color="inherit" /> : <Trash2 />}
-        sx={{ mt: 3 }}
-        onClick={onDelete}
-      >
-        {isPending ? "Removing..." : "Remove User from Project"}
-      </Button>
-    </Card>
+    <>
+      <Card component={Stack} sx={{ bgcolor: colors.red[50], p: 1.5 }}>
+        <Typography variant="body2" fontWeight="medium" color="error">
+          Danger Zone
+        </Typography>
+        <Typography variant="subtitle2" color="text.secondary">
+          Send an email invitation directly to a user to join this project. The invitation link will be valid for 7
+          days.
+        </Typography>
+        <Button
+          variant="contained"
+          color="error"
+          startIcon={isPending ? <CircularProgress size={16} color="inherit" /> : <Trash2 />}
+          sx={{ mt: 3 }}
+          onClick={() => setOpen(true)}
+        >
+          {isPending ? "Removing..." : "Remove User from Project"}
+        </Button>
+      </Card>
+
+      <ConfirmDialog
+        open={open}
+        title="Remove User"
+        description="Are you sure you want to remove this user?"
+        confirmColor="error"
+        confirmLabel="Remove"
+        onClose={() => setOpen(false)}
+        onConfirm={() => {
+          setOpen(false);
+          onDelete();
+        }}
+      />
+    </>
   );
 }

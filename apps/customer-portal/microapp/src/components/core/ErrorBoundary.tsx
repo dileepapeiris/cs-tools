@@ -4,6 +4,7 @@ import * as React from "react";
 interface ErrorBoundaryProps {
   children: React.ReactNode;
   fallback: React.ReactNode;
+  onError?: () => void;
 }
 
 interface ErrorBoundaryState {
@@ -23,6 +24,7 @@ export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoun
   componentDidCatch(error: Error, info: React.ErrorInfo): void {
     const ownerStack = React.captureOwnerStack?.();
     console.error(error, info.componentStack, ownerStack);
+    this.props.onError?.();
   }
 
   render(): React.ReactNode {

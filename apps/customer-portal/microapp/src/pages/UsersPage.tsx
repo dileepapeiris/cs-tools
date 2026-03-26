@@ -27,12 +27,14 @@ import { Suspense } from "react";
 
 import { MOCK_ROLES } from "@src/mocks/data/users";
 import EmptyState from "../components/shared/EmptyState";
+import { useNotify } from "../context/snackbar";
 
 export default function UsersPage() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const location = useLocation();
   const { projectId } = useProject();
+  const notify = useNotify();
 
   const baseRoute = location.pathname;
   const searchValue = searchParams.get("search") ?? "";
@@ -90,7 +92,10 @@ export default function UsersPage() {
         </Stack>
         <Divider />
         <Stack gap={2} pt={1}>
-          <ErrorBoundary fallback={<UsersListContentSkeleton />}>
+          <ErrorBoundary
+            fallback={<UsersListContentSkeleton />}
+            onError={() => notify.error("Failed to load users. Try again later.")}
+          >
             <Suspense fallback={<UsersListContentSkeleton />}>
               <UsersListContent />
             </Suspense>

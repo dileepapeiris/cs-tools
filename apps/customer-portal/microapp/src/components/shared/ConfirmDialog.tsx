@@ -1,4 +1,4 @@
-import { Button, Card, Dialog, Fade, Stack, Typography } from "@wso2/oxygen-ui";
+import { Button, Card, Dialog, Stack, Typography } from "@wso2/oxygen-ui";
 
 interface ConfirmDialogProps {
   open: boolean;

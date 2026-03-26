@@ -1,6 +1,5 @@
 import apiClient from "@src/services/apiClient";
 import { infiniteQueryOptions, mutationOptions, queryOptions } from "@tanstack/react-query";
-import { stripHtmlTags } from "@utils/others";
 import type {
   CaseSummary,
   CaseClassificationRequestDTO,

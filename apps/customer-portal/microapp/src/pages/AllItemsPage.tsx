@@ -34,7 +34,7 @@ import { changeRequests } from "@src/services/changes";
 
 import { ITEM_DETAIL_PATHS } from "@pages/SupportPage";
 import { serviceRequests } from "../services/services";
-import type { CasesFiltersDTO, GetCasesRequestDTO, GetChangeRequestsRquestDTO } from "../types";
+import type { GetCasesRequestDTO, GetChangeRequestsRquestDTO } from "../types";
 import type { GetChatsRequestDTO } from "../types/chat.dto";
 import EmptyState from "../components/shared/EmptyState";
 import { ErrorBoundary } from "../components/core";

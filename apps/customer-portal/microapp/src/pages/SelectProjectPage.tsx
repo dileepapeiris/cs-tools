@@ -90,6 +90,7 @@ function ProjectsListContent({ search }: { search: string }) {
   if (data.length === 1) {
     setProjectId(data[0].id);
     navigate("/");
+    return <ProjectsListContentSkeleton />;
   }
 
   return (

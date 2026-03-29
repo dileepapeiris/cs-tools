@@ -42,7 +42,10 @@ import useGetProjectCases from "@api/useGetProjectCases";
 import { useGetDeployments } from "@api/useGetDeployments";
 import { isS0Case } from "@utils/support";
 import { CaseType } from "@constants/supportConstants";
-import { PROJECT_TYPE_LABELS } from "@constants/projectDetailsConstants";
+import {
+  getProjectPermissions,
+  shouldExcludeS0,
+} from "@utils/subscriptionUtils";
 import type { AllCasesFilterValues } from "@models/responses";
 import AllCasesStatCards from "@components/support/all-cases/AllCasesStatCards";
 import AllCasesSearchBar from "@components/support/all-cases/AllCasesSearchBar";
@@ -73,14 +76,14 @@ export default function AllCasesPage(): JSX.Element {
     projectId || "",
   );
   const projectReady = !isProjectLoading && project !== undefined;
-  const isManagedCloudSubscription =
-    project?.type?.label === PROJECT_TYPE_LABELS.MANAGED_CLOUD_SUBSCRIPTION;
-  const excludeS0 = projectReady ? !isManagedCloudSubscription : false;
+  const permissions = getProjectPermissions(project?.type?.label);
+  const excludeS0 = projectReady
+    ? shouldExcludeS0(project?.type?.label)
+    : false;
 
   // Fetch filter metadata first to get Incident and Query IDs for stats API
   const { data: filterMetadata } = useGetProjectFilters(projectId || "");
 
-  // Fetch deployments for the deployment filter
   const { data: deploymentsData } = useGetDeployments(projectId || "");
 
   const {
@@ -250,7 +253,11 @@ export default function AllCasesPage(): JSX.Element {
         onFiltersToggle={() => setIsFiltersOpen(!isFiltersOpen)}
         filters={filters}
         filterMetadata={filterMetadata}
-        deployments={deploymentsData?.deployments}
+        deployments={
+          permissions.hasDeployments
+            ? deploymentsData?.deployments
+            : undefined
+        }
         onFilterChange={handleFilterChange}
         onClearFilters={handleClearFilters}
         excludeS0={excludeS0}

@@ -23,41 +23,23 @@ import { useQuery, useSuspenseQuery } from "@tanstack/react-query";
 import { users } from "@src/services/users";
 import { useProject } from "@context/project";
 import { ErrorBoundary } from "@components/core";
-import { Suspense } from "react";
+import { Suspense, useMemo, useState } from "react";
 
 import { MOCK_ROLES } from "@src/mocks/data/users";
 import EmptyState from "../components/shared/EmptyState";
 import { useNotify } from "../context/snackbar";
 
 export default function UsersPage() {
-  const navigate = useNavigate();
-  const [searchParams] = useSearchParams();
-  const location = useLocation();
-  const { projectId } = useProject();
   const notify = useNotify();
-
-  const baseRoute = location.pathname;
-  const searchValue = searchParams.get("search") ?? "";
-
-  const updateParams = (updates: Record<string, string | null>) => {
-    const next = new URLSearchParams(searchParams);
-
-    Object.entries(updates).forEach(([key, value]) => {
-      if (!value) {
-        next.delete(key);
-      } else {
-        next.set(key, value);
-      }
-    });
-
-    navigate(`${baseRoute}?${next.toString()}`, { replace: true });
-  };
-
+  const { projectId } = useProject();
   const { data } = useQuery(users.all(projectId!));
+
   const total = data?.length;
   const registered = data?.filter((user) => user.status === "registered").length;
   const invited = data?.filter((user) => user.status === "invited").length;
   const admins = data?.filter((user) => user.roles.includes("Admin")).length;
+
+  const [search, setSearch] = useState("");
 
   return (
     <>
@@ -78,8 +60,8 @@ export default function UsersPage() {
           <SearchBar
             size="small"
             placeholder="Search Users"
-            value={searchValue}
-            onChange={(e) => updateParams({ ["search"]: e.target.value || null })}
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
             sx={{ mt: 1, bgcolor: "background.paper" }}
             fullWidth
           />
@@ -97,7 +79,7 @@ export default function UsersPage() {
             onError={() => notify.error("Failed to load users. Try again later.")}
           >
             <Suspense fallback={<UsersListContentSkeleton />}>
-              <UsersListContent />
+              <UsersListContent search={search} />
             </Suspense>
           </ErrorBoundary>
         </Stack>
@@ -107,9 +89,21 @@ export default function UsersPage() {
   );
 }
 
-function UsersListContent() {
+function UsersListContent({ search }: { search: string }) {
   const { projectId } = useProject();
-  const { data } = useSuspenseQuery(users.all(projectId!));
+  const { data: usersData } = useSuspenseQuery(users.all(projectId!));
+
+  const data = useMemo(() => {
+    if (!search) return usersData;
+
+    const normalizedSearch = search.toLowerCase();
+
+    return usersData.filter(
+      (user) =>
+        user.firstName.toLowerCase().includes(normalizedSearch) ||
+        user.lastName.toLowerCase().includes(normalizedSearch),
+    );
+  }, [usersData, search]);
 
   if (data.length === 0) return <EmptyState title="No users found" />;
 

@@ -24,9 +24,11 @@ import { useSuspenseQuery } from "@tanstack/react-query";
 import { projects } from "@src/services/projects";
 import { ErrorBoundary, ExitButton } from "@components/core";
 import EmptyState from "../components/shared/EmptyState";
+import { useNotify } from "../context/snackbar";
 
 export default function SelectProjectPage() {
   const theme = useTheme();
+  const notify = useNotify();
   const [search, setSearch] = useState("");
 
   return (
@@ -52,7 +54,10 @@ export default function SelectProjectPage() {
           sx={{ mt: 1, bgcolor: "background.paper" }}
           fullWidth
         />
-        <ErrorBoundary fallback={<ProjectsListContentSkeleton />}>
+        <ErrorBoundary
+          fallback={<ProjectsListContentSkeleton />}
+          onError={() => notify.error("Failed to load projects. Try again later.")}
+        >
           <Suspense fallback={<ProjectsListContentSkeleton />}>
             <ProjectsListContent search={search} />
           </Suspense>

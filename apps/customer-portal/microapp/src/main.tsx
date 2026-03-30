@@ -21,8 +21,22 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { OxygenUIThemeProvider } from "@wso2/oxygen-ui";
 import theme from "./theme";
 import "@src/index.css";
+import axios from "axios";
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      retry: (failureCount, error) => {
+        if (axios.isAxiosError(error)) {
+          const status = error.response?.status;
+          if (status && status >= 400 && status < 500) return false;
+        }
+
+        return failureCount < 3;
+      },
+    },
+  },
+});
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>

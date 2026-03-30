@@ -27,6 +27,7 @@ export const Topic = {
   cancelLocalNotification: "cancelling_local_notification",
   clearAllLocalNotifications: "clearing_all_local_notifications",
   qrRequest: "qr_request",
+  version: "micro_app_version",
 } as const;
 
 export type TopicType = (typeof Topic)[keyof typeof Topic];

@@ -30,6 +30,7 @@ const TOPIC = {
   CONFIRM_ALERT: "confirm_alert",
   TOTP: "totp",
   OPEN_URL: "open_url",
+  MICRO_APP_VERSION: "micro_app_version",
 };
 
 export interface BrowserConfiguration {
@@ -60,6 +61,9 @@ declare global {
       rejectTotpQrMigrationData: (error: string) => void;
       resolveOpenUrl?: () => void;
       rejectOpenUrl?: (error: any) => void;
+      requestMicroAppVersion: () => void;
+      resolveMicroAppVersion: (version: string) => void;
+      rejectMicroAppVersion: (error: string) => void;
     };
     ReactNativeWebView?: {
       postMessage: (message: string) => void;
@@ -242,8 +246,7 @@ export const sendNativeLog = (message?: string, data?: unknown, level: LogLevel 
       level,
     });
   } else {
-    // TODO: Replace this with Logger.error(ErrorMessages.NATIVE_BRIDGE_NOT_AVAILABLE)
-    console.error(ErrorMessages.NATIVE_BRIDGE_NOT_AVAILABLE);
+    Logger.error(ErrorMessages.NATIVE_BRIDGE_NOT_AVAILABLE);
   }
 };
 
@@ -282,6 +285,17 @@ export const openUrl = (config: BrowserConfiguration): void => {
 
     window.ReactNativeWebView.postMessage(alertData);
   } else {
-    console.error("Native bridge is not available");
+    Logger.error(ErrorMessages.NATIVE_BRIDGE_NOT_AVAILABLE);
+  }
+};
+
+export const getVersion = (callback: Callback<string>): void => {
+  if (window.nativebridge) {
+    triggerSuperAppAction(Topic.version);
+    window.nativebridge.resolveMicroAppVersion = (version) => {
+      callback(version);
+    };
+  } else {
+    Logger.error(ErrorMessages.NATIVE_BRIDGE_NOT_AVAILABLE);
   }
 };

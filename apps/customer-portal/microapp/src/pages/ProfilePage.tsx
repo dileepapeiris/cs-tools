@@ -14,7 +14,7 @@
 // specific language governing permissions and limitations
 // under the License.
 
-import { useEffect, useLayoutEffect, type ReactNode } from "react";
+import { useEffect, useLayoutEffect, useState, type ReactNode } from "react";
 import { Card, Divider, Skeleton, Stack, Switch, Typography, colors } from "@wso2/oxygen-ui";
 import { Bell, BookOpen, Bot, Clock4, Lock, Mail, Phone, User } from "@wso2/oxygen-ui-icons-react";
 import { useLayout } from "@context/layout";
@@ -26,7 +26,7 @@ import { useProject } from "../context/project";
 import { projects } from "../services/projects";
 import { useNotify } from "../context/snackbar";
 import { metadata } from "../services/metadata";
-import { openUrl } from "../components/microapp-bridge";
+import { getVersion, openUrl } from "../components/microapp-bridge";
 import { CHANGE_PASSWORD_URL } from "../config/endpoints";
 
 export default function ProfilePage() {
@@ -62,6 +62,10 @@ export default function ProfilePage() {
     queryClient.prefetchQuery(metadata.get());
   };
 
+  const [version, setVersion] = useState<string | undefined>(undefined);
+
+  useEffect(() => getVersion((version) => setVersion(version)));
+
   useEffect(prefetch, []);
 
   useLayoutEffect(() => {
@@ -72,6 +76,10 @@ export default function ProfilePage() {
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [data]);
+
+  useEffect(() => {
+    getVersion((version) => console.log("Micro App Version: ", version));
+  }, []);
 
   return (
     <Stack gap={2.5}>
@@ -144,9 +152,11 @@ export default function ProfilePage() {
           suffix={<Switch defaultChecked />}
         />
       </SectionCard>
-      <Typography variant="caption" color="text.secondary" textAlign="center" sx={{ py: 1 }}>
-        Version 1.0.0
-      </Typography>
+      {version && (
+        <Typography variant="caption" color="text.secondary" textAlign="center" sx={{ py: 1 }}>
+          Version {version}
+        </Typography>
+      )}
     </Stack>
   );
 }

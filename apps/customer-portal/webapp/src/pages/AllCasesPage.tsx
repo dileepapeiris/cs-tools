@@ -227,10 +227,17 @@ export default function AllCasesPage(): JSX.Element {
   };
 
   useEffect(() => {
-    if (!permissions.hasDeployments && filters.deploymentId) {
+    if (!projectDetailsReady) {
+      return;
+    }
+    if (
+      projectDetailsReady &&
+      !permissions.hasDeployments &&
+      filters.deploymentId
+    ) {
       setFilters((prev) => ({ ...prev, deploymentId: undefined }));
     }
-  }, [permissions.hasDeployments, filters.deploymentId]);
+  }, [projectDetailsReady, permissions.hasDeployments, filters.deploymentId]);
 
   return (
     <Stack spacing={3}>

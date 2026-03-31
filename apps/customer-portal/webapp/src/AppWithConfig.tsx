@@ -70,7 +70,7 @@ export default function AppWithConfig(): JSX.Element {
       // eslint-disable-next-line @typescript-eslint/ban-ts-comment
       // @ts-ignore
       periodicTokenRefresh
-      storage={localStorage}
+      storage="localStorage"
       scopes={["openid", "email", "groups"]}
       preferences={{
         theme: {

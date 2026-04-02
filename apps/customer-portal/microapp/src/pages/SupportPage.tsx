@@ -14,7 +14,7 @@
 // specific language governing permissions and limitations
 // under the License.
 
-import { Suspense, useState } from "react";
+import { Suspense, useState, type ReactNode } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { Button, Card, Grid, pxToRem, Stack, Tab, Tabs, Typography, useTheme } from "@wso2/oxygen-ui";
 import { MessageSquareQuote } from "@wso2/oxygen-ui-icons-react";
@@ -141,38 +141,38 @@ function ItemsListContent({ tab }: { tab: ItemCardProps["type"] }) {
   switch (tab) {
     case "case":
       return (
-        <ErrorBoundary fallback={<ItemsListContentSkeleton />}>
+        <ItemsListErrorBoundary>
           <Suspense fallback={<ItemsListContentSkeleton />}>
             <CaseItemListContent />
           </Suspense>
-        </ErrorBoundary>
+        </ItemsListErrorBoundary>
       );
 
     case "chat":
       return (
-        <ErrorBoundary fallback={<ItemsListContentSkeleton />}>
+        <ItemsListErrorBoundary>
           <Suspense fallback={<ItemsListContentSkeleton />}>
             <ChatItemListContent />
           </Suspense>
-        </ErrorBoundary>
+        </ItemsListErrorBoundary>
       );
 
     case "service":
       return (
-        <ErrorBoundary fallback={<ItemsListContentSkeleton />}>
+        <ItemsListErrorBoundary>
           <Suspense fallback={<ItemsListContentSkeleton />}>
             <ServiceRequestItemListContent />
           </Suspense>
-        </ErrorBoundary>
+        </ItemsListErrorBoundary>
       );
 
     case "change":
       return (
-        <ErrorBoundary fallback={<ItemsListContentSkeleton />}>
+        <ItemsListErrorBoundary>
           <Suspense fallback={<ItemsListContentSkeleton />}>
             <ChangeRequestItemListContent />
           </Suspense>
-        </ErrorBoundary>
+        </ItemsListErrorBoundary>
       );
   }
 }
@@ -245,4 +245,8 @@ function ItemsListContentSkeleton() {
       ))}
     </>
   );
+}
+
+function ItemsListErrorBoundary({ children }: { children: ReactNode }) {
+  return <ErrorBoundary fallback={<ItemsListContentSkeleton />}>{children}</ErrorBoundary>;
 }

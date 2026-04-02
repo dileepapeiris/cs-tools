@@ -35,3 +35,19 @@ export const PROJECT_STATUS_META: Record<ProjectStatus, { color: "success" | "wa
   "All Good": { color: "success" },
   "Needs Attention": { color: "warning" },
 };
+
+export const PROJECT_SEVERITY_PIE_COLORS: Record<string, string> = {
+  "10": colors.red[500],
+  "11": colors.orange[500],
+  "12": colors.yellow[600],
+  "13": colors.blue[500],
+  "14": colors.green[500],
+};
+
+export const ENGAGEMENTS_TYPE_PIE_COLORS: Record<string, string> = {
+  Migration: colors.blue[500],
+  Consultancy: colors.green[500],
+  "New Feature / Improvement": colors.teal[400],
+  "Follow up": colors.cyan[500],
+  Onboarding: colors.yellow[600],
+};

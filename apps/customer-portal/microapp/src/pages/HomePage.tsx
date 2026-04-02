@@ -23,22 +23,7 @@ import { useProject } from "@context/project";
 import { changeRequests } from "../services/changes";
 import { overrideOrDefault } from "../utils/others";
 import { Fab } from "../components/core";
-
-const PROJECT_SEVERITY_PIE_COLORS: Record<string, string> = {
-  "10": colors.red[500],
-  "11": colors.orange[500],
-  "12": colors.yellow[600],
-  "13": colors.blue[500],
-  "14": colors.green[500],
-};
-
-const ENGAGEMENTS_TYPE_PIE_COLORS: Record<string, string> = {
-  Migration: colors.blue[500],
-  Consultancy: colors.green[500],
-  "New Feature / Improvement": colors.teal[400],
-  "Follow up": colors.cyan[500],
-  Onboarding: colors.yellow[600],
-};
+import { ENGAGEMENTS_TYPE_PIE_COLORS, PROJECT_SEVERITY_PIE_COLORS } from "../config/constants";
 
 export default function HomePage() {
   const { projectId } = useProject();

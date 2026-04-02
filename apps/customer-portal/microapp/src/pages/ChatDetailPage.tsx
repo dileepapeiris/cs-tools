@@ -32,7 +32,7 @@ import { useParams } from "react-router-dom";
 import { useMutation, useQueries, useQuery } from "@tanstack/react-query";
 import { chats } from "@src/services/chats";
 import { useProject } from "../context/project";
-import type { MessageDispatchDTO } from "../types/chat.dto";
+import type { MessageDispatchDto } from "../types/chat.dto";
 import { projects } from "../services/projects";
 
 dayjs.extend(relativeTime);
@@ -92,7 +92,7 @@ export default function ChatDetailPage() {
       },
     ]);
 
-    const payload: Omit<MessageDispatchDTO, "region" | "tier"> = { message: comment, envProducts: envProducts };
+    const payload: Omit<MessageDispatchDto, "region" | "tier"> = { message: comment, envProducts: envProducts };
     createMessage(payload);
     setComment("");
   };

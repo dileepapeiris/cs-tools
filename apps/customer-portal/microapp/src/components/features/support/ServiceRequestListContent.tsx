@@ -1,7 +1,7 @@
 import { useProject } from "@root/src/context/project";
 import { ItemsListContentSkeleton, usePaginationSubtitleOverride } from "@root/src/pages/AllItemsPage";
 import { serviceRequests } from "@root/src/services/services";
-import type { GetCasesRequestDTO } from "@root/src/types";
+import type { GetCasesRequestDto } from "@root/src/types";
 import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
 import { InfiniteScroll } from "../../shared";
 import EmptyState from "../../shared/EmptyState";
@@ -12,7 +12,7 @@ import { ITEM_DETAIL_PATHS } from "@root/src/pages/SupportPage";
 export function ServiceRequestListContent({ filter, search }: { filter: string; search: string }) {
   const { projectId } = useProject();
 
-  const filters: GetCasesRequestDTO["filters"] = {};
+  const filters: GetCasesRequestDto["filters"] = {};
 
   if (filter !== "all") {
     filters.statusIds = [Number(filter)];

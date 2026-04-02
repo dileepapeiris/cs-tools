@@ -17,12 +17,12 @@
 import apiClient from "@src/services/apiClient";
 import type {
   PaginatedArray,
-  GetChangeRequestsRquestDTO,
+  GetChangeRequestsRquestDto,
   ChangeRequestSummary,
-  ChangeRequestsDTO,
-  ChangeRequestDTO,
+  ChangeRequestsDto,
+  ChangeRequestDto,
   ChangeRequest,
-  ChangeRequestsStatsDTO,
+  ChangeRequestsStatsDto,
 } from "@src/types";
 import { infiniteQueryOptions, queryOptions } from "@tanstack/react-query";
 
@@ -34,9 +34,9 @@ import {
 
 const getAllChangeRequests = async (
   id: string,
-  body: GetChangeRequestsRquestDTO = {},
+  body: GetChangeRequestsRquestDto = {},
 ): Promise<PaginatedArray<ChangeRequestSummary>> => {
-  const response = (await apiClient.post<ChangeRequestsDTO>(PROJECT_CHANGE_REQUESTS_ENDPOINT(id), body)).data;
+  const response = (await apiClient.post<ChangeRequestsDto>(PROJECT_CHANGE_REQUESTS_ENDPOINT(id), body)).data;
   const result = response.changeRequests.map(toChangeRequestSummary) as PaginatedArray<ChangeRequestSummary>;
   result.pagination = {
     totalRecords: response.totalRecords,
@@ -48,16 +48,16 @@ const getAllChangeRequests = async (
 };
 
 const getChangeRequest = async (id: string): Promise<ChangeRequest> => {
-  const response = (await apiClient.get<ChangeRequestDTO>(CHANGE_REQUEST_DETAILS_ENDPOINT(id))).data;
+  const response = (await apiClient.get<ChangeRequestDto>(CHANGE_REQUEST_DETAILS_ENDPOINT(id))).data;
   return toChangeRequest(response);
 };
 
-const getChangeRequestsStats = async (id: string): Promise<ChangeRequestsStatsDTO> => {
-  return (await apiClient.get<ChangeRequestsStatsDTO>(CHANGE_REQUEST_STATS_ENDPOINT(id))).data;
+const getChangeRequestsStats = async (id: string): Promise<ChangeRequestsStatsDto> => {
+  return (await apiClient.get<ChangeRequestsStatsDto>(CHANGE_REQUEST_STATS_ENDPOINT(id))).data;
 };
 
 /* Mappers */
-function toChangeRequestSummary(dto: ChangeRequestsDTO["changeRequests"][number]): ChangeRequestSummary {
+function toChangeRequestSummary(dto: ChangeRequestsDto["changeRequests"][number]): ChangeRequestSummary {
   return {
     id: dto.id,
     number: dto.number,
@@ -73,7 +73,7 @@ function toChangeRequestSummary(dto: ChangeRequestsDTO["changeRequests"][number]
   };
 }
 
-function toChangeRequest(dto: ChangeRequestDTO): ChangeRequest {
+function toChangeRequest(dto: ChangeRequestDto): ChangeRequest {
   return {
     id: dto.id,
     number: dto.number,
@@ -104,13 +104,13 @@ function toChangeRequest(dto: ChangeRequestDTO): ChangeRequest {
 export const changeRequests = {
   get: (id: string) => queryOptions({ queryKey: ["change-request", id], queryFn: () => getChangeRequest(id) }),
 
-  all: (id: string, body: GetChangeRequestsRquestDTO = {}) =>
+  all: (id: string, body: GetChangeRequestsRquestDto = {}) =>
     queryOptions({
       queryKey: ["change-requests", id, body],
       queryFn: () => getAllChangeRequests(id, body),
     }),
 
-  paginated: (id: string, body: GetChangeRequestsRquestDTO = {}) =>
+  paginated: (id: string, body: GetChangeRequestsRquestDto = {}) =>
     infiniteQueryOptions({
       queryKey: ["change-requests", "paginated", id, body],
       queryFn: ({ pageParam }) =>

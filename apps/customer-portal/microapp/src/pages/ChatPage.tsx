@@ -26,7 +26,7 @@ import { useProject } from "@context/project";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 import { chats } from "../services/chats";
-import type { MessageDispatchDTO } from "../types/chat.dto";
+import type { MessageDispatchDto } from "../types/chat.dto";
 import { Pin } from "@wso2/oxygen-ui-icons-react";
 
 dayjs.extend(relativeTime);
@@ -119,7 +119,7 @@ export default function ChatPage() {
       },
     ]);
 
-    const payload: Omit<MessageDispatchDTO, "region" | "tier"> = { message: comment, envProducts: envProducts };
+    const payload: Omit<MessageDispatchDto, "region" | "tier"> = { message: comment, envProducts: envProducts };
     setComment("");
 
     if (conversationId) createMessage(payload);

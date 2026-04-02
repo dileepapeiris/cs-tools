@@ -14,7 +14,7 @@
 // specific language governing permissions and limitations
 // under the License.
 
-export interface MeDTO {
+export interface MeDto {
   id: string;
   email: string;
   firstName: string;
@@ -23,9 +23,9 @@ export interface MeDTO {
   timeZone: string;
 }
 
-export type UsersDTO = UserDTO[];
+export type UsersDto = UserDto[];
 
-export interface UserDTO {
+export interface UserDto {
   id: string;
   email: string;
   firstName: string;
@@ -36,7 +36,7 @@ export interface UserDTO {
   membershipStatus: string;
 }
 
-export interface CreateContactRequestDTO {
+export interface CreateContactRequestDto {
   contactEmail: string;
   contactFirstName: string;
   contactLastName: string;
@@ -44,7 +44,7 @@ export interface CreateContactRequestDTO {
   isSecurityContact: boolean;
 }
 
-export interface EditMeDTO {
+export interface EditMeDto {
   phoneNumber: string;
   timeZone: string;
 }

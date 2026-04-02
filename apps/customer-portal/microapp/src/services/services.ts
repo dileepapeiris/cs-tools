@@ -15,19 +15,19 @@
 // under the License.
 
 import apiClient from "@src/services/apiClient";
-import type { GetCasesRequestDTO, PaginatedArray } from "@src/types";
+import type { GetCasesRequestDto, PaginatedArray } from "@src/types";
 import { infiniteQueryOptions, queryOptions } from "@tanstack/react-query";
 import type { ServiceRequest, ServiceRequestSummary } from "@src/types/service.model";
-import type { ServiceRequestDTO, ServiceRequestsDTO } from "@src/types/service.dto";
+import type { ServiceRequestDto, ServiceRequestsDto } from "@src/types/service.dto";
 
 import { CASE_DETAILS_ENDPOINT, PROJECT_CASES_ENDPOINT } from "@config/endpoints";
 
 const getAllServiceRequests = async (
   id: string,
-  body: GetCasesRequestDTO = {},
+  body: GetCasesRequestDto = {},
 ): Promise<PaginatedArray<ServiceRequestSummary>> => {
   const response = (
-    await apiClient.post<ServiceRequestsDTO>(PROJECT_CASES_ENDPOINT(id), {
+    await apiClient.post<ServiceRequestsDto>(PROJECT_CASES_ENDPOINT(id), {
       ...body,
       filters: {
         ...(body?.filters ?? {}),
@@ -46,12 +46,12 @@ const getAllServiceRequests = async (
 };
 
 const getServiceRequest = async (id: string): Promise<ServiceRequest> => {
-  const response = (await apiClient.get<ServiceRequestDTO>(CASE_DETAILS_ENDPOINT(id))).data;
+  const response = (await apiClient.get<ServiceRequestDto>(CASE_DETAILS_ENDPOINT(id))).data;
   return toServiceRequest(response);
 };
 
 /* Mappers */
-export function toServiceRequestSummary(dto: ServiceRequestsDTO["cases"][number]): ServiceRequestSummary {
+export function toServiceRequestSummary(dto: ServiceRequestsDto["cases"][number]): ServiceRequestSummary {
   return {
     id: dto.id,
     internalId: dto.internalId,
@@ -67,7 +67,7 @@ export function toServiceRequestSummary(dto: ServiceRequestsDTO["cases"][number]
   };
 }
 
-export function toServiceRequest(dto: ServiceRequestDTO): ServiceRequest {
+export function toServiceRequest(dto: ServiceRequestDto): ServiceRequest {
   return {
     id: dto.id,
     internalId: dto.internalId,
@@ -91,13 +91,13 @@ export function toServiceRequest(dto: ServiceRequestDTO): ServiceRequest {
 export const serviceRequests = {
   get: (id: string) => queryOptions({ queryKey: ["service-request", id], queryFn: () => getServiceRequest(id) }),
 
-  all: (id: string, body: GetCasesRequestDTO = {}) =>
+  all: (id: string, body: GetCasesRequestDto = {}) =>
     queryOptions({
       queryKey: ["service-requests", id, body],
       queryFn: () => getAllServiceRequests(id, body),
     }),
 
-  paginated: (id: string, body: GetCasesRequestDTO = {}) =>
+  paginated: (id: string, body: GetCasesRequestDto = {}) =>
     infiniteQueryOptions({
       queryKey: ["service-requests", "paginated", id, body],
       queryFn: ({ pageParam }) =>

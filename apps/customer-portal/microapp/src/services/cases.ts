@@ -18,22 +18,22 @@ import apiClient from "@src/services/apiClient";
 import { infiniteQueryOptions, mutationOptions, queryOptions } from "@tanstack/react-query";
 import type {
   CaseSummary,
-  CaseClassificationRequestDTO,
-  CaseClassificationResponseDTO,
-  CasesDTO,
-  CasesFiltersDTO,
-  CasesStatsDTO,
-  CreateCaseRequestDTO,
-  CreateCaseResponseDTO,
-  GetCasesRequestDTO,
+  CaseClassificationRequestDto,
+  CaseClassificationResponseDto,
+  CasesDto,
+  CasesFiltersDto,
+  CasesStatsDto,
+  CreateCaseRequestDto,
+  CreateCaseResponseDto,
+  GetCasesRequestDto,
   Case,
-  CaseDTO,
-  CommentsDTO,
-  CommentDTO,
+  CaseDto,
+  CommentsDto,
+  CommentDto,
   Comment,
-  CreateCommentRequestDTO,
+  CreateCommentRequestDto,
   PaginatedArray,
-  GetCasesStatsRequestDTO,
+  GetCasesStatsRequestDto,
 } from "@src/types";
 
 import {
@@ -46,9 +46,9 @@ import {
   PROJECT_CASES_FILTERS_ENDPOINT,
 } from "@config/endpoints";
 
-export const getAllCases = async (id: string, body: GetCasesRequestDTO = {}): Promise<PaginatedArray<CaseSummary>> => {
+export const getAllCases = async (id: string, body: GetCasesRequestDto = {}): Promise<PaginatedArray<CaseSummary>> => {
   const response = (
-    await apiClient.post<CasesDTO>(PROJECT_CASES_ENDPOINT(id), {
+    await apiClient.post<CasesDto>(PROJECT_CASES_ENDPOINT(id), {
       ...body,
       filters: {
         ...(body?.filters ?? {}),
@@ -67,23 +67,23 @@ export const getAllCases = async (id: string, body: GetCasesRequestDTO = {}): Pr
 };
 
 const getCase = async (id: string): Promise<Case> => {
-  const response = (await apiClient.get<CaseDTO>(CASE_DETAILS_ENDPOINT(id))).data;
+  const response = (await apiClient.get<CaseDto>(CASE_DETAILS_ENDPOINT(id))).data;
   return toCase(response);
 };
 
-const getFilters = async (id: string): Promise<CasesFiltersDTO> => {
-  return (await apiClient.get<CasesFiltersDTO>(PROJECT_CASES_FILTERS_ENDPOINT(id))).data;
+const getFilters = async (id: string): Promise<CasesFiltersDto> => {
+  return (await apiClient.get<CasesFiltersDto>(PROJECT_CASES_FILTERS_ENDPOINT(id))).data;
 };
 
-const createCase = async (body: CreateCaseRequestDTO): Promise<CreateCaseResponseDTO> => {
-  return (await apiClient.post<CreateCaseResponseDTO>(CREATE_CASE_ENDPOINT, body)).data;
+const createCase = async (body: CreateCaseRequestDto): Promise<CreateCaseResponseDto> => {
+  return (await apiClient.post<CreateCaseResponseDto>(CREATE_CASE_ENDPOINT, body)).data;
 };
 
 const classify = async (
-  props: Omit<CaseClassificationRequestDTO, "region" | "tier">,
-): Promise<CaseClassificationResponseDTO> => {
+  props: Omit<CaseClassificationRequestDto, "region" | "tier">,
+): Promise<CaseClassificationResponseDto> => {
   return (
-    await apiClient.post<CaseClassificationResponseDTO>(CASE_CLASSIFICATION_ENDPOINT, {
+    await apiClient.post<CaseClassificationResponseDto>(CASE_CLASSIFICATION_ENDPOINT, {
       ...props,
       region: "EU", // TODO: Remove hardcoded
       tier: "Tier 1", // TODO: Remove hardcoded
@@ -91,26 +91,26 @@ const classify = async (
   ).data;
 };
 
-const getCasesStats = async (id: string, body: Partial<GetCasesStatsRequestDTO>): Promise<CasesStatsDTO> => {
+const getCasesStats = async (id: string, body: Partial<GetCasesStatsRequestDto>): Promise<CasesStatsDto> => {
   return (
-    await apiClient.get<CasesStatsDTO>(CASE_STATS_ENDPOINT(id), {
+    await apiClient.get<CasesStatsDto>(CASE_STATS_ENDPOINT(id), {
       params: { ...body, caseTypes: body.caseTypes?.join(",") },
     })
   ).data;
 };
 
 const getComments = async (id: string): Promise<Comment[]> => {
-  const response = (await apiClient.get<CommentsDTO>(CASE_COMMENTS_ENDPOINT(id))).data;
+  const response = (await apiClient.get<CommentsDto>(CASE_COMMENTS_ENDPOINT(id))).data;
   return response.comments.map(toComment);
 };
 
-const createComment = async (id: string, body: CreateCommentRequestDTO): Promise<Comment> => {
-  const response = (await apiClient.post<CommentDTO>(CASE_COMMENTS_ENDPOINT(id), body)).data;
+const createComment = async (id: string, body: CreateCommentRequestDto): Promise<Comment> => {
+  const response = (await apiClient.post<CommentDto>(CASE_COMMENTS_ENDPOINT(id), body)).data;
   return toComment(response);
 };
 
 /* Mappers */
-export function toCaseSummary(dto: CasesDTO["cases"][number]): CaseSummary {
+export function toCaseSummary(dto: CasesDto["cases"][number]): CaseSummary {
   return {
     id: dto.id,
     internalId: dto.internalId,
@@ -125,7 +125,7 @@ export function toCaseSummary(dto: CasesDTO["cases"][number]): CaseSummary {
   };
 }
 
-function toCase(dto: CaseDTO): Case {
+function toCase(dto: CaseDto): Case {
   return {
     id: dto.id,
     internalId: dto.internalId,
@@ -149,7 +149,7 @@ function toCase(dto: CaseDTO): Case {
   };
 }
 
-export function toComment(dto: CommentDTO): Comment {
+export function toComment(dto: CommentDto): Comment {
   return {
     id: dto.id,
     content: dto.content,
@@ -169,13 +169,13 @@ export function toComment(dto: CommentDTO): Comment {
 export const cases = {
   get: (id: string) => queryOptions({ queryKey: ["case", id], queryFn: () => getCase(id) }),
 
-  all: (id: string, body: GetCasesRequestDTO = {}) =>
+  all: (id: string, body: GetCasesRequestDto = {}) =>
     queryOptions({
       queryKey: ["cases", id, body],
       queryFn: () => getAllCases(id, body),
     }),
 
-  paginated: (id: string, body: GetCasesRequestDTO = {}) =>
+  paginated: (id: string, body: GetCasesRequestDto = {}) =>
     infiniteQueryOptions({
       queryKey: ["cases", "paginated", id, body],
       queryFn: ({ pageParam }) => getAllCases(id, { ...body, pagination: { ...body.pagination, offset: pageParam } }),
@@ -195,14 +195,14 @@ export const cases = {
     }),
 
   create: mutationOptions({
-    mutationFn: (body: CreateCaseRequestDTO) => createCase(body),
+    mutationFn: (body: CreateCaseRequestDto) => createCase(body),
   }),
 
   classify: mutationOptions({
-    mutationFn: (body: Omit<CaseClassificationRequestDTO, "region" | "tier">) => classify(body),
+    mutationFn: (body: Omit<CaseClassificationRequestDto, "region" | "tier">) => classify(body),
   }),
 
-  stats: (id: string, body: Partial<GetCasesStatsRequestDTO> = {}) =>
+  stats: (id: string, body: Partial<GetCasesStatsRequestDto> = {}) =>
     queryOptions({
       queryKey: ["cases-stats", id, body],
       queryFn: () => getCasesStats(id, body),
@@ -213,6 +213,6 @@ export const cases = {
   comments: (id: string) => queryOptions({ queryKey: ["comments", id], queryFn: () => getComments(id) }),
   createComment: (id: string) =>
     mutationOptions({
-      mutationFn: (body: CreateCommentRequestDTO) => createComment(id, body),
+      mutationFn: (body: CreateCommentRequestDto) => createComment(id, body),
     }),
 };

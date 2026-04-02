@@ -16,11 +16,11 @@
 
 import type { EntityReference, Pagination } from "@src/types";
 
-export interface ProjectsDTO extends Pagination {
-  projects: ProjectSummaryDTO[];
+export interface ProjectsDto extends Pagination {
+  projects: ProjectSummaryDto[];
 }
 
-export interface ProjectDTO {
+export interface ProjectDto {
   id: string;
   key: string;
   name: string;
@@ -53,13 +53,13 @@ export interface ProjectDTO {
   onboardingStatus: string | null;
 }
 
-type ProjectSummaryDTO = Pick<ProjectDTO, "id" | "name" | "key" | "createdOn" | "description" | "type"> & {
+type ProjectSummaryDto = Pick<ProjectDto, "id" | "name" | "key" | "createdOn" | "description" | "type"> & {
   activeCasesCount: number;
   activeChatsCount: number;
   slaStatus: string;
 };
 
-export interface ProjectStatsDTO {
+export interface ProjectStatsDto {
   projectStats: {
     openCases: number;
     activeChats: number;
@@ -74,11 +74,11 @@ export interface ProjectStatsDTO {
   };
 }
 
-export interface ProjectDeploymentsDTO extends Pagination {
-  deployments: ProjectDeploymentDTO[];
+export interface ProjectDeploymentsDto extends Pagination {
+  deployments: ProjectDeploymentDto[];
 }
 
-export interface ProjectDeploymentDTO {
+export interface ProjectDeploymentDto {
   id: string;
   name: string;
   createdOn: string;
@@ -89,11 +89,11 @@ export interface ProjectDeploymentDTO {
   type: EntityReference;
 }
 
-export interface DeploymentProductsDTO extends Pagination {
-  deployedProducts: DeploymentProductDTO[];
+export interface DeploymentProductsDto extends Pagination {
+  deployedProducts: DeploymentProductDto[];
 }
 
-export interface DeploymentProductDTO {
+export interface DeploymentProductDto {
   id: string;
   createdOn: string;
   updatedOn: string;

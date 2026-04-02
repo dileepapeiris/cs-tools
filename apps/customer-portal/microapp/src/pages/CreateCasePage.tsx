@@ -23,7 +23,7 @@ import { useMutation, useQuery, useQueryClient, useSuspenseQuery } from "@tansta
 import { useProject } from "@context/project";
 import { projects } from "@src/services/projects";
 import { cases } from "@src/services/cases";
-import type { CaseClassificationResponseDTO } from "@src/types";
+import type { CaseClassificationResponseDto } from "@src/types";
 import { useEffect, useMemo, useState } from "react";
 import * as Yup from "yup";
 import { overrideOrDefault } from "../utils/others";
@@ -43,7 +43,7 @@ export default function CreateCasePage() {
   const navigate = useNavigate();
   const location = useLocation();
   const messages = location.state?.messages || [];
-  const classifications: CaseClassificationResponseDTO = location.state?.classifications;
+  const classifications: CaseClassificationResponseDto = location.state?.classifications;
   const queryClient = useQueryClient();
   const { projectId } = useProject();
   const notify = useNotify();

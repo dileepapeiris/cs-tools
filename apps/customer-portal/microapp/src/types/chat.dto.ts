@@ -17,14 +17,14 @@
 import type { EntityReference } from "./case.dto";
 import type { Pagination } from "./pagination.types";
 
-export interface MessageDispatchDTO {
+export interface MessageDispatchDto {
   message: string;
   envProducts: Record<string, string[]>;
   region: string;
   tier: string;
 }
 
-export interface MessageResponseDTO {
+export interface MessageResponseDto {
   message: string;
   sessionId: string;
   conversationId: string;
@@ -32,11 +32,11 @@ export interface MessageResponseDTO {
   // TODO: Add recommendations: { query: string; recommendations: { title: string; articleId: string; score: number }[] } | null;
 }
 
-export interface ChatsDTO extends Pagination {
-  conversations: ChatDTO[];
+export interface ChatsDto extends Pagination {
+  conversations: ChatDto[];
 }
 
-export interface ChatDTO {
+export interface ChatDto {
   id: string;
   number: string;
   initialMessage: string;
@@ -46,7 +46,7 @@ export interface ChatDTO {
   state: EntityReference | null;
 }
 
-export interface GetChatsRequestDTO {
+export interface GetChatsRequestDto {
   filters?: {
     stateKeys?: number[];
     searchQuery?: string;

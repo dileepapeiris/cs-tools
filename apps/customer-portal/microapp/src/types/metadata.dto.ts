@@ -16,6 +16,6 @@
 
 import type { EntityReference } from "./case.dto";
 
-export interface MetadataDTO {
+export interface MetadataDto {
   timeZones: EntityReference[];
 }

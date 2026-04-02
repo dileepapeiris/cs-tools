@@ -17,11 +17,11 @@
 import apiClient from "@src/services/apiClient";
 import { infiniteQueryOptions, mutationOptions, queryOptions } from "@tanstack/react-query";
 import type {
-  ChatDTO,
-  ChatsDTO,
-  GetChatsRequestDTO,
-  MessageDispatchDTO,
-  MessageResponseDTO,
+  ChatDto,
+  ChatsDto,
+  GetChatsRequestDto,
+  MessageDispatchDto,
+  MessageResponseDto,
 } from "@src/types/chat.dto";
 import type { Chat, Message } from "@src/types/chat.model";
 
@@ -32,12 +32,12 @@ import {
   CHAT_INITIATE_ENDPOINT,
   PROJECT_CHATS_ENDPOINT,
 } from "@config/endpoints";
-import type { Comment, CommentsDTO, PaginatedArray } from "../types";
+import type { Comment, CommentsDto, PaginatedArray } from "../types";
 import { toComment } from "./cases";
 
-const initiate = async (id: string, data: Omit<MessageDispatchDTO, "region" | "tier">): Promise<Message> => {
+const initiate = async (id: string, data: Omit<MessageDispatchDto, "region" | "tier">): Promise<Message> => {
   const response = (
-    await apiClient.post<MessageResponseDTO>(CHAT_INITIATE_ENDPOINT(id), {
+    await apiClient.post<MessageResponseDto>(CHAT_INITIATE_ENDPOINT(id), {
       ...data,
       region: "EU", // TODO: Remove hardcoded
       tier: "Tier 1", // TODO: Remove hardcoded
@@ -50,10 +50,10 @@ const initiate = async (id: string, data: Omit<MessageDispatchDTO, "region" | "t
 const send = async (
   id: string,
   conversationId: string,
-  data: Omit<MessageDispatchDTO, "region" | "tier">,
+  data: Omit<MessageDispatchDto, "region" | "tier">,
 ): Promise<Message> => {
   const response = (
-    await apiClient.post<MessageResponseDTO>(CHAT_ADD_MESSAGE_ENDPOINT(id, conversationId), {
+    await apiClient.post<MessageResponseDto>(CHAT_ADD_MESSAGE_ENDPOINT(id, conversationId), {
       ...data,
       region: "EU", // TODO: Remove hardcoded
       tier: "Tier 1", // TODO: Remove hardcoded
@@ -64,12 +64,12 @@ const send = async (
 };
 
 const getChat = async (id: string): Promise<Chat> => {
-  const response = (await apiClient.get<ChatDTO>(CHAT_DETAILS_ENDPOINT(id))).data;
+  const response = (await apiClient.get<ChatDto>(CHAT_DETAILS_ENDPOINT(id))).data;
   return toChat(response);
 };
 
-const getAllChats = async (id: string, body: GetChatsRequestDTO = {}): Promise<PaginatedArray<Chat>> => {
-  const response = (await apiClient.post<ChatsDTO>(PROJECT_CHATS_ENDPOINT(id), body)).data;
+const getAllChats = async (id: string, body: GetChatsRequestDto = {}): Promise<PaginatedArray<Chat>> => {
+  const response = (await apiClient.post<ChatsDto>(PROJECT_CHATS_ENDPOINT(id), body)).data;
   const result = response.conversations.map(toChat) as PaginatedArray<Chat>;
   result.pagination = {
     totalRecords: response.totalRecords,
@@ -81,12 +81,12 @@ const getAllChats = async (id: string, body: GetChatsRequestDTO = {}): Promise<P
 };
 
 const getComments = async (id: string): Promise<Comment[]> => {
-  const response = (await apiClient.get<CommentsDTO>(CHAT_COMMENTS_ENDPOINT(id))).data;
+  const response = (await apiClient.get<CommentsDto>(CHAT_COMMENTS_ENDPOINT(id))).data;
   return response.comments.map(toComment);
 };
 
 /* Mappers */
-function toMessage(dto: MessageResponseDTO, direction: "outgoing" | "incoming"): Message {
+function toMessage(dto: MessageResponseDto, direction: "outgoing" | "incoming"): Message {
   return {
     content: dto.message,
     direction: direction,
@@ -95,7 +95,7 @@ function toMessage(dto: MessageResponseDTO, direction: "outgoing" | "incoming"):
   };
 }
 
-function toChat(dto: ChatDTO): Chat {
+function toChat(dto: ChatDto): Chat {
   return {
     id: dto.id,
     number: dto.number,
@@ -111,12 +111,12 @@ function toChat(dto: ChatDTO): Chat {
 export const chats = {
   initiate: (id: string) =>
     mutationOptions({
-      mutationFn: (body: Omit<MessageDispatchDTO, "region" | "tier">) => initiate(id, body),
+      mutationFn: (body: Omit<MessageDispatchDto, "region" | "tier">) => initiate(id, body),
     }),
 
   send: (id: string, conversationId: string) =>
     mutationOptions({
-      mutationFn: (body: Omit<MessageDispatchDTO, "region" | "tier">) => send(id, conversationId, body),
+      mutationFn: (body: Omit<MessageDispatchDto, "region" | "tier">) => send(id, conversationId, body),
     }),
 
   get: (id: string) =>
@@ -125,13 +125,13 @@ export const chats = {
       queryFn: () => getChat(id),
     }),
 
-  all: (id: string, body: GetChatsRequestDTO = {}) =>
+  all: (id: string, body: GetChatsRequestDto = {}) =>
     queryOptions({
       queryKey: ["chats", id, body],
       queryFn: () => getAllChats(id, body),
     }),
 
-  paginated: (id: string, body: GetChatsRequestDTO = {}) =>
+  paginated: (id: string, body: GetChatsRequestDto = {}) =>
     infiniteQueryOptions({
       queryKey: ["chats", "paginated", id, body],
       queryFn: ({ pageParam }) => getAllChats(id, { ...body, pagination: { ...body.pagination, offset: pageParam } }),

@@ -1,7 +1,7 @@
 import { useProject } from "@root/src/context/project";
 import { ItemsListContentSkeleton, usePaginationSubtitleOverride } from "@root/src/pages/AllItemsPage";
 import { changeRequests } from "@root/src/services/changes";
-import type { GetChangeRequestsRquestDTO } from "@root/src/types";
+import type { GetChangeRequestsRquestDto } from "@root/src/types";
 import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
 import { InfiniteScroll } from "../../shared";
 import EmptyState from "../../shared/EmptyState";
@@ -12,7 +12,7 @@ import { ITEM_DETAIL_PATHS } from "@root/src/pages/SupportPage";
 export function ChangeRequestListContent({ filter, search }: { filter: string; search: string }) {
   const { projectId } = useProject();
 
-  const filters: GetChangeRequestsRquestDTO["filters"] = {};
+  const filters: GetChangeRequestsRquestDto["filters"] = {};
 
   if (filter !== "all") {
     filters.stateKeys = [Number(filter)];

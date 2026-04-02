@@ -1,7 +1,7 @@
 import { useProject } from "@root/src/context/project";
 import { ItemsListContentSkeleton, usePaginationSubtitleOverride } from "@root/src/pages/AllItemsPage";
 import { chats } from "@root/src/services/chats";
-import type { GetChatsRequestDTO } from "@root/src/types/chat.dto";
+import type { GetChatsRequestDto } from "@root/src/types/chat.dto";
 import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
 import { InfiniteScroll } from "../../shared";
 import EmptyState from "../../shared/EmptyState";
@@ -12,7 +12,7 @@ import { ITEM_DETAIL_PATHS } from "@root/src/pages/SupportPage";
 export function ChatListContent({ filter, search }: { filter: string; search: string }) {
   const { projectId } = useProject();
 
-  const filters: GetChatsRequestDTO["filters"] = {};
+  const filters: GetChatsRequestDto["filters"] = {};
 
   if (filter !== "all") {
     filters.stateKeys = [Number(filter)];

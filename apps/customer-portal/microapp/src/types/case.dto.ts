@@ -16,11 +16,11 @@
 
 import type { Pagination } from "@src/types";
 
-export interface CasesDTO extends Pagination {
-  cases: CaseSummaryDTO[];
+export interface CasesDto extends Pagination {
+  cases: CaseSummaryDto[];
 }
 
-export interface CaseSummaryDTO {
+export interface CaseSummaryDto {
   id: string;
   internalId: string;
   number: string;
@@ -39,7 +39,7 @@ export interface CaseSummaryDTO {
   status?: EntityReference;
 }
 
-export interface CaseDTO {
+export interface CaseDto {
   updatedOn: string;
   slaResponseTime: string;
   deployedProduct: (EntityReference & { version: string | null }) | null;
@@ -67,7 +67,7 @@ export interface CaseDTO {
   status: EntityReference | null;
 }
 
-export interface CasesFiltersDTO {
+export interface CasesFiltersDto {
   caseStates: EntityReference[];
   severities: EntityReference[];
   issueTypes: EntityReference[];
@@ -92,7 +92,7 @@ export interface EntityReference {
   label: string;
 }
 
-export interface GetCasesRequestDTO {
+export interface GetCasesRequestDto {
   filters?: {
     caseTypes?: string[];
     createdByMe?: boolean;
@@ -112,7 +112,7 @@ export interface GetCasesRequestDTO {
   };
 }
 
-export interface CreateCaseRequestDTO {
+export interface CreateCaseRequestDto {
   type: string;
   projectId: string;
   deploymentId: string;
@@ -123,7 +123,7 @@ export interface CreateCaseRequestDTO {
   severityKey: number;
 }
 
-export interface CreateCaseResponseDTO {
+export interface CreateCaseResponseDto {
   id: string;
   internalId: string;
   number: number;
@@ -133,14 +133,14 @@ export interface CreateCaseResponseDTO {
   type: EntityReference;
 }
 
-export interface CaseClassificationRequestDTO {
+export interface CaseClassificationRequestDto {
   chatHistory: string;
   envProducts: Record<string, string[]>;
   region: string;
   tier: string;
 }
 
-export interface CaseClassificationResponseDTO {
+export interface CaseClassificationResponseDto {
   issueType: string;
   severityLevel: string;
   caseInfo: {
@@ -154,7 +154,7 @@ export interface CaseClassificationResponseDTO {
   };
 }
 
-export interface CasesStatsDTO {
+export interface CasesStatsDto {
   totalCount: number;
   activeCount: number;
   outstandingCount: number;
@@ -170,11 +170,11 @@ export interface CasesStatsDTO {
   outstandingEngagementTypeCount: { id: string; label: string; count: number }[];
 }
 
-export interface CommentsDTO extends Pagination {
-  comments: CommentDTO[];
+export interface CommentsDto extends Pagination {
+  comments: CommentDto[];
 }
 
-export interface CommentDTO {
+export interface CommentDto {
   id: string;
   content: string;
   type: string;
@@ -192,11 +192,11 @@ export interface CommentDTO {
   }[];
 }
 
-export interface CreateCommentRequestDTO {
+export interface CreateCommentRequestDto {
   content: string;
   type: "comments";
 }
 
-export interface GetCasesStatsRequestDTO {
+export interface GetCasesStatsRequestDto {
   caseTypes: string[];
 }

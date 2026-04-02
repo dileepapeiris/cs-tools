@@ -16,17 +16,17 @@
 
 import type {
   Deployment,
-  DeploymentProductDTO,
-  DeploymentProductsDTO,
+  DeploymentProductDto,
+  DeploymentProductsDto,
   PaginatedArray,
   Pagination,
   Product,
   Project,
-  ProjectDeploymentDTO,
-  ProjectDeploymentsDTO,
-  ProjectDTO,
+  ProjectDeploymentDto,
+  ProjectDeploymentsDto,
+  ProjectDto,
   ProjectInfo,
-  ProjectsDTO,
+  ProjectsDto,
   ProjectStatus,
 } from "@src/types";
 import {
@@ -40,15 +40,15 @@ import { infiniteQueryOptions, mutationOptions, queryOptions } from "@tanstack/r
 import { stripHtmlTags } from "@utils/others";
 
 const getAllProjects = async (): Promise<Project[]> => {
-  const projects = (await apiClient.post<ProjectsDTO>(PROJECTS_ENDPOINT, {})).data.projects;
-  const projectsWithStats = await Promise.all(projects.map(mapProjectDTOToProjectSummary));
+  const projects = (await apiClient.post<ProjectsDto>(PROJECTS_ENDPOINT, {})).data.projects;
+  const projectsWithStats = await Promise.all(projects.map(mapProjectDtoToProjectSummary));
 
   return projectsWithStats;
 };
 
 const getProject = async (id: string): Promise<ProjectInfo> => {
-  const response = (await apiClient.get<ProjectDTO>(PROJECT_DETAILS_ENDPOINT(id))).data;
-  return mapProjectDTOToProject(response);
+  const response = (await apiClient.get<ProjectDto>(PROJECT_DETAILS_ENDPOINT(id))).data;
+  return mapProjectDtoToProject(response);
 };
 
 const editProject = async (id: string, body: { hasAgent: boolean }): Promise<void> => {
@@ -59,7 +59,7 @@ const getDeploymentsByProject = async (
   id: string,
   body: Partial<Omit<Pagination, "totalRecords">>,
 ): Promise<PaginatedArray<Deployment>> => {
-  const response = (await apiClient.get<ProjectDeploymentsDTO>(PROJECT_DEPLOYMENTS_ENDPOINT(id), { params: body }))
+  const response = (await apiClient.get<ProjectDeploymentsDto>(PROJECT_DEPLOYMENTS_ENDPOINT(id), { params: body }))
     .data;
   const result = response.deployments.map(toDeployment) as PaginatedArray<Deployment>;
   result.pagination = {
@@ -76,7 +76,7 @@ const getProductsByDeployment = async (
   body: Partial<Omit<Pagination, "totalRecords">>,
 ): Promise<PaginatedArray<Product>> => {
   const response = (
-    await apiClient.get<DeploymentProductsDTO>(PROJECT_DEPLOYMENT_PRODUCTS_ENDPOINT(deploymentId), { params: body })
+    await apiClient.get<DeploymentProductsDto>(PROJECT_DEPLOYMENT_PRODUCTS_ENDPOINT(deploymentId), { params: body })
   ).data;
   const result = response.deployedProducts.map(toProduct) as PaginatedArray<Product>;
   result.pagination = {
@@ -89,7 +89,7 @@ const getProductsByDeployment = async (
 };
 
 /* Mappers */
-function mapProjectDTOToProjectSummary(project: ProjectsDTO["projects"][number]): Project {
+function mapProjectDtoToProjectSummary(project: ProjectsDto["projects"][number]): Project {
   return {
     id: project.id,
     projectKey: project.key,
@@ -105,7 +105,7 @@ function mapProjectDTOToProjectSummary(project: ProjectsDTO["projects"][number])
   };
 }
 
-function mapProjectDTOToProject(project: ProjectDTO): ProjectInfo {
+function mapProjectDtoToProject(project: ProjectDto): ProjectInfo {
   return {
     id: project.id,
     projectKey: project.key,
@@ -117,7 +117,7 @@ function mapProjectDTOToProject(project: ProjectDTO): ProjectInfo {
   };
 }
 
-function toDeployment(deployment: ProjectDeploymentDTO): Deployment {
+function toDeployment(deployment: ProjectDeploymentDto): Deployment {
   return {
     id: deployment.id,
     name: deployment.name,
@@ -130,7 +130,7 @@ function toDeployment(deployment: ProjectDeploymentDTO): Deployment {
   };
 }
 
-function toProduct(product: DeploymentProductDTO): Product {
+function toProduct(product: DeploymentProductDto): Product {
   return {
     id: product.id,
     createdOn: new Date(product.createdOn.replace(" ", "T")),

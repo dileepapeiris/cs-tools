@@ -14,18 +14,18 @@
 // specific language governing permissions and limitations
 // under the License.
 
-import type { CaseDTO, CaseSummaryDTO, EntityReference, Pagination } from "@src/types";
+import type { CaseDto, CaseSummaryDto, EntityReference, Pagination } from "@src/types";
 
-export interface ServiceRequestsDTO extends Pagination {
-  cases: ServiceRequestSummaryDTO[];
+export interface ServiceRequestsDto extends Pagination {
+  cases: ServiceRequestSummaryDto[];
 }
 
-interface ServiceRequestSummaryDTO extends CaseSummaryDTO {
+interface ServiceRequestSummaryDto extends CaseSummaryDto {
   createdBy: string;
   assignedTeam: EntityReference | null;
 }
 
-export interface ServiceRequestDTO extends CaseDTO {
+export interface ServiceRequestDto extends CaseDto {
   createdBy: string;
   assignedTeam: EntityReference | null;
 }

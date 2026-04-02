@@ -14,13 +14,13 @@
 // specific language governing permissions and limitations
 // under the License.
 
-import type { CasesStatsDTO, EntityReference, Pagination } from "@src/types";
+import type { CasesStatsDto, EntityReference, Pagination } from "@src/types";
 
-export interface ChangeRequestsDTO extends Pagination {
-  changeRequests: ChangeRequestSummaryDTO[];
+export interface ChangeRequestsDto extends Pagination {
+  changeRequests: ChangeRequestSummaryDto[];
 }
 
-interface ChangeRequestSummaryDTO {
+interface ChangeRequestSummaryDto {
   id: string;
   number: string;
   title: string;
@@ -34,7 +34,7 @@ interface ChangeRequestSummaryDTO {
   updatedOn: string;
 }
 
-export interface ChangeRequestDTO {
+export interface ChangeRequestDto {
   id: string;
   number: string;
   title: string;
@@ -60,7 +60,7 @@ export interface ChangeRequestDTO {
   updatedOn: string;
 }
 
-export interface GetChangeRequestsRquestDTO {
+export interface GetChangeRequestsRquestDto {
   filters?: {
     impactKey?: number;
     searchQuery?: string;
@@ -72,7 +72,7 @@ export interface GetChangeRequestsRquestDTO {
   };
 }
 
-export type ChangeRequestsStatsDTO = Pick<
-  CasesStatsDTO,
+export type ChangeRequestsStatsDto = Pick<
+  CasesStatsDto,
   "totalCount" | "activeCount" | "outstandingCount" | "stateCount"
 >;

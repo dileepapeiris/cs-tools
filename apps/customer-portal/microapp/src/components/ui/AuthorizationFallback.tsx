@@ -15,7 +15,7 @@
 // under the License.
 
 import { Backdrop, Box, Button, pxToRem, Stack, Typography } from "@wso2/oxygen-ui";
-import { LockIcon, LogOutIcon } from "@wso2/oxygen-ui-icons-react";
+import { CircleQuestionMark, CircleQuestionMarkIcon, LockIcon, LogOutIcon } from "@wso2/oxygen-ui-icons-react";
 import { goToMyAppsScreen } from "../microapp-bridge";
 
 export function AuthorizationFallback() {
@@ -40,15 +40,25 @@ export function AuthorizationFallback() {
           Permission Required
         </Typography>
 
-        <Typography variant="body2" color="text.secondary" mt={0.3}>
-          You don't have access to this application
+        <Typography variant="body2" color="text.secondary" mt={0.3} px={1}>
+          To use the Customer Portal, your organization needs an active Customer Support subscription.
         </Typography>
+        <Typography variant="body2" color="text.secondary" mt={0.3}></Typography>
       </Stack>
 
       <Button variant="contained" color="secondary" sx={{ mt: 2 }} onClick={goToMyAppsScreen}>
         <LogOutIcon size={pxToRem(20)} style={{ transform: "scaleX(-1)", marginRight: 10 }} />
         Exit
       </Button>
+      <Typography
+        variant="subtitle2"
+        color="text.secondary"
+        mt={0.3}
+        px={1}
+        sx={{ position: "absolute", bottom: "calc(var(--safe-bottom))", opacity: 0.6 }}
+      >
+        If you're unsure, please check with your admin or contact support.
+      </Typography>
     </Backdrop>
   );
 }

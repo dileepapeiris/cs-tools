@@ -62,7 +62,7 @@ export default function SelectProjectPage() {
             if (axios.isAxiosError(error)) {
               const status = error.response?.status;
 
-              if (status === 401 || status === 403 || status === 500) {
+              if (status === 401 || status === 403) {
                 return <AuthorizationFallback />;
               }
             }

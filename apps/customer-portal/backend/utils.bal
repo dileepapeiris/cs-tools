@@ -294,8 +294,7 @@ public isolated function mapDeployedProducts(entity:DeployedProductsResponse res
                 } : (),
             deployment: deployment != () ? {id: deployment.id, label: deployment.name} : (),
             version: version != () ? {id: version.id, label: version.name} : (),
-            category: category != () ? {id: category.id, label: category.name} : (),
-            instanceCount: product.instanceCount
+            category: category != () ? {id: category.id, label: category.name} : ()
         };
 
     return {

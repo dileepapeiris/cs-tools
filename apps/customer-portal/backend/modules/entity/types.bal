@@ -880,8 +880,6 @@ public type DeployedProduct record {|
     string? releasedOn;
     # End of life date of the product
     string? endOfLifeOn;
-    # Instances of the deployed product
-    int instanceCount?;
     json...;
 |};
 

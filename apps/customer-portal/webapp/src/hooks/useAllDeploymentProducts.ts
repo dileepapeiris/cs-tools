@@ -25,7 +25,7 @@ import {
 import type {
   DeploymentProductItem,
 } from "@models/responses";
-import { addApiHeaders } from "@utils/apiUtils";
+import { mergeApiHeaders } from "@utils/apiUtils";
 
 interface DeploymentForProducts {
   id: string;
@@ -57,7 +57,10 @@ export function useAllDeploymentProducts(
       queryFn: async () => {
         const token = await getIdToken();
         const fetchFn: FetchFn = (url, init) =>
-          fetch(url, { ...init, headers: addApiHeaders(token) });
+          fetch(url, {
+            ...init,
+            headers: mergeApiHeaders(token, init?.headers),
+          });
         return fetchDeploymentProductsAll({
           deploymentId,
           pageSize: 10,

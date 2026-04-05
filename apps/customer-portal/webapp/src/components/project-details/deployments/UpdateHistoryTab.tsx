@@ -191,6 +191,9 @@ export default function UpdateHistoryTab({
     isLoadingRecommended ||
     (searchParams != null && showUpdateLevelDropdownSkeleton);
 
+  const isEditInlineLoading =
+    isLoadingRecommended || showUpdateLevelDropdownSkeleton;
+
   const availableUpdateLevels = useMemo(() => {
     if (!updateLevelsData) return [];
 
@@ -422,6 +425,7 @@ export default function UpdateHistoryTab({
                     isSaving={isSaving}
                     availableUpdateLevels={availableUpdateLevels}
                     showUpdateLevelSkeleton={showUpdateLevelDropdownSkeleton}
+                    showEditFormSkeleton={isEditInlineLoading}
                   />
                 );
               })}
@@ -540,6 +544,7 @@ interface TimelineItemProps {
   isSaving: boolean;
   availableUpdateLevels: number[];
   showUpdateLevelSkeleton: boolean;
+  showEditFormSkeleton: boolean;
 }
 
 /**
@@ -559,6 +564,7 @@ function TimelineItem({
   isSaving,
   availableUpdateLevels,
   showUpdateLevelSkeleton,
+  showEditFormSkeleton,
 }: TimelineItemProps): JSX.Element {
   const [editForm, setEditForm] = useState<ProductUpdate>(update);
 
@@ -641,100 +647,124 @@ function TimelineItem({
           }}
         />
         {isEditing ? (
-          <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
-            <Box
-              sx={{
-                display: "grid",
-                gridTemplateColumns: "1fr 1fr",
-                gap: 2,
-              }}
-            >
-              {showUpdateLevelSkeleton ? (
-                <Skeleton
-                  variant="rounded"
-                  width="100%"
-                  height={40}
-                  sx={{ alignSelf: "flex-end" }}
-                />
-              ) : (
+          showEditFormSkeleton ? (
+            <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
+              <AddNewUpdateSectionSkeleton />
+              <Box sx={{ display: "flex", justifyContent: "flex-end" }}>
+                <Button
+                  variant="outlined"
+                  size="small"
+                  onClick={onCancelEdit}
+                  disabled={isSaving}
+                  sx={{
+                    color: "text.secondary",
+                    borderColor: "text.secondary",
+                    "&:hover": {
+                      borderColor: "text.primary",
+                      color: "text.primary",
+                    },
+                  }}
+                >
+                  Cancel
+                </Button>
+              </Box>
+            </Box>
+          ) : (
+            <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
+              <Box
+                sx={{
+                  display: "grid",
+                  gridTemplateColumns: "1fr 1fr",
+                  gap: 2,
+                }}
+              >
+                {showUpdateLevelSkeleton ? (
+                  <Skeleton
+                    variant="rounded"
+                    width="100%"
+                    height={40}
+                    sx={{ alignSelf: "flex-end" }}
+                  />
+                ) : (
+                  <TextField
+                    select
+                    label="Update Level"
+                    value={editForm.updateLevel}
+                    onChange={handleEditChange("updateLevel")}
+                    size="small"
+                    fullWidth
+                    disabled={isSaving}
+                    sx={{
+                      "& .MuiInputBase-root": { bgcolor: "background.paper" },
+                    }}
+                  >
+                    <MenuItem value="">Select</MenuItem>
+                    {availableUpdateLevels.map((level) => (
+                      <MenuItem key={level} value={level}>
+                        {level}
+                      </MenuItem>
+                    ))}
+                  </TextField>
+                )}
                 <TextField
-                  select
-                  label="Update Level"
-                  value={editForm.updateLevel}
-                  onChange={handleEditChange("updateLevel")}
+                  label="Date"
+                  type="date"
+                  value={editForm.date}
+                  onChange={handleEditChange("date")}
                   size="small"
                   fullWidth
                   disabled={isSaving}
+                  slotProps={{ inputLabel: { shrink: true } }}
                   sx={{
                     "& .MuiInputBase-root": { bgcolor: "background.paper" },
                   }}
-                >
-                  <MenuItem value="">Select</MenuItem>
-                  {availableUpdateLevels.map((level) => (
-                    <MenuItem key={level} value={level}>
-                      {level}
-                    </MenuItem>
-                  ))}
-                </TextField>
-              )}
+                />
+              </Box>
               <TextField
-                label="Date"
-                type="date"
-                value={editForm.date}
-                onChange={handleEditChange("date")}
+                label="Description"
+                value={editForm.details || ""}
+                onChange={handleEditChange("details")}
                 size="small"
                 fullWidth
+                multiline
+                rows={2}
                 disabled={isSaving}
-                slotProps={{ inputLabel: { shrink: true } }}
                 sx={{
                   "& .MuiInputBase-root": { bgcolor: "background.paper" },
                 }}
               />
+              <Box sx={{ display: "flex", justifyContent: "flex-end", gap: 1 }}>
+                <Button
+                  variant="outlined"
+                  size="small"
+                  onClick={onCancelEdit}
+                  disabled={isSaving}
+                  sx={{
+                    color: "text.secondary",
+                    borderColor: "text.secondary",
+                    "&:hover": {
+                      borderColor: "text.primary",
+                      color: "text.primary",
+                    },
+                  }}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  variant="contained"
+                  size="small"
+                  onClick={handleSave}
+                  disabled={isSaving || !editForm.updateLevel || !editForm.date}
+                  sx={{
+                    bgcolor: "primary.main",
+                    "&:hover": { bgcolor: "primary.dark" },
+                  }}
+                >
+                  {isSaving ? "Saving Update..." : "Save"}
+                </Button>
+              </Box>
             </Box>
-            <TextField
-              label="Description"
-              value={editForm.details || ""}
-              onChange={handleEditChange("details")}
-              size="small"
-              fullWidth
-              multiline
-              rows={2}
-              disabled={isSaving}
-              sx={{
-                "& .MuiInputBase-root": { bgcolor: "background.paper" },
-              }}
-            />
-            <Box sx={{ display: "flex", justifyContent: "flex-end", gap: 1 }}>
-              <Button
-                variant="outlined"
-                size="small"
-                onClick={onCancelEdit}
-                disabled={isSaving}
-                sx={{
-                  color: "text.secondary",
-                  borderColor: "text.secondary",
-                  "&:hover": {
-                    borderColor: "text.primary",
-                    color: "text.primary",
-                  },
-                }}
-              >
-                Cancel
-              </Button>
-              <Button
-                variant="contained"
-                size="small"
-                onClick={handleSave}
-                disabled={isSaving || !editForm.updateLevel || !editForm.date}
-                sx={{
-                  bgcolor: "primary.main",
-                  "&:hover": { bgcolor: "primary.dark" },
-                }}
-              >
-                {isSaving ? "Saving Update..." : "Save"}
-              </Button>
-            </Box>
-          </Box>
+          )
         ) : (
           <>
             <Box

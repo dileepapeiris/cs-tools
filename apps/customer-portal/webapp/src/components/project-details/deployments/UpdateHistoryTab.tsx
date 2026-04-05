@@ -575,10 +575,19 @@ function TimelineItem({
   const handleEditChange =
     (field: keyof ProductUpdate) => (e: ChangeEvent<HTMLInputElement>) => {
       const value = e.target.value;
-      setEditForm((prev) => ({
-        ...prev,
-        [field]: field === "updateLevel" ? parseInt(value, 10) : value,
-      }));
+      setEditForm((prev) => {
+        if (field === "updateLevel") {
+          if (value === "" || value.trim() === "") {
+            return prev;
+          }
+          const parsed = parseInt(value, 10);
+          return {
+            ...prev,
+            updateLevel: Number.isNaN(parsed) ? prev.updateLevel : parsed,
+          };
+        }
+        return { ...prev, [field]: value };
+      });
     };
 
   const handleSave = () => {
@@ -698,7 +707,6 @@ function TimelineItem({
                       "& .MuiInputBase-root": { bgcolor: "background.paper" },
                     }}
                   >
-                    <MenuItem value="">Select</MenuItem>
                     {availableUpdateLevels.map((level) => (
                       <MenuItem key={level} value={level}>
                         {level}

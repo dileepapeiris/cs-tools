@@ -208,13 +208,8 @@ export default function UserProfileModal({
           return;
         }
 
-        onClose();
-        if (hasTimeZoneInPayload) {
-          window.location.reload();
-          return;
-        }
-
         showSuccess("Profile updated successfully");
+        onClose();
       },
       onError: (err) => {
         const msg = err?.message ?? "";

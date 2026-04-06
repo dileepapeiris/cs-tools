@@ -14,8 +14,8 @@
 // specific language governing permissions and limitations
 // under the License.
 
-import { Box, Button, Pagination, Stack } from "@wso2/oxygen-ui";
-import { PhoneCall } from "@wso2/oxygen-ui-icons-react";
+import { Box, Button, Pagination, Stack, Typography } from "@wso2/oxygen-ui";
+import { MapPin, PhoneCall } from "@wso2/oxygen-ui-icons-react";
 import {
   useState,
   useCallback,
@@ -40,7 +40,6 @@ import RequestCallModal from "@case-details-calls/RequestCallModal";
 import DeleteCallRequestModal from "@case-details-calls/DeleteCallRequestModal";
 import RejectCallRequestModal from "@case-details-calls/RejectCallRequestModal";
 import ApproveCallRequestModal from "@case-details-calls/ApproveCallRequestModal";
-import MissingTimezoneDialog from "@case-details-calls/MissingTimezoneDialog";
 import UserProfileModal from "@components/common/header/UserProfileModal";
 import ErrorBanner from "@components/common/error-banner/ErrorBanner";
 import SuccessBanner from "@components/common/success-banner/SuccessBanner";
@@ -85,16 +84,42 @@ export default function CallsPanel({
   const [deleteCall, setDeleteCall] = useState<CallRequest | null>(null);
   const [approveCall, setApproveCall] = useState<CallRequest | null>(null);
   const [rejectCall, setRejectCall] = useState<CallRequest | null>(null);
-  const [isMissingTzDialogOpen, setIsMissingTzDialogOpen] = useState(false);
+  const [pendingCallAfterTz, setPendingCallAfterTz] = useState<
+    | { type: "create" }
+    | { type: "edit"; call: CallRequest }
+    | null
+  >(null);
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
-  const [hasShownTzPrompt, setHasShownTzPrompt] = useState(false);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [callRequestsPage, setCallRequestsPage] = useState(1);
 
   const { data: projectFilters } = useGetProjectFilters(projectId);
-  const { data: userDetails } = useGetUserDetails();
-  const userTimeZone = userDetails?.timeZone || undefined;
+  const {
+    data: userDetails,
+    refetch: refetchUserDetails,
+    isPending: isUserDetailsPending,
+    isFetching: isUserDetailsFetching,
+    isError: isUserDetailsError,
+  } = useGetUserDetails();
+
+  const resolvedUserTimeZone =
+    userDetails?.timeZone?.trim() ||
+    (userDetails as { timezone?: string } | undefined)?.timezone?.trim() ||
+    "";
+
+  const userTimeZone = resolvedUserTimeZone || undefined;
+
+  /** True while GET /users/me has not returned usable profile data for this panel. */
+  const isUserMeLoading =
+    !isUserDetailsError &&
+    (isUserDetailsPending ||
+      (isUserDetailsFetching && userDetails === undefined));
+
+  const needsTimeZone =
+    !isUserMeLoading &&
+    !!userDetails &&
+    !resolvedUserTimeZone;
 
   // Derive filtered state keys from project filters (all non-Canceled states for search body)
   const callRequestStateKeys = useMemo<number[] | undefined>(() => {
@@ -213,9 +238,14 @@ export default function CallsPanel({
   };
 
   const handleOpenModal = () => {
-    setEditCall(null);
     setSuccessMessage(null);
     setErrorMessage(null);
+    if (!userDetails?.timeZone?.trim()) {
+      setPendingCallAfterTz({ type: "create" });
+      setIsProfileModalOpen(true);
+      return;
+    }
+    setEditCall(null);
     setIsModalOpen(true);
   };
   const handleCloseModal = () => {
@@ -223,6 +253,11 @@ export default function CallsPanel({
     setEditCall(null);
   };
   const handleEditClick = (call: CallRequest) => {
+    if (!userDetails?.timeZone?.trim()) {
+      setPendingCallAfterTz({ type: "edit", call });
+      setIsProfileModalOpen(true);
+      return;
+    }
     setEditCall(call);
     setIsModalOpen(true);
   };
@@ -317,15 +352,6 @@ export default function CallsPanel({
     return () => clearTimeout(t);
   }, [errorMessage]);
 
-  // Prompt once per mount when the user has no timezone set and data is loaded
-  useEffect(() => {
-    if (hasShownTzPrompt) return;
-    if (userDetails && !userDetails.timeZone) {
-      setIsMissingTzDialogOpen(true);
-      setHasShownTzPrompt(true);
-    }
-  }, [userDetails, hasShownTzPrompt]);
-
   const requestCallButton = (
     <Button
       variant="contained"
@@ -338,21 +364,8 @@ export default function CallsPanel({
     </Button>
   );
 
-  return (
-    <Stack spacing={3}>
-      {successMessage && (
-        <SuccessBanner
-          message={successMessage}
-          onClose={() => setSuccessMessage(null)}
-        />
-      )}
-      {errorMessage && (
-        <ErrorBanner
-          message={errorMessage}
-          onClose={() => setErrorMessage(null)}
-        />
-      )}
-
+  const mainCallsContent = (
+    <>
       {!(allCallRequests.length === 0 && !isPending && !isError) && (
         <Box sx={{ alignSelf: "flex-start" }}>{requestCallButton}</Box>
       )}
@@ -387,10 +400,82 @@ export default function CallsPanel({
           )}
         </Stack>
       )}
+    </>
+  );
+
+  return (
+    <Stack spacing={3}>
+      {successMessage && (
+        <SuccessBanner
+          message={successMessage}
+          onClose={() => setSuccessMessage(null)}
+        />
+      )}
+      {errorMessage && (
+        <ErrorBanner
+          message={errorMessage}
+          onClose={() => setErrorMessage(null)}
+        />
+      )}
+
+      {isUserMeLoading ? (
+        <Box
+          role="status"
+          aria-busy="true"
+          aria-label="Loading your profile for call scheduling"
+          sx={{ width: "100%" }}
+        >
+          <CallsListSkeleton />
+        </Box>
+      ) : needsTimeZone ? (
+        <Box
+          sx={{
+            flex: 1,
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            justifyContent: "center",
+            minHeight: 280,
+            width: "100%",
+            py: 4,
+            px: 2,
+          }}
+        >
+          <Box
+            role="region"
+            aria-label="Time zone required"
+            sx={{
+              maxWidth: 520,
+              width: "100%",
+              textAlign: "center",
+            }}
+          >
+            <Typography
+              variant="body2"
+              color="text.secondary"
+              sx={{ mb: 2, textAlign: "center" }}
+            >
+              Set your time zone first to request or reschedule a call. Go to
+              your profile to choose your time zone.
+            </Typography>
+            <Button
+              variant="contained"
+              color="primary"
+              startIcon={<MapPin size={16} />}
+              onClick={() => setIsProfileModalOpen(true)}
+            >
+              Set Time Zone
+            </Button>
+          </Box>
+        </Box>
+      ) : (
+        mainCallsContent
+      )}
 
       <DeleteCallRequestModal
         open={!!deleteCall}
         call={deleteCall}
+        userTimeZone={userTimeZone}
         onClose={handleCloseDeleteModal}
         onConfirm={handleConfirmDelete}
         isDeleting={patchCallRequest.isPending}
@@ -432,18 +517,29 @@ export default function CallsPanel({
         isRejecting={patchCallRequest.isPending}
       />
 
-      <MissingTimezoneDialog
-        open={isMissingTzDialogOpen}
-        onClose={() => setIsMissingTzDialogOpen(false)}
-        onSetTimeZone={() => {
-          setIsMissingTzDialogOpen(false);
-          setIsProfileModalOpen(true);
-        }}
-      />
-
       <UserProfileModal
         open={isProfileModalOpen}
-        onClose={() => setIsProfileModalOpen(false)}
+        onClose={() => {
+          setIsProfileModalOpen(false);
+          void refetchUserDetails()
+            .then((result) => {
+              const tz = result.data?.timeZone?.trim();
+              if (!pendingCallAfterTz || !tz) {
+                return;
+              }
+              if (pendingCallAfterTz.type === "create") {
+                setEditCall(null);
+                setIsModalOpen(true);
+              } else {
+                setEditCall(pendingCallAfterTz.call);
+                setIsModalOpen(true);
+              }
+              setPendingCallAfterTz(null);
+            })
+            .catch(() => {
+              setPendingCallAfterTz(null);
+            });
+        }}
       />
     </Stack>
   );

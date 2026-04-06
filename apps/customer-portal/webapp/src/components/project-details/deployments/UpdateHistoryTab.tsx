@@ -23,6 +23,7 @@ import {
   TextField,
   Typography,
   alpha,
+  type Theme,
 } from "@wso2/oxygen-ui";
 import { SquarePen, Trash2 } from "@wso2/oxygen-ui-icons-react";
 import {
@@ -34,8 +35,19 @@ import {
   type JSX,
 } from "react";
 import type { ProductUpdate } from "@models/responses";
+import { useErrorBanner } from "@context/error-banner/ErrorBannerContext";
+import { useSuccessBanner } from "@context/success-banner/SuccessBannerContext";
 import { useGetRecommendedUpdateLevels } from "@api/useGetRecommendedUpdateLevels";
 import { usePostUpdateLevelsSearch } from "@api/usePostUpdateLevelsSearch";
+
+function updatesHistoryErrorMessage(error: unknown): string {
+  return error instanceof Error
+    ? error.message
+    : "Failed to save update history.";
+}
+
+/** Which update-history mutation is in flight (for footer / button labels). */
+export type UpdateHistorySaveAction = "add" | "delete" | "edit";
 
 export interface UpdateHistoryTabProps {
   updates: ProductUpdate[];
@@ -46,6 +58,7 @@ export interface UpdateHistoryTabProps {
   onFormStateChange?: (state: {
     canAdd: boolean;
     isSaving: boolean;
+    saveAction: UpdateHistorySaveAction | null;
     handleAdd: () => void;
   }) => void;
 }
@@ -61,6 +74,50 @@ const INITIAL_FORM: UpdateFormData = {
   date: "",
   details: "",
 };
+
+function updateHistoryEntryBackground(theme: Theme): string {
+  return alpha(
+    theme.palette.text.secondary,
+    theme.palette.mode === "dark" ? 0.22 : 0.12,
+  );
+}
+
+/** Visible outline on history cards and section rules in light / dark mode. */
+function updateHistoryOutlineColor(theme: Theme): string {
+  return theme.palette.mode === "dark"
+    ? alpha(theme.palette.common.white, 0.28)
+    : alpha(theme.palette.common.black, 0.12);
+}
+
+/**
+ * Placeholder layout while recommended levels or update-level search is loading.
+ *
+ * @returns {JSX.Element} Skeleton block for the add-update form.
+ */
+function AddNewUpdateSectionSkeleton(): JSX.Element {
+  return (
+    <Box
+      sx={{
+        display: "flex",
+        flexDirection: "column",
+        gap: 2,
+      }}
+    >
+      <Skeleton variant="text" width={140} height={28} />
+      <Box
+        sx={{
+          display: "grid",
+          gridTemplateColumns: "1fr 1fr",
+          gap: 2,
+        }}
+      >
+        <Skeleton variant="rounded" width="100%" height={40} />
+        <Skeleton variant="rounded" width="100%" height={40} />
+      </Box>
+      <Skeleton variant="rounded" width="100%" height={72} />
+    </Box>
+  );
+}
 
 /**
  * Displays update history timeline and allows adding/editing/deleting updates.
@@ -78,9 +135,18 @@ export default function UpdateHistoryTab({
 }: UpdateHistoryTabProps): JSX.Element {
   const [form, setForm] = useState<UpdateFormData>(INITIAL_FORM);
   const [editingIndex, setEditingIndex] = useState<number | null>(null);
-  const [isSaving, setIsSaving] = useState(false);
+  const [saveInFlight, setSaveInFlight] = useState<
+    UpdateHistorySaveAction | null
+  >(null);
 
-  const { data: recommendedUpdateLevels = [] } = useGetRecommendedUpdateLevels();
+  const isSaving = saveInFlight !== null;
+  const { showSuccess } = useSuccessBanner();
+  const { showError } = useErrorBanner();
+
+  const {
+    data: recommendedUpdateLevels = [],
+    isLoading: isLoadingRecommended,
+  } = useGetRecommendedUpdateLevels();
 
   const matchedRecommendation = useMemo(() => {
     if (
@@ -111,8 +177,22 @@ export default function UpdateHistoryTab({
     };
   }, [productName, productVersion, matchedRecommendation]);
 
-  const { data: updateLevelsData, isLoading: isLoadingUpdateLevels } =
-    usePostUpdateLevelsSearch(searchParams);
+  const {
+    data: updateLevelsData,
+    isLoading: isLoadingUpdateLevels,
+    isFetching: isFetchingUpdateLevels,
+  } = usePostUpdateLevelsSearch(searchParams);
+
+  const showUpdateLevelDropdownSkeleton =
+    isLoadingUpdateLevels ||
+    (isFetchingUpdateLevels && updateLevelsData == null);
+
+  const isAddUpdateSectionLoading =
+    isLoadingRecommended ||
+    (searchParams != null && showUpdateLevelDropdownSkeleton);
+
+  const isEditInlineLoading =
+    isLoadingRecommended || showUpdateLevelDropdownSkeleton;
 
   const availableUpdateLevels = useMemo(() => {
     if (!updateLevelsData) return [];
@@ -124,18 +204,6 @@ export default function UpdateHistoryTab({
 
     return levels;
   }, [updateLevelsData]);
-
-  const getUpdateDescription = useCallback(
-    (updateLevel: number): string | null => {
-      if (!updateLevelsData) return null;
-
-      const levelData = updateLevelsData[String(updateLevel)];
-      if (!levelData?.updateDescriptionLevels?.[0]) return null;
-
-      return levelData.updateDescriptionLevels[0].description || null;
-    },
-    [updateLevelsData],
-  );
 
   const sortedUpdates = useMemo(() => {
     return [...updates].sort((a, b) => {
@@ -156,16 +224,7 @@ export default function UpdateHistoryTab({
   const handleFormChange =
     (field: keyof UpdateFormData) => (e: ChangeEvent<HTMLInputElement>) => {
       const value = e.target.value;
-      setForm((prev) => {
-        const next = { ...prev, [field]: value };
-        if (field === "updateLevel" && value && !prev.details) {
-          const description = getUpdateDescription(parseInt(value, 10));
-          if (description) {
-            next.details = description;
-          }
-        }
-        return next;
-      });
+      setForm((prev) => ({ ...prev, [field]: value }));
     };
 
   const handleAddUpdate = useCallback(async () => {
@@ -180,14 +239,17 @@ export default function UpdateHistoryTab({
       details: form.details || undefined,
     };
 
-    setIsSaving(true);
+    setSaveInFlight("add");
     try {
       await onSaveUpdates([...updates, newUpdate]);
       setForm(INITIAL_FORM);
+      showSuccess("Update history entry added successfully.");
+    } catch (error) {
+      showError(updatesHistoryErrorMessage(error));
     } finally {
-      setIsSaving(false);
+      setSaveInFlight(null);
     }
-  }, [form, updates, onSaveUpdates]);
+  }, [form, updates, onSaveUpdates, showSuccess, showError]);
 
   const isFormValid = !!form.updateLevel && !!form.date;
 
@@ -195,12 +257,21 @@ export default function UpdateHistoryTab({
   useEffect(() => {
     if (onFormStateChange) {
       onFormStateChange({
-        canAdd: isFormValid && !isSaving,
+        canAdd:
+          isFormValid && !isSaving && !isAddUpdateSectionLoading,
         isSaving,
+        saveAction: saveInFlight,
         handleAdd: handleAddUpdate,
       });
     }
-  }, [isFormValid, isSaving, handleAddUpdate, onFormStateChange]);
+  }, [
+    isFormValid,
+    isSaving,
+    saveInFlight,
+    isAddUpdateSectionLoading,
+    handleAddUpdate,
+    onFormStateChange,
+  ]);
 
   const handleEditClick = useCallback(
     (update: ProductUpdate) => {
@@ -217,14 +288,17 @@ export default function UpdateHistoryTab({
       const newUpdates = updates.filter(
         (u) => !(u.updateLevel === update.updateLevel && u.date === update.date),
       );
-      setIsSaving(true);
+      setSaveInFlight("delete");
       try {
         await onSaveUpdates(newUpdates);
+        showSuccess("Update history entry deleted successfully.");
+      } catch (error) {
+        showError(updatesHistoryErrorMessage(error));
       } finally {
-        setIsSaving(false);
+        setSaveInFlight(null);
       }
     },
-    [updates, onSaveUpdates],
+    [updates, onSaveUpdates, showSuccess, showError],
   );
 
   const handleSaveEdit = useCallback(
@@ -238,15 +312,18 @@ export default function UpdateHistoryTab({
 
       const newUpdates = [...updates];
       newUpdates[index] = editedUpdate;
-      setIsSaving(true);
+      setSaveInFlight("edit");
       try {
         await onSaveUpdates(newUpdates);
         setEditingIndex(null);
+        showSuccess("Update history entry updated successfully.");
+      } catch (error) {
+        showError(updatesHistoryErrorMessage(error));
       } finally {
-        setIsSaving(false);
+        setSaveInFlight(null);
       }
     },
-    [updates, onSaveUpdates],
+    [updates, onSaveUpdates, showSuccess, showError],
   );
 
   const formatDate = (dateStr: string): string => {
@@ -278,6 +355,7 @@ export default function UpdateHistoryTab({
           sx={{
             bgcolor: (theme) => alpha(theme.palette.primary.main, 0.08),
             border: 1,
+            borderRadius: 1,
             borderColor: (theme) => alpha(theme.palette.primary.main, 0.3),
             p: 2,
           }}
@@ -346,7 +424,8 @@ export default function UpdateHistoryTab({
                     formatDate={formatDate}
                     isSaving={isSaving}
                     availableUpdateLevels={availableUpdateLevels}
-                    isLoadingUpdateLevels={isLoadingUpdateLevels}
+                    showUpdateLevelSkeleton={showUpdateLevelDropdownSkeleton}
+                    showEditFormSkeleton={isEditInlineLoading}
                   />
                 );
               })}
@@ -358,103 +437,96 @@ export default function UpdateHistoryTab({
       <Box
         sx={{
           borderTop: 1,
-          borderColor: "divider",
+          borderColor: (theme) => updateHistoryOutlineColor(theme),
           pt: 3,
           display: "flex",
           flexDirection: "column",
           gap: 2,
         }}
       >
-        <Typography
-          variant="subtitle2"
-          sx={{ fontWeight: 600, color: "text.primary" }}
-        >
-          Add New Update
-        </Typography>
-        <Box
-          sx={{
-            display: "grid",
-            gridTemplateColumns: "1fr 1fr",
-            gap: 2,
-          }}
-        >
-          <TextField
-            select
-            id="new-update-level"
-            label="Update Level *"
-            value={form.updateLevel}
-            onChange={handleFormChange("updateLevel")}
-            fullWidth
-            size="small"
-            disabled={isSaving || isLoadingUpdateLevels}
-            sx={{
-              "& .MuiSelect-select": {
-                color: !form.updateLevel ? "text.secondary" : undefined,
-              },
-            }}
-          >
-            <MenuItem value="">
-              {isLoadingUpdateLevels ? "Loading..." : "Select Update Level"}
-            </MenuItem>
-            {availableUpdateLevels.map((level) => (
-              <MenuItem key={level} value={level}>
-                {level}
-              </MenuItem>
-            ))}
-          </TextField>
-          <TextField
-            id="new-applied-on"
-            label="Applied On *"
-            type="date"
-            value={form.date}
-            onChange={handleFormChange("date")}
-            fullWidth
-            size="small"
-            disabled={isSaving}
-            slotProps={{ inputLabel: { shrink: true } }}
-          />
-        </Box>
-        <TextField
-          id="new-update-description"
-          label="Description (Optional)"
-          placeholder="Brief description about the update..."
-          value={form.details}
-          onChange={handleFormChange("details")}
-          fullWidth
-          size="small"
-          multiline
-          rows={2}
-          disabled={isSaving}
-        />
-        {matchedRecommendation && (
-          <Box
-            sx={{
-              bgcolor: (theme) => alpha(theme.palette.info.main, 0.08),
-              border: 1,
-              borderColor: (theme) => alpha(theme.palette.info.main, 0.3),
-              p: 1.5,
-            }}
-          >
-            <Typography variant="caption" sx={{ color: "text.secondary" }}>
-              Recommended Update Level: U
-              {matchedRecommendation.recommendedUpdateLevel}
-              {matchedRecommendation.availableUpdatesCount > 0 &&
-                ` (${matchedRecommendation.availableUpdatesCount} updates available)`}
-            </Typography>
-          </Box>
-        )}
-        {!onFormStateChange && (
-          <Box sx={{ display: "flex", justifyContent: "flex-end" }}>
-            <Button
-              variant="contained"
-              color="primary"
-              onClick={handleAddUpdate}
-              disabled={!isFormValid || isSaving}
-              sx={{ minWidth: 120 }}
+        {isAddUpdateSectionLoading ? (
+          <AddNewUpdateSectionSkeleton />
+        ) : (
+          <>
+            <Typography
+              variant="subtitle2"
+              sx={{ fontWeight: 600, color: "text.primary" }}
             >
-              {isSaving ? "Adding..." : "Add Update"}
-            </Button>
-          </Box>
+              Add New Update
+            </Typography>
+            <Box
+              sx={{
+                display: "grid",
+                gridTemplateColumns: "1fr 1fr",
+                gap: 2,
+              }}
+            >
+              <TextField
+                select
+                id="new-update-level"
+                label="Update Level *"
+                value={form.updateLevel}
+                onChange={handleFormChange("updateLevel")}
+                fullWidth
+                size="small"
+                disabled={isSaving || showUpdateLevelDropdownSkeleton}
+                sx={{
+                  "& .MuiSelect-select": {
+                    color: !form.updateLevel ? "text.secondary" : undefined,
+                  },
+                }}
+              >
+                <MenuItem value="">Select Update Level</MenuItem>
+                {availableUpdateLevels.map((level) => (
+                  <MenuItem key={level} value={level}>
+                    {level}
+                  </MenuItem>
+                ))}
+              </TextField>
+              <TextField
+                id="new-applied-on"
+                label="Applied On *"
+                type="date"
+                value={form.date}
+                onChange={handleFormChange("date")}
+                fullWidth
+                size="small"
+                disabled={isSaving}
+                slotProps={{ inputLabel: { shrink: true } }}
+              />
+            </Box>
+            <TextField
+              id="new-update-description"
+              label="Description (Optional)"
+              placeholder="Brief description about the update..."
+              value={form.details}
+              onChange={handleFormChange("details")}
+              fullWidth
+              size="small"
+              multiline
+              rows={2}
+              disabled={isSaving}
+            />
+            {!onFormStateChange && (
+              <Box sx={{ display: "flex", justifyContent: "flex-end" }}>
+                <Button
+                  variant="contained"
+                  color="primary"
+                  onClick={handleAddUpdate}
+                  disabled={!isFormValid || isSaving}
+                  sx={{ minWidth: 120 }}
+                >
+                  {saveInFlight === "delete"
+                    ? "Deleting Update..."
+                    : saveInFlight === "edit"
+                      ? "Saving Update..."
+                      : saveInFlight === "add"
+                        ? "Adding..."
+                        : "Add Update"}
+                </Button>
+              </Box>
+            )}
+          </>
         )}
       </Box>
     </Box>
@@ -471,7 +543,8 @@ interface TimelineItemProps {
   formatDate: (dateStr: string) => string;
   isSaving: boolean;
   availableUpdateLevels: number[];
-  isLoadingUpdateLevels: boolean;
+  showUpdateLevelSkeleton: boolean;
+  showEditFormSkeleton: boolean;
 }
 
 /**
@@ -490,7 +563,8 @@ function TimelineItem({
   formatDate,
   isSaving,
   availableUpdateLevels,
-  isLoadingUpdateLevels,
+  showUpdateLevelSkeleton,
+  showEditFormSkeleton,
 }: TimelineItemProps): JSX.Element {
   const [editForm, setEditForm] = useState<ProductUpdate>(update);
 
@@ -501,10 +575,19 @@ function TimelineItem({
   const handleEditChange =
     (field: keyof ProductUpdate) => (e: ChangeEvent<HTMLInputElement>) => {
       const value = e.target.value;
-      setEditForm((prev) => ({
-        ...prev,
-        [field]: field === "updateLevel" ? parseInt(value, 10) : value,
-      }));
+      setEditForm((prev) => {
+        if (field === "updateLevel") {
+          if (value === "" || value.trim() === "") {
+            return prev;
+          }
+          const parsed = parseInt(value, 10);
+          return {
+            ...prev,
+            updateLevel: Number.isNaN(parsed) ? prev.updateLevel : parsed,
+          };
+        }
+        return { ...prev, [field]: value };
+      });
     };
 
   const handleSave = () => {
@@ -548,12 +631,14 @@ function TimelineItem({
       <Box
         sx={{
           flex: 1,
-          bgcolor: (theme) =>
-            theme.palette.mode === "dark" ? "grey.800" : "grey.700",
-          color: "white",
+          bgcolor: (theme) => updateHistoryEntryBackground(theme),
+          color: "text.primary",
           p: 2,
           position: "relative",
           ml: -1,
+          border: 1,
+          borderStyle: "solid",
+          borderColor: (theme) => updateHistoryOutlineColor(theme),
         }}
       >
         <Box
@@ -566,95 +651,128 @@ function TimelineItem({
             borderTop: "6px solid transparent",
             borderBottom: "6px solid transparent",
             borderRight: (theme) =>
-              `8px solid ${theme.palette.mode === "dark" ? theme.palette.grey[800] : theme.palette.grey[700]}`,
+              `8px solid ${updateHistoryEntryBackground(theme)}`,
             transform: "translateX(-100%)",
           }}
         />
         {isEditing ? (
-          <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
-            <Box
-              sx={{
-                display: "grid",
-                gridTemplateColumns: "1fr 1fr",
-                gap: 2,
-              }}
-            >
-              <TextField
-                select
-                label="Update Level"
-                value={editForm.updateLevel}
-                onChange={handleEditChange("updateLevel")}
-                size="small"
-                fullWidth
-                disabled={isSaving || isLoadingUpdateLevels}
+          showEditFormSkeleton ? (
+            <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
+              <AddNewUpdateSectionSkeleton />
+              <Box sx={{ display: "flex", justifyContent: "flex-end" }}>
+                <Button
+                  variant="outlined"
+                  size="small"
+                  onClick={onCancelEdit}
+                  disabled={isSaving}
+                  sx={{
+                    color: "text.secondary",
+                    borderColor: "text.secondary",
+                    "&:hover": {
+                      borderColor: "text.primary",
+                      color: "text.primary",
+                    },
+                  }}
+                >
+                  Cancel
+                </Button>
+              </Box>
+            </Box>
+          ) : (
+            <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
+              <Box
                 sx={{
-                  "& .MuiInputBase-root": { bgcolor: "background.paper" },
+                  display: "grid",
+                  gridTemplateColumns: "1fr 1fr",
+                  gap: 2,
                 }}
               >
-                <MenuItem value="">
-                  {isLoadingUpdateLevels ? "Loading..." : "Select"}
-                </MenuItem>
-                {availableUpdateLevels.map((level) => (
-                  <MenuItem key={level} value={level}>
-                    {level}
-                  </MenuItem>
-                ))}
-              </TextField>
+                {showUpdateLevelSkeleton ? (
+                  <Skeleton
+                    variant="rounded"
+                    width="100%"
+                    height={40}
+                    sx={{ alignSelf: "flex-end" }}
+                  />
+                ) : (
+                  <TextField
+                    select
+                    label="Update Level"
+                    value={editForm.updateLevel}
+                    onChange={handleEditChange("updateLevel")}
+                    size="small"
+                    fullWidth
+                    disabled={isSaving}
+                    sx={{
+                      "& .MuiInputBase-root": { bgcolor: "background.paper" },
+                    }}
+                  >
+                    {availableUpdateLevels.map((level) => (
+                      <MenuItem key={level} value={level}>
+                        {level}
+                      </MenuItem>
+                    ))}
+                  </TextField>
+                )}
+                <TextField
+                  label="Date"
+                  type="date"
+                  value={editForm.date}
+                  onChange={handleEditChange("date")}
+                  size="small"
+                  fullWidth
+                  disabled={isSaving}
+                  slotProps={{ inputLabel: { shrink: true } }}
+                  sx={{
+                    "& .MuiInputBase-root": { bgcolor: "background.paper" },
+                  }}
+                />
+              </Box>
               <TextField
-                label="Date"
-                type="date"
-                value={editForm.date}
-                onChange={handleEditChange("date")}
+                label="Description"
+                value={editForm.details || ""}
+                onChange={handleEditChange("details")}
                 size="small"
                 fullWidth
+                multiline
+                rows={2}
                 disabled={isSaving}
-                slotProps={{ inputLabel: { shrink: true } }}
                 sx={{
                   "& .MuiInputBase-root": { bgcolor: "background.paper" },
                 }}
               />
+              <Box sx={{ display: "flex", justifyContent: "flex-end", gap: 1 }}>
+                <Button
+                  variant="outlined"
+                  size="small"
+                  onClick={onCancelEdit}
+                  disabled={isSaving}
+                  sx={{
+                    color: "text.secondary",
+                    borderColor: "text.secondary",
+                    "&:hover": {
+                      borderColor: "text.primary",
+                      color: "text.primary",
+                    },
+                  }}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  variant="contained"
+                  size="small"
+                  onClick={handleSave}
+                  disabled={isSaving || !editForm.updateLevel || !editForm.date}
+                  sx={{
+                    bgcolor: "primary.main",
+                    "&:hover": { bgcolor: "primary.dark" },
+                  }}
+                >
+                  {isSaving ? "Saving Update..." : "Save"}
+                </Button>
+              </Box>
             </Box>
-            <TextField
-              label="Description"
-              value={editForm.details || ""}
-              onChange={handleEditChange("details")}
-              size="small"
-              fullWidth
-              multiline
-              rows={2}
-              disabled={isSaving}
-              sx={{
-                "& .MuiInputBase-root": { bgcolor: "background.paper" },
-              }}
-            />
-            <Box sx={{ display: "flex", justifyContent: "flex-end", gap: 1 }}>
-              <Button
-                variant="outlined"
-                size="small"
-                onClick={onCancelEdit}
-                disabled={isSaving}
-                sx={{
-                  color: "grey.300",
-                  borderColor: "grey.600",
-                  "&:hover": { borderColor: "grey.400" },
-                }}
-              >
-                Cancel
-              </Button>
-              <Button
-                variant="contained"
-                size="small"
-                onClick={handleSave}
-                disabled={isSaving || !editForm.updateLevel || !editForm.date}
-                sx={{
-                  bgcolor: "primary.main",
-                  "&:hover": { bgcolor: "primary.dark" },
-                }}
-              >
-                {isSaving ? "Saving..." : "Save"}
-              </Button>
-            </Box>
-          </Box>
+          )
         ) : (
           <>
             <Box
@@ -669,7 +787,7 @@ function TimelineItem({
                 <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
                   <Typography
                     variant="h6"
-                    sx={{ fontWeight: 600, color: "white" }}
+                    sx={{ fontWeight: 600, color: "text.primary" }}
                   >
                     U{update.updateLevel}
                   </Typography>
@@ -679,17 +797,21 @@ function TimelineItem({
                     disabled={isSaving}
                     aria-label={`Edit update U${update.updateLevel}`}
                     sx={{
-                      color: "grey.300",
+                      color: "text.secondary",
                       "&:hover": {
-                        color: "primary.light",
-                        bgcolor: (theme) => alpha(theme.palette.grey[600], 0.3),
+                        color: "primary.main",
+                        bgcolor: (theme) =>
+                          alpha(theme.palette.text.secondary, 0.12),
                       },
                     }}
                   >
                     <SquarePen size={12} aria-hidden />
                   </IconButton>
                 </Box>
-                <Typography variant="body2" sx={{ color: "grey.300", mt: 0.5 }}>
+                <Typography
+                  variant="body2"
+                  sx={{ color: "text.secondary", mt: 0.5 }}
+                >
                   Date: {formatDate(update.date)}
                 </Typography>
               </Box>
@@ -699,10 +821,11 @@ function TimelineItem({
                 disabled={isSaving}
                 aria-label={`Delete update U${update.updateLevel}`}
                 sx={{
-                  color: "grey.300",
+                  color: "text.secondary",
                   "&:hover": {
-                    color: "error.light",
-                    bgcolor: (theme) => alpha(theme.palette.grey[600], 0.3),
+                    color: "error.main",
+                    bgcolor: (theme) =>
+                      alpha(theme.palette.text.secondary, 0.12),
                   },
                 }}
               >
@@ -710,7 +833,7 @@ function TimelineItem({
               </IconButton>
             </Box>
             {update.details && (
-              <Typography variant="body2" sx={{ color: "grey.200" }}>
+              <Typography variant="body2" sx={{ color: "text.secondary" }}>
                 {update.details}
               </Typography>
             )}
@@ -746,7 +869,13 @@ function UpdateHistorySkeleton(): JSX.Element {
           ))}
         </Box>
       </Box>
-      <Box sx={{ borderTop: 1, borderColor: "divider", pt: 3 }}>
+      <Box
+        sx={{
+          borderTop: 1,
+          borderColor: (theme) => updateHistoryOutlineColor(theme),
+          pt: 3,
+        }}
+      >
         <Skeleton variant="text" width={150} height={24} sx={{ mb: 2 }} />
         <Skeleton variant="rectangular" width="100%" height={120} />
       </Box>

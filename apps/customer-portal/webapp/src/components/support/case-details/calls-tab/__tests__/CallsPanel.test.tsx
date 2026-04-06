@@ -88,6 +88,9 @@ describe("CallsPanel", () => {
     mockPatchMutate.mockClear();
     vi.mocked(useGetUserDetails).mockReturnValue({
       data: { timeZone: "America/New_York" },
+      refetch: vi
+        .fn()
+        .mockResolvedValue({ data: { timeZone: "America/New_York" } }),
       isLoading: false,
       isError: false,
     } as unknown as ReturnType<typeof useGetUserDetails>);
@@ -440,6 +443,7 @@ describe("CallsPanel", () => {
   it("should show missing timezone dialog when user has no timezone set", () => {
     vi.mocked(useGetUserDetails).mockReturnValue({
       data: { timeZone: null },
+      refetch: vi.fn().mockResolvedValue({ data: { timeZone: null } }),
       isLoading: false,
       isError: false,
     } as unknown as ReturnType<typeof useGetUserDetails>);
@@ -460,7 +464,54 @@ describe("CallsPanel", () => {
         caseId={mockCaseId}
         caseStatusLabel="Work In Progress"
       />);
-    expect(screen.getByText("Time Zone Not Set")).toBeInTheDocument();
+    expect(
+      screen.getByRole("region", { name: /time zone required/i }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(/Set your time zone first to request or reschedule a call/i),
+    ).toBeInTheDocument();
+    expect(
+      screen.queryByRole("button", { name: /^Request Call$/ }),
+    ).not.toBeInTheDocument();
+  });
+
+  it("should block Request Call flow with time zone gate when profile has no timezone", () => {
+    vi.mocked(useGetUserDetails).mockReturnValue({
+      data: { timeZone: null },
+      refetch: vi.fn().mockResolvedValue({ data: { timeZone: null } }),
+      isLoading: false,
+      isError: false,
+    } as unknown as ReturnType<typeof useGetUserDetails>);
+
+    vi.mocked(useGetCallRequests).mockReturnValue({
+      isPending: false,
+      isError: false,
+      refetch: vi.fn(),
+      fetchNextPage: vi.fn(),
+      hasNextPage: false,
+      isFetchingNextPage: false,
+      isFetchNextPageError: false,
+      data: { pages: [{ callRequests: [] }] },
+    } as unknown as ReturnType<typeof useGetCallRequests>);
+
+    renderWithProviders(
+      <CallsPanel
+        projectId={mockProjectId}
+        caseId={mockCaseId}
+        caseStatusLabel="Work In Progress"
+      />,
+    );
+    expect(
+      screen.getByText(/Set your time zone first to request or reschedule a call/i),
+    ).toBeInTheDocument();
+    expect(
+      screen.queryByRole("button", { name: /^Request Call$/ }),
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByPlaceholderText(
+        /Describe your call request or topics you'd like to discuss/i,
+      ),
+    ).not.toBeInTheDocument();
   });
 
   it("should open Request Call modal when button is clicked", () => {
@@ -481,7 +532,7 @@ describe("CallsPanel", () => {
         caseStatusLabel="Work In Progress"
       />);
 
-    fireEvent.click(screen.getByRole("button", { name: /Request Call/i }));
+    fireEvent.click(screen.getByRole("button", { name: /^Request Call$/ }));
 
     expect(screen.getByRole("dialog")).toBeInTheDocument();
     expect(document.getElementById("preferred-time-0")).toBeTruthy();

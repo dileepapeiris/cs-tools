@@ -135,6 +135,13 @@ vi.mock(
   }),
 );
 
+vi.mock(
+  "@components/common/novera-floating-chat/NoveraFloatingChat",
+  async () => ({
+    default: () => <div data-testid="novera-floating-chat" />,
+  }),
+);
+
 vi.mock("@components/common/side-nav-bar/SideBar", async () => ({
   default: ({ collapsed, onSelect, onToggleExpand }: any) => (
     <div data-testid="sidebar">
@@ -168,6 +175,7 @@ describe("AppLayout", () => {
     expect(screen.getByTestId("app-main")).toBeInTheDocument();
     expect(screen.getByTestId("outlet")).toBeInTheDocument();
     expect(screen.getByTestId("footer")).toBeInTheDocument();
+    expect(screen.getByTestId("novera-floating-chat")).toBeInTheDocument();
   });
 
   it("should NOT render Sidebar on the project hub (landing page)", () => {
@@ -182,6 +190,7 @@ describe("AppLayout", () => {
 
     expect(screen.getByTestId("header")).toBeInTheDocument();
     expect(screen.queryByTestId("sidebar")).toBeNull();
+    expect(screen.queryByTestId("novera-floating-chat")).toBeNull();
   });
 
   it("should render global loader when isVisible is true", () => {

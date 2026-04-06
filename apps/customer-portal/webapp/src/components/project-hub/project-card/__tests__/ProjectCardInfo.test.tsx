@@ -3,6 +3,7 @@
 // WSO2 LLC. licenses this file to you under the Apache License,
 // Version 2.0 (the "License"); you may not use this file except
 // in compliance with the License.
+//
 // You may obtain a copy of the License at
 //
 // http://www.apache.org/licenses/LICENSE-2.0
@@ -15,64 +16,75 @@
 // under the License.
 
 import { render, screen } from "@testing-library/react";
-import { describe, expect, it, vi } from "vitest";
+import { describe, expect, it, vi, afterEach } from "vitest";
+import type { ReactNode } from "react";
+import { ThemeProvider, createTheme } from "@wso2/oxygen-ui";
 import ProjectCardInfo from "@components/project-hub/project-card/ProjectCardInfo";
 
-// Mock @wso2/oxygen-ui
-vi.mock("@wso2/oxygen-ui", () => ({
-  Box: ({ children, sx }: any) => (
-    <div data-testid="box" style={sx}>
-      {children}
-    </div>
-  ),
-  Form: {
-    CardHeader: ({ title, subheader }: any) => (
-      <div data-testid="card-header">
-        <div data-testid="title">{title}</div>
-        <div data-testid="subheader">{subheader}</div>
-      </div>
+vi.mock("@wso2/oxygen-ui", async () => {
+  const actual = await vi.importActual<typeof import("@wso2/oxygen-ui")>(
+    "@wso2/oxygen-ui",
+  );
+  return {
+    ...actual,
+    Form: {
+      ...actual.Form,
+      CardHeader: ({ title }: { title: ReactNode }) => (
+        <div data-testid="card-header">
+          <div data-testid="title">{title}</div>
+        </div>
+      ),
+    },
+    Tooltip: ({
+      children,
+      title,
+    }: {
+      children: React.ReactNode;
+      title: string;
+    }) => (
+      <span data-testid="tooltip-host">
+        {children}
+        <span role="tooltip">{title}</span>
+      </span>
     ),
-  },
-  Tooltip: ({ children }: any) => <span data-testid="tooltip">{children}</span>,
-  Typography: ({ children, variant, sx }: any) => (
-    <span data-testid={`typography-${variant}`} style={sx}>
-      {children}
-    </span>
-  ),
-}));
+  };
+});
+
+function renderWithTheme(ui: ReactNode) {
+  return render(<ThemeProvider theme={createTheme()}>{ui}</ThemeProvider>);
+}
 
 describe("ProjectCardInfo", () => {
-  it("should strip HTML tags from subtitle", () => {
-    const props = {
-      title: "Test Project",
-      subtitle: "<p>This is a test subtitle</p>",
-    };
-
-    render(<ProjectCardInfo {...props} />);
-
-    expect(screen.getByText("This is a test subtitle")).toBeInTheDocument();
+  it("renders project title", () => {
+    renderWithTheme(<ProjectCardInfo title="My Project" />);
+    expect(screen.getByText("My Project")).toBeInTheDocument();
   });
 
-  it("should use correct Typography variants", () => {
-    const props = {
-      title: "Title",
-      subtitle: "Subtitle",
-    };
-
-    render(<ProjectCardInfo {...props} />);
-
-    expect(screen.getByTestId("typography-h6")).toBeInTheDocument();
-    expect(screen.getByTestId("typography-body2")).toBeInTheDocument();
+  it("uses h6 typography for title", () => {
+    renderWithTheme(<ProjectCardInfo title="Title" />);
+    expect(screen.getByText("Title").closest(".MuiTypography-h6")).toBeTruthy();
   });
 
-  it("should display '--' fallback for empty title and subtitle", () => {
-    const props = {
-      title: "",
-      subtitle: "",
-    };
+  it("displays '--' fallback for empty title", () => {
+    renderWithTheme(<ProjectCardInfo title="" />);
+    expect(screen.getByText("--")).toBeInTheDocument();
+  });
+});
 
-    render(<ProjectCardInfo {...props} />);
+describe("ProjectCardInfo truncation tooltip (ClampedTextWithTooltip path)", () => {
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
 
-    expect(screen.getAllByText("--")).toHaveLength(2);
+  it("exposes tooltip with full title when line-clamped content overflows", () => {
+    vi.spyOn(HTMLElement.prototype, "scrollHeight", "get").mockReturnValue(200);
+    vi.spyOn(HTMLElement.prototype, "clientHeight", "get").mockReturnValue(24);
+
+    const full =
+      "Extremely Long Hub Card Title For Tooltip Regression Coverage Text";
+
+    renderWithTheme(<ProjectCardInfo title={full} />);
+
+    expect(screen.getByRole("tooltip")).toHaveTextContent(full);
   });
 });

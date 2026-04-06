@@ -31,10 +31,13 @@ import GlobalNotificationBanner from "@components/common/notification-banner/Glo
 import Footer from "@components/common/footer/Footer";
 import Header from "@components/common/header/Header";
 import SideBar from "@components/common/side-nav-bar/SideBar";
+import NoveraFloatingChat from "@components/common/novera-floating-chat/NoveraFloatingChat";
+import { FloatingNoveraVisibilityProvider } from "@context/floating-novera-visibility/FloatingNoveraVisibilityContext";
 import {
   getSidebarCollapsed,
   setSidebarCollapsed,
 } from "@utils/settingsStorage";
+
 /**
  * AppLayout component.
  *
@@ -44,11 +47,15 @@ interface AppLayoutProps {
   children?: ReactNode;
 }
 
+/**
+ * AppLayout component providing the main structure, navigation, and global UI elements.
+ */
 export default function AppLayout({ children }: AppLayoutProps): JSX.Element {
   const location = useLocation();
   const mainContentRef = useRef<HTMLDivElement>(null);
   const { isLoading: isAuthLoading } = useAsgardeo();
 
+  // Scroll to top on route change
   useEffect(() => {
     if (mainContentRef.current) {
       mainContentRef.current.scrollTop = 0;
@@ -64,7 +71,7 @@ export default function AppLayout({ children }: AppLayoutProps): JSX.Element {
     "Authenticating…" | "Fetching user info…" | "Please wait…"
   >("Authenticating…");
 
-  // Animate loading message in the center of the page.
+  // Animate loading message during authentication
   useEffect(() => {
     if (!isAuthLoading) return;
 
@@ -84,40 +91,47 @@ export default function AppLayout({ children }: AppLayoutProps): JSX.Element {
     };
   }, [isAuthLoading]);
 
-  // Persist sidebar collapsed state to localStorage
+  // Persist sidebar state
   useEffect(() => {
     setSidebarCollapsed(shellState.sidebarCollapsed);
   }, [shellState.sidebarCollapsed]);
 
+  // Path Logic Constants
   const isProjectHub = location.pathname === "/" || location.pathname === "";
+  
   const isCaseDetailsPage =
-    /\/projects\/[^/]+\/support\/cases\/[^/]+$/.test(location.pathname) ||
-    /\/[^/]+\/support\/cases\/[^/]+$/.test(location.pathname);
+    /\/(?:projects\/[^/]+|[^/]+)\/support\/cases\/[^/]+$/.test(location.pathname);
+  
+  const isServiceRequestCreatePage = location.pathname.endsWith(
+    "/service-requests/create",
+  );
+
+  // Resolved: Regex matches details but uses negative lookahead to exclude 'create'
   const isServiceRequestDetailsPage =
-    /\/projects\/[^/]+\/(?:support|operations)\/service-requests\/[^/]+$/.test(
+    /\/(?:projects\/[^/]+|[^/]+)\/(?:support|operations)\/service-requests\/(?!create$)[^/]+$/.test(
       location.pathname,
-    ) || /\/[^/]+\/(?:support|operations)\/service-requests\/[^/]+$/.test(
-      location.pathname,
-    );
+    ) && !isServiceRequestCreatePage;
+
   const isEngagementDetailsPage = location.pathname.includes("/engagements/");
+
   const isSecurityReportAnalysisDetailsPage =
-    /\/projects\/[^/]+\/security-center\/security-report-analysis\/[^/]+$/.test(
-      location.pathname,
-    ) ||
-    /\/[^/]+\/security-center\/security-report-analysis\/[^/]+$/.test(
+    /\/(?:projects\/[^/]+|[^/]+)\/security-center\/security-report-analysis\/[^/]+$/.test(
       location.pathname,
     );
+
   const isVulnerabilityDetailsPage =
-    (/\/projects\/[^/]+\/security-center\/[^/]+$/.test(location.pathname) ||
-      /\/[^/]+\/security-center\/[^/]+$/.test(location.pathname)) &&
+    (/\/(?:projects\/[^/]+|[^/]+)\/security-center\/[^/]+$/.test(location.pathname)) &&
     !location.pathname.includes("security-report-analysis");
+
   const isPendingUpdatesPage =
-    /\/projects\/[^/]+\/updates\/pending$/.test(location.pathname) ||
-    /\/[^/]+\/updates\/pending$/.test(location.pathname);
+    /\/(?:projects\/[^/]+|[^/]+)\/updates\/pending$/.test(location.pathname);
+
   const isUpdateLevelDetailsPage =
-    /\/projects\/[^/]+\/updates\/pending\/level\/[^/]+$/.test(
+    /\/(?:projects\/[^/]+|[^/]+)\/updates\/pending\/level\/[^/]+$/.test(
       location.pathname,
-    ) || /\/[^/]+\/updates\/pending\/level\/[^/]+$/.test(location.pathname);
+    );
+
+  // Pages that should have the 'Details' layout (zero padding, etc.)
   const isDetailsStylePage =
     isCaseDetailsPage ||
     isServiceRequestDetailsPage ||
@@ -131,7 +145,6 @@ export default function AppLayout({ children }: AppLayoutProps): JSX.Element {
     <IdleTimeoutProvider>
       <GlobalNotificationBanner visible={notificationBannerConfig.visible} />
       <AppShell>
-        {/* Header component. */}
         <AppShell.Navbar>
           <Header
             onToggleSidebar={shellActions.toggleSidebar}
@@ -139,7 +152,6 @@ export default function AppLayout({ children }: AppLayoutProps): JSX.Element {
           />
         </AppShell.Navbar>
 
-        {/* Side bar component. */}
         {!isProjectHub && (
           <AppShell.Sidebar>
             <SideBar
@@ -151,81 +163,82 @@ export default function AppLayout({ children }: AppLayoutProps): JSX.Element {
           </AppShell.Sidebar>
         )}
 
-        {/* Main content. */}
         <AppShell.Main>
-          <Box
-            sx={{
-              display: "flex",
-              flexDirection: "column",
-              height: "100%",
-              width: "100%",
-              flex: 1,
-              minHeight: 0,
-              overflow: "hidden",
-              position: "relative",
-            }}
-          >
-            {isVisible && (
-              <LinearProgress
-                color="warning"
-                sx={{
-                  position: "absolute",
-                  top: 0,
-                  left: 0,
-                  right: 0,
-                  zIndex: 1300,
-                  height: 3,
-                }}
-              />
-            )}
+          <FloatingNoveraVisibilityProvider>
             <Box
-              ref={mainContentRef}
               sx={{
-                flex: 1,
-                minHeight: 0,
                 display: "flex",
                 flexDirection: "column",
-                overflow: "auto",
-                ...(isDetailsStylePage ? { minHeight: "60vh" } : {}),
-                ...(isAuthLoading
-                  ? { p: 0 }
-                  : isDetailsStylePage
-                    ? { px: 0, pb: 0, pt: 0 }
-                    : { p: 3 }),
+                height: "100%",
+                width: "100%",
+                flex: 1,
+                minHeight: 0,
+                overflow: "hidden",
+                position: "relative",
               }}
             >
-              {isAuthLoading ? (
-                <Box
+              {isVisible && (
+                <LinearProgress
+                  color="warning"
                   sx={{
-                    flex: 1,
-                    minHeight: 0,
-                    display: "flex",
-                    flexDirection: "column",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    gap: 2,
+                    position: "absolute",
+                    top: 0,
+                    left: 0,
+                    right: 0,
+                    zIndex: 1300,
+                    height: 3,
                   }}
-                >
-                  <LinearProgress
-                    color="warning"
-                    sx={{ width: "80%", maxWidth: 400, height: 4 }}
-                  />
-                  <Typography variant="body2" color="text.secondary">
-                    {loadingMessage}
-                  </Typography>
-                </Box>
-              ) : (
-                children || (
-                  <Outlet
-                    context={{ sidebarCollapsed: shellState.sidebarCollapsed }}
-                  />
-                )
+                />
               )}
+              <Box
+                ref={mainContentRef}
+                sx={{
+                  flex: 1,
+                  minHeight: 0,
+                  display: "flex",
+                  flexDirection: "column",
+                  overflow: "auto",
+                  ...(isDetailsStylePage ? { minHeight: "60vh" } : {}),
+                  ...(isAuthLoading
+                    ? { p: 0 }
+                    : isDetailsStylePage
+                      ? { px: 0, pb: 0, pt: 0 }
+                      : { p: 3 }),
+                }}
+              >
+                {isAuthLoading ? (
+                  <Box
+                    sx={{
+                      flex: 1,
+                      minHeight: 0,
+                      display: "flex",
+                      flexDirection: "column",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      gap: 2,
+                    }}
+                  >
+                    <LinearProgress
+                      color="warning"
+                      sx={{ width: "80%", maxWidth: 400, height: 4 }}
+                    />
+                    <Typography variant="body2" color="text.secondary">
+                      {loadingMessage}
+                    </Typography>
+                  </Box>
+                ) : (
+                  children || (
+                    <Outlet
+                      context={{ sidebarCollapsed: shellState.sidebarCollapsed }}
+                    />
+                  )
+                )}
+              </Box>
+              {!isProjectHub && <NoveraFloatingChat />}
             </Box>
-          </Box>
+          </FloatingNoveraVisibilityProvider>
         </AppShell.Main>
 
-        {/* Footer component. */}
         <AppShell.Footer>
           <Footer />
         </AppShell.Footer>

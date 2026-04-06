@@ -52,6 +52,20 @@ const mockVersions = [
   { id: "ver-450", version: "4.5.0", product: { id: "prod-api-mgr", label: "WSO2 API Manager" } },
 ];
 
+const mockProductsPage = {
+  products: mockProducts,
+  totalRecords: mockProducts.length,
+  offset: 0,
+  limit: 10,
+};
+
+const mockVersionsPage = {
+  versions: mockVersions,
+  totalRecords: mockVersions.length,
+  offset: 0,
+  limit: 10,
+};
+
 describe("AddProductModal", () => {
   const mockOnClose = vi.fn();
   const mockOnSuccess = vi.fn();
@@ -60,15 +74,20 @@ describe("AddProductModal", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     vi.mocked(useGetProducts).mockReturnValue({
-      data: mockProducts,
+      data: mockProductsPage,
       isLoading: false,
+      isFetching: false,
       isError: false,
     } as unknown as ReturnType<typeof useGetProducts>);
-    vi.mocked(useSearchProductVersions).mockReturnValue({
-      data: mockVersions,
-      isLoading: false,
-      isError: false,
-    } as unknown as ReturnType<typeof useSearchProductVersions>);
+    vi.mocked(useSearchProductVersions).mockImplementation(
+      (productId: string) =>
+        ({
+          data: productId ? mockVersionsPage : undefined,
+          isLoading: false,
+          isFetching: false,
+          isError: false,
+        }) as unknown as ReturnType<typeof useSearchProductVersions>,
+    );
     vi.mocked(usePostDeploymentProduct).mockReturnValue({
       mutateAsync: mockMutateAsync,
       isPending: false,
@@ -104,7 +123,6 @@ describe("AddProductModal", () => {
     expect(screen.getByLabelText(/Core Count/)).toBeInTheDocument();
     expect(screen.getByLabelText(/TPS/)).toBeInTheDocument();
     expect(screen.getByLabelText(/Description/)).toBeInTheDocument();
-    expect(screen.getByText("Initial Update Information")).toBeInTheDocument();
   });
 
   it("should disable version dropdown until product is selected", () => {
@@ -149,11 +167,21 @@ describe("AddProductModal", () => {
 
     const productSelect = screen.getByLabelText(/Product Name/);
     fireEvent.mouseDown(productSelect);
-    fireEvent.click(screen.getByText("WSO2 API Manager"));
+    fireEvent.click(
+      await screen.findByRole("option", {
+        name: /WSO2 API Manager/,
+        hidden: true,
+      }),
+    );
 
     const versionSelect = screen.getByLabelText(/Version/);
+    await waitFor(() =>
+      expect(versionSelect).not.toHaveAttribute("aria-disabled", "true"),
+    );
     fireEvent.mouseDown(versionSelect);
-    fireEvent.click(screen.getByText("7.8.0"));
+    fireEvent.click(
+      await screen.findByRole("option", { name: /7\.8\.0/, hidden: true }),
+    );
 
     const submitButton = screen.getByRole("button", { name: "Add Product" });
     await waitFor(() => expect(submitButton).not.toBeDisabled());
@@ -189,10 +217,21 @@ describe("AddProductModal", () => {
     );
 
     fireEvent.mouseDown(screen.getByLabelText(/Product Name/));
-    fireEvent.click(screen.getByText("WSO2 API Manager"));
+    fireEvent.click(
+      await screen.findByRole("option", {
+        name: /WSO2 API Manager/,
+        hidden: true,
+      }),
+    );
 
-    fireEvent.mouseDown(screen.getByLabelText(/Version/));
-    fireEvent.click(screen.getByText("7.8.0"));
+    const versionField = screen.getByLabelText(/Version/);
+    await waitFor(() =>
+      expect(versionField).not.toHaveAttribute("aria-disabled", "true"),
+    );
+    fireEvent.mouseDown(versionField);
+    fireEvent.click(
+      await screen.findByRole("option", { name: /7\.8\.0/, hidden: true }),
+    );
 
     fireEvent.change(screen.getByLabelText(/Core Count/), {
       target: { value: "8" },
@@ -219,7 +258,7 @@ describe("AddProductModal", () => {
     });
   });
 
-  it("should reset form on close", () => {
+  it("should reset form on close", async () => {
     const { rerender } = renderWithProviders(
       <AddProductModal
         open={true}
@@ -233,7 +272,12 @@ describe("AddProductModal", () => {
       name: /Product Name/,
     });
     fireEvent.mouseDown(productCombobox);
-    fireEvent.click(screen.getByText("WSO2 API Manager"));
+    fireEvent.click(
+      await screen.findByRole("option", {
+        name: /WSO2 API Manager/,
+        hidden: true,
+      }),
+    );
     expect(productCombobox).toHaveTextContent(/WSO2 API Manager/);
 
     fireEvent.click(screen.getByRole("button", { name: "Cancel" }));
@@ -258,6 +302,53 @@ describe("AddProductModal", () => {
     );
 
     // After reset, Product Name should be cleared (empty selection)
+    expect(
+      screen.getByRole("combobox", { name: /Product Name/ }),
+    ).not.toHaveTextContent("WSO2 API Manager");
+  });
+
+  it("should show a fresh product list when remounted with a new key after close", async () => {
+    const { rerender } = renderWithProviders(
+      <AddProductModal
+        key={0}
+        open={true}
+        deploymentId="dep-1"
+        projectId="proj-1"
+        onClose={mockOnClose}
+      />,
+    );
+
+    const productCombobox = screen.getByRole("combobox", {
+      name: /Product Name/,
+    });
+    fireEvent.mouseDown(productCombobox);
+    fireEvent.click(
+      await screen.findByRole("option", {
+        name: /WSO2 API Manager/,
+        hidden: true,
+      }),
+    );
+    expect(productCombobox).toHaveTextContent(/WSO2 API Manager/);
+
+    rerender(
+      <AddProductModal
+        key={0}
+        open={false}
+        deploymentId="dep-1"
+        projectId="proj-1"
+        onClose={mockOnClose}
+      />,
+    );
+    rerender(
+      <AddProductModal
+        key={1}
+        open={true}
+        deploymentId="dep-1"
+        projectId="proj-1"
+        onClose={mockOnClose}
+      />,
+    );
+
     expect(
       screen.getByRole("combobox", { name: /Product Name/ }),
     ).not.toHaveTextContent("WSO2 API Manager");

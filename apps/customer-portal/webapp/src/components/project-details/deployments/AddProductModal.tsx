@@ -32,11 +32,15 @@ import { X } from "@wso2/oxygen-ui-icons-react";
 import {
   useCallback,
   useEffect,
-  useMemo,
+  useLayoutEffect,
+  useRef,
   useState,
   type ChangeEvent,
   type JSX,
+  type UIEvent,
 } from "react";
+import { SelectMenuLoadMoreRow } from "@components/common/select-menu-load-more-row/SelectMenuLoadMoreRow";
+import { paginatedSelectMenuListProps } from "@constants/dropdownConstants";
 import { useGetProducts } from "@api/useGetProducts";
 import { useSearchProductVersions } from "@api/useSearchProductVersions";
 import { usePostDeploymentProduct } from "@api/usePostDeploymentProduct";
@@ -71,7 +75,7 @@ function parseValidNumber(value: string): number | undefined {
 
 /**
  * Modal for adding a WSO2 product to a deployment environment.
- * Product Name and Version come from APIs; Description and Initial Update Info are disabled.
+ * Product Name and Version come from paginated APIs; Description and optional metrics are user-entered.
  *
  * @param {AddProductModalProps} props - open, deploymentId, projectId, onClose, optional onSuccess/onError.
  * @returns {JSX.Element} The add product modal.
@@ -89,6 +93,36 @@ export default function AddProductModal({
   const [versionOffset, setVersionOffset] = useState(0);
   const [products, setProducts] = useState<ProductItem[]>([]);
   const [versions, setVersions] = useState<ProductVersionItem[]>([]);
+  const previousProductIdRef = useRef<string>("");
+  const [cachedProductsTotalRecords, setCachedProductsTotalRecords] = useState<
+    number | null
+  >(null);
+  const [cachedVersionsTotalRecords, setCachedVersionsTotalRecords] = useState<
+    number | null
+  >(null);
+
+  const [productsLoadMorePending, setProductsLoadMorePending] = useState(false);
+  const [versionsLoadMorePending, setVersionsLoadMorePending] = useState(false);
+  const accumulatedProductsLengthRef = useRef(0);
+  const accumulatedVersionsLengthRef = useRef(0);
+
+  useLayoutEffect(() => {
+    accumulatedProductsLengthRef.current = products.length;
+    accumulatedVersionsLengthRef.current = versions.length;
+  }, [products, versions]);
+
+  const resetModalState = useCallback(() => {
+    setForm(INITIAL_FORM);
+    setProductOffset(0);
+    setProducts([]);
+    setVersionOffset(0);
+    setVersions([]);
+    previousProductIdRef.current = "";
+    setProductsLoadMorePending(false);
+    setVersionsLoadMorePending(false);
+    setCachedProductsTotalRecords(null);
+    setCachedVersionsTotalRecords(null);
+  }, []);
 
   const {
     data: productsPage,
@@ -98,6 +132,13 @@ export default function AddProductModal({
     offset: productOffset,
     limit: 10,
   });
+
+  /* eslint-disable react-hooks/set-state-in-effect -- paginated Select: load-more flags + merged list rows */
+  useEffect(() => {
+    if (!isFetchingProducts) {
+      setProductsLoadMorePending(false);
+    }
+  }, [isFetchingProducts]);
 
   const {
     data: versionsPage,
@@ -109,36 +150,78 @@ export default function AddProductModal({
   });
 
   useEffect(() => {
+    if (!isFetchingVersions) {
+      setVersionsLoadMorePending(false);
+    }
+  }, [isFetchingVersions]);
+
+  useEffect(() => {
     if (!productsPage) return;
+
     const pageItems = productsPage.products ?? [];
     const offset = productsPage.offset ?? 0;
+    const pageLimit =
+      typeof productsPage.limit === "number" && productsPage.limit > 0
+        ? productsPage.limit
+        : 10;
 
-    Promise.resolve().then(() => {
-      if (offset === 0) {
-        setProducts(pageItems);
-        return;
+    const applyServerProductsTotal = (): void => {
+      if (
+        typeof productsPage.totalRecords === "number" &&
+        !Number.isNaN(productsPage.totalRecords)
+      ) {
+        setCachedProductsTotalRecords(productsPage.totalRecords);
       }
-      setProducts((prev) => {
-        const existingIds = new Set(prev.map((p) => p.id));
-        const next = [...prev];
-        pageItems.forEach((item) => {
-          if (!existingIds.has(item.id)) {
-            next.push(item);
-            existingIds.add(item.id);
-          }
-        });
-        return next;
-      });
-    });
-  }, [productsPage]);
+    };
 
-  const productsTotalRecords = productsPage?.totalRecords ?? products.length;
+    if (offset > 0 && pageItems.length === 0) {
+      setCachedProductsTotalRecords(accumulatedProductsLengthRef.current);
+      return;
+    }
+
+    if (offset === 0) {
+      setProducts(pageItems);
+      if (pageItems.length < pageLimit) {
+        setCachedProductsTotalRecords(pageItems.length);
+      } else {
+        applyServerProductsTotal();
+      }
+      return;
+    }
+
+    const prevProducts = products;
+    const prevProductIds = new Set(
+      prevProducts.map((p) => p.id).filter((id): id is string => Boolean(id)),
+    );
+    const newProductItems = pageItems.filter(
+      (p) => typeof p.id === "string" && p.id.length > 0 && !prevProductIds.has(p.id),
+    );
+    const mergedProductsLen = prevProducts.length + newProductItems.length;
+
+    if (newProductItems.length === 0) {
+      setCachedProductsTotalRecords(prevProducts.length);
+      return;
+    }
+
+    if (pageItems.length < pageLimit) {
+      setCachedProductsTotalRecords(mergedProductsLen);
+    } else {
+      applyServerProductsTotal();
+    }
+    setProducts([...prevProducts, ...newProductItems]);
+  }, [productsPage, products]);
+
+  const productsTotalRecords =
+    cachedProductsTotalRecords ??
+    productsPage?.totalRecords ??
+    products.length;
   const canLoadMoreProducts = products.length < productsTotalRecords;
 
   const handleProductsScroll = useCallback(
-    (event: React.UIEvent<HTMLDivElement>) => {
+    (event: UIEvent<HTMLElement>) => {
       const target = event.currentTarget;
       if (
+        productsLoadMorePending ||
         !canLoadMoreProducts ||
         isLoadingProducts ||
         isFetchingProducts ||
@@ -152,10 +235,12 @@ export default function AddProductModal({
         target.scrollHeight - target.scrollTop - target.clientHeight <
         threshold
       ) {
+        setProductsLoadMorePending(true);
         setProductOffset((prev) => prev + 10);
       }
     },
     [
+      productsLoadMorePending,
       canLoadMoreProducts,
       isLoadingProducts,
       isFetchingProducts,
@@ -164,48 +249,101 @@ export default function AddProductModal({
   );
 
   useEffect(() => {
-    if (!versionsPage) return;
-    const pageItems = versionsPage.versions ?? [];
-    const offset = versionsPage.offset ?? 0;
+    if (previousProductIdRef.current !== form.productId) {
+      previousProductIdRef.current = form.productId;
+      setVersionOffset(0);
+      setVersions([]);
+      setCachedVersionsTotalRecords(null);
+    }
 
-    if (pageItems.length === 0) {
+    if (!form.productId) {
       return;
     }
 
-    Promise.resolve().then(() => {
-      if (offset === 0) {
-        setVersions(pageItems);
-        return;
+    if (!versionsPage) {
+      return;
+    }
+
+    const pageItems = versionsPage.versions ?? [];
+    const offset = versionsPage.offset ?? 0;
+    const pageLimit =
+      typeof versionsPage.limit === "number" && versionsPage.limit > 0
+        ? versionsPage.limit
+        : 10;
+
+    const applyServerVersionsTotal = (): void => {
+      if (
+        typeof versionsPage.totalRecords === "number" &&
+        !Number.isNaN(versionsPage.totalRecords)
+      ) {
+        setCachedVersionsTotalRecords(versionsPage.totalRecords);
       }
-      setVersions((prev) => {
-        const existingIds = new Set(prev.map((v) => v.id));
-        const next = [...prev];
-        pageItems.forEach((item) => {
-          if (!existingIds.has(item.id)) {
-            next.push(item);
-            existingIds.add(item.id);
-          }
-        });
-        return next;
-      });
-    });
-  }, [versionsPage]);
+    };
 
-  // Reset versions when product changes.
-  useEffect(() => {
-    Promise.resolve().then(() => {
-      setVersions([]);
-      setVersionOffset(0);
-    });
-  }, [form.productId]);
+    if (offset > 0 && pageItems.length === 0) {
+      setCachedVersionsTotalRecords(accumulatedVersionsLengthRef.current);
+      return;
+    }
 
-  const versionsTotalRecords = versionsPage?.totalRecords ?? versions.length;
+    if (offset === 0) {
+      setVersions(pageItems);
+      if (pageItems.length < pageLimit) {
+        setCachedVersionsTotalRecords(pageItems.length);
+      } else {
+        applyServerVersionsTotal();
+      }
+      return;
+    }
+
+    const prevVersions = versions;
+    const prevVersionIds = new Set(
+      prevVersions.map((v) => v.id).filter((id): id is string => Boolean(id)),
+    );
+    const newVersionItems = pageItems.filter(
+      (v) => typeof v.id === "string" && v.id.length > 0 && !prevVersionIds.has(v.id),
+    );
+    const mergedVersionsLen = prevVersions.length + newVersionItems.length;
+
+    if (newVersionItems.length === 0) {
+      setCachedVersionsTotalRecords(prevVersions.length);
+      return;
+    }
+
+    if (pageItems.length < pageLimit) {
+      setCachedVersionsTotalRecords(mergedVersionsLen);
+    } else {
+      applyServerVersionsTotal();
+    }
+    setVersions([...prevVersions, ...newVersionItems]);
+  }, [form.productId, versionsPage, versions]);
+  /* eslint-enable react-hooks/set-state-in-effect */
+
+  const versionsTotalRecords =
+    cachedVersionsTotalRecords ??
+    versionsPage?.totalRecords ??
+    versions.length;
   const canLoadMoreVersions = versions.length < versionsTotalRecords;
 
+  /**
+   * Footer spinner only after the user scrolls to load more (pending flag), not for
+   * background refetches or inflated API totalRecords.
+   */
+  const isFetchingMoreProducts =
+    productsLoadMorePending &&
+    isFetchingProducts &&
+    productOffset > 0 &&
+    products.length > 0;
+  const isFetchingMoreVersions =
+    versionsLoadMorePending &&
+    isFetchingVersions &&
+    versionOffset > 0 &&
+    versions.length > 0;
+
   const handleVersionsScroll = useCallback(
-    (event: React.UIEvent<HTMLDivElement>) => {
+    (event: UIEvent<HTMLElement>) => {
       const target = event.currentTarget;
       if (
+        versionsLoadMorePending ||
         !canLoadMoreVersions ||
         isLoadingVersions ||
         isFetchingVersions ||
@@ -219,26 +357,18 @@ export default function AddProductModal({
         target.scrollHeight - target.scrollTop - target.clientHeight <
         threshold
       ) {
+        setVersionsLoadMorePending(true);
         setVersionOffset((prev) => prev + 10);
       }
     },
     [
+      versionsLoadMorePending,
       canLoadMoreVersions,
       isLoadingVersions,
       isFetchingVersions,
       versions.length,
     ],
   );
-
-  // Sort versions in ascending order
-  const sortedVersions = useMemo(() => {
-    return [...versions].sort((a, b) => {
-      return a.version.localeCompare(b.version, undefined, {
-        numeric: true,
-        sensitivity: "base",
-      });
-    });
-  }, [versions]);
 
   const postProduct = usePostDeploymentProduct();
 
@@ -250,9 +380,9 @@ export default function AddProductModal({
     deploymentId.length > 0;
 
   const handleClose = useCallback(() => {
-    setForm(INITIAL_FORM);
+    resetModalState();
     onClose();
-  }, [onClose]);
+  }, [onClose, resetModalState]);
 
   const handleProductChange = useCallback(
     (event: ChangeEvent<HTMLInputElement>) => {
@@ -382,8 +512,9 @@ export default function AddProductModal({
             }}
             SelectProps={{
               MenuProps: {
+                MenuListProps: paginatedSelectMenuListProps(handleProductsScroll),
                 PaperProps: {
-                  onScroll: handleProductsScroll,
+                  sx: { zIndex: 1400 },
                 },
               },
             }}
@@ -394,6 +525,11 @@ export default function AddProductModal({
                 {p.label ?? p.name ?? p.id}
               </MenuItem>
             ))}
+            <SelectMenuLoadMoreRow
+              visible={Boolean(
+                canLoadMoreProducts && isFetchingMoreProducts,
+              )}
+            />
             {(isLoadingProducts || isFetchingProducts) &&
               products.length === 0 && (
                 <MenuItem disabled>
@@ -417,18 +553,24 @@ export default function AddProductModal({
             }}
             SelectProps={{
               MenuProps: {
+                MenuListProps: paginatedSelectMenuListProps(handleVersionsScroll),
                 PaperProps: {
-                  onScroll: handleVersionsScroll,
+                  sx: { zIndex: 1400 },
                 },
               },
             }}
           >
             <MenuItem value="">Select</MenuItem>
-            {sortedVersions.map((v) => (
+            {versions.map((v) => (
               <MenuItem key={v.id} value={v.id}>
                 {v.version}
               </MenuItem>
             ))}
+            <SelectMenuLoadMoreRow
+              visible={Boolean(
+                canLoadMoreVersions && isFetchingMoreVersions,
+              )}
+            />
             {(isLoadingVersions || isFetchingVersions) &&
               versions.length === 0 && (
                 <MenuItem disabled>

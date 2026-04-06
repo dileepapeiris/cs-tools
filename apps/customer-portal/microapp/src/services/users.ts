@@ -60,6 +60,7 @@ function toMe(dto: MeDto): Me {
     lastName: dto.lastName,
     phoneNumber: dto.phoneNumber ?? undefined,
     timezone: dto.timeZone,
+    roles: dto.roles,
   };
 }
 

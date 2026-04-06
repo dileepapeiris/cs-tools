@@ -41,7 +41,7 @@ export interface ChangeRequestDto {
   description: string;
   createdBy: string;
   case: (EntityReference & { number: string }) | null;
-  deployment: EntityReference | null;
+  deployment: (EntityReference & { number: string }) | null;
   endDate: string | null;
   approvedBy: string | null;
   approvedOn: string | null;

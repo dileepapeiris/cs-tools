@@ -25,8 +25,6 @@ import { projects } from "@src/services/projects";
 import { ErrorBoundary, ExitButton } from "@components/core";
 import EmptyState from "../components/shared/EmptyState";
 import { useNotify } from "../context/snackbar";
-import axios from "axios";
-import { AuthorizationFallback } from "../components/ui";
 
 export default function SelectProjectPage() {
   const theme = useTheme();
@@ -58,17 +56,7 @@ export default function SelectProjectPage() {
         />
         <ErrorBoundary
           onError={() => notify.error("Failed to load projects. Try again later.")}
-          fallback={(error) => {
-            if (axios.isAxiosError(error)) {
-              const status = error.response?.status;
-
-              if (status === 401 || status === 403) {
-                return <AuthorizationFallback />;
-              }
-            }
-
-            return <ProjectsListContentSkeleton />;
-          }}
+          fallback={<ProjectsListContentSkeleton />}
         >
           <Suspense fallback={<ProjectsListContentSkeleton />}>
             <ProjectsListContent search={search} />

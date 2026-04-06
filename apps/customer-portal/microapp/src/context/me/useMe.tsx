@@ -14,22 +14,15 @@
 // specific language governing permissions and limitations
 // under the License.
 
-import LayoutProvider from "./layout/LayoutProvider";
-import ProjectProvider from "./project/ProjectProvider";
-import SnackbarProvider from "./snackbar/SnackbarProvider";
-import { ColorModeProvider } from "./theme";
-import MeProvider from "./me/MeProvider";
+import { useContext } from "react";
+import { MeContext } from "./MeContext";
 
-export default function AppProvider({ children }: { children: React.ReactNode }) {
-  return (
-    <ColorModeProvider>
-      <LayoutProvider>
-        <SnackbarProvider>
-          <MeProvider>
-            <ProjectProvider>{children}</ProjectProvider>
-          </MeProvider>
-        </SnackbarProvider>
-      </LayoutProvider>
-    </ColorModeProvider>
-  );
+export function useMe() {
+  const context = useContext(MeContext);
+
+  if (!context) {
+    throw new Error("useMe must be used within a MeProvider");
+  }
+
+  return context;
 }

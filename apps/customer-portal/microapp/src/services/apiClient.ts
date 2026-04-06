@@ -65,9 +65,9 @@ apiClient.interceptors.request.use(
 
         // NOTE: This header is intended for local development testing only.
         // This manually injects the JWT assertion header and must remain disabled in production.
-        if (import.meta.env.DEV) {
-          config.headers["x-jwt-assertion"] = token;
-        }
+        // if (import.meta.env.DEV) {
+        //   config.headers["x-jwt-assertion"] = token;
+        // }
       } else {
         Logger.warn("No token available for request");
       }

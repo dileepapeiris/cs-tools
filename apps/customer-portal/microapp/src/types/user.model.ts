@@ -21,6 +21,7 @@ export interface Me {
   lastName: string;
   phoneNumber?: string;
   timezone: string;
+  roles: string[];
 }
 
 export interface User {

@@ -28,12 +28,14 @@ import { useNotify } from "../context/snackbar";
 import { metadata } from "../services/metadata";
 import { getVersion, openUrl } from "../components/microapp-bridge";
 import { CHANGE_PASSWORD_URL } from "../config/endpoints";
+import { useMe } from "../context/me";
 
 export default function ProfilePage() {
   const layout = useLayout();
   const notify = useNotify();
   const queryClient = useQueryClient();
   const { projectId, noveraEnabled, kbReferencesEnabled } = useProject();
+  const { isAdmin } = useMe();
   const { data } = useQuery(users.me());
   const name = data ? data?.firstName + " " + data?.lastName : undefined;
 
@@ -50,14 +52,9 @@ export default function ProfilePage() {
   const AppBarSlot = () => (
     <Stack direction="row" alignItems="center" gap={1.5} mt={-2}>
       {name ? <Avatar>{name}</Avatar> : <Skeleton variant="circular" width={40} height={40} sx={{ flexShrink: 0 }} />}
-      <Stack width="100%">
-        <Typography variant="h6" fontWeight="medium" sx={{ flex: 1 }}>
-          {name ?? <Skeleton variant="text" width="100%" height={30} />}
-        </Typography>
-        <Typography variant="subtitle2" fontWeight="regular" color="text.secondary">
-          {data ? "Customer since 2024" : <Skeleton variant="text" width="35%" height={20} />}
-        </Typography>
-      </Stack>
+      <Typography variant="h6" fontWeight="medium" sx={{ flex: 1 }}>
+        {name ?? <Skeleton variant="text" width="100%" height={30} />}
+      </Typography>
     </Stack>
   );
 
@@ -132,38 +129,40 @@ export default function ProfilePage() {
         <SettingListItem name="Push Notifications" icon={Bell} suffix={<Switch defaultChecked />} />
       </SectionCard>
 
-      <SectionCard title="AI Features">
-        <SettingListItem
-          name="AI Chat Assistant"
-          description="Enable AI-powered chat support"
-          iconColor={colors.purple[500]}
-          icon={Bot}
-          suffix={
-            <Switch
-              checked={isNoveraEnabled}
-              onChange={(event) => {
-                projectEditMutation.mutate({ hasAgent: event.target.checked });
-                setIsNoveraEnabled(!isNoveraEnabled);
-              }}
-            />
-          }
-        />
-        <SettingListItem
-          name="Smart Knowledge Base"
-          description="Get intelligent article suggestions"
-          iconColor={colors.blue[500]}
-          icon={BookOpen}
-          suffix={
-            <Switch
-              checked={isKbReferencesEnabled}
-              onChange={(event) => {
-                projectEditMutation.mutate({ hasKbReferences: event.target.checked });
-                setIsKbReferencesEnabled(!isKbReferencesEnabled);
-              }}
-            />
-          }
-        />
-      </SectionCard>
+      {isAdmin && (
+        <SectionCard title="AI Features">
+          <SettingListItem
+            name="AI Chat Assistant"
+            description="Enable AI-powered chat support"
+            iconColor={colors.purple[500]}
+            icon={Bot}
+            suffix={
+              <Switch
+                checked={isNoveraEnabled}
+                onChange={(event) => {
+                  projectEditMutation.mutate({ hasAgent: event.target.checked });
+                  setIsNoveraEnabled(!isNoveraEnabled);
+                }}
+              />
+            }
+          />
+          <SettingListItem
+            name="Smart Knowledge Base"
+            description="Get intelligent article suggestions"
+            iconColor={colors.blue[500]}
+            icon={BookOpen}
+            suffix={
+              <Switch
+                checked={isKbReferencesEnabled}
+                onChange={(event) => {
+                  projectEditMutation.mutate({ hasKbReferences: event.target.checked });
+                  setIsKbReferencesEnabled(!isKbReferencesEnabled);
+                }}
+              />
+            }
+          />
+        </SectionCard>
+      )}
       {version && (
         <Typography variant="caption" color="text.secondary" textAlign="center" sx={{ py: 1 }}>
           Version {version}

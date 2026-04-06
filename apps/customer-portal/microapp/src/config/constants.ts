@@ -51,3 +51,5 @@ export const ENGAGEMENTS_TYPE_PIE_COLORS: Record<string, string> = {
   "Follow up": colors.cyan[500],
   Onboarding: colors.yellow[600],
 };
+
+export const ADMIN_USER_ROLE = "sn_customerservice.customer_admin";

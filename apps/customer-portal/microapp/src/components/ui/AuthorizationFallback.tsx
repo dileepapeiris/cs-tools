@@ -15,7 +15,7 @@
 // under the License.
 
 import { Backdrop, Box, Button, pxToRem, Stack, Typography } from "@wso2/oxygen-ui";
-import { CircleQuestionMark, CircleQuestionMarkIcon, LockIcon, LogOutIcon } from "@wso2/oxygen-ui-icons-react";
+import { LockIcon, LogOutIcon } from "@wso2/oxygen-ui-icons-react";
 import { goToMyAppsScreen } from "../microapp-bridge";
 
 export function AuthorizationFallback() {

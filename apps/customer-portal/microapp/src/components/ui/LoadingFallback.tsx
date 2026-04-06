@@ -14,22 +14,21 @@
 // specific language governing permissions and limitations
 // under the License.
 
-import LayoutProvider from "./layout/LayoutProvider";
-import ProjectProvider from "./project/ProjectProvider";
-import SnackbarProvider from "./snackbar/SnackbarProvider";
-import { ColorModeProvider } from "./theme";
-import MeProvider from "./me/MeProvider";
+import { Backdrop, CircularProgress, Stack } from "@wso2/oxygen-ui";
 
-export default function AppProvider({ children }: { children: React.ReactNode }) {
+export function LoadingFallback() {
   return (
-    <ColorModeProvider>
-      <LayoutProvider>
-        <SnackbarProvider>
-          <MeProvider>
-            <ProjectProvider>{children}</ProjectProvider>
-          </MeProvider>
-        </SnackbarProvider>
-      </LayoutProvider>
-    </ColorModeProvider>
+    <Backdrop
+      open={true}
+      component={Stack}
+      sx={{
+        bgcolor: "background.default",
+        zIndex: 9999,
+        textAlign: "center",
+        alignItems: "center",
+      }}
+    >
+      <CircularProgress color="primary" size={30} />
+    </Backdrop>
   );
 }

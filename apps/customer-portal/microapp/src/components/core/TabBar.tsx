@@ -20,10 +20,12 @@ import { House, MessageSquare, User, Users } from "@wso2/oxygen-ui-icons-react";
 import { useLayout } from "@src/context/layout";
 import { useThemeMode } from "@context/theme";
 import { useLayoutEffect, useRef } from "react";
+import { useMe } from "@root/src/context/me";
 
 export function TabBar() {
   const ref = useRef<HTMLDivElement>(null);
   const { activeTabIndex } = useLayout();
+  const { isAdmin } = useMe();
   const mode = useThemeMode();
 
   useLayoutEffect(() => {
@@ -51,7 +53,18 @@ export function TabBar() {
       <BottomNavigation value={activeTabIndex} showLabels>
         <BottomNavigationAction component={Link} to="/" label="Home" icon={<House />} disableRipple />
         <BottomNavigationAction component={Link} to="/support" label="Support" icon={<MessageSquare />} disableRipple />
-        <BottomNavigationAction component={Link} to="/users" label="Users" icon={<Users />} disableRipple />
+        <BottomNavigationAction
+          disableRipple
+          component={Link}
+          to="/users"
+          label="Users"
+          icon={<Users />}
+          sx={{
+            "&.MuiBottomNavigationAction-root": {
+              display: isAdmin ? "flex" : "none",
+            },
+          }}
+        />
         <BottomNavigationAction component={Link} to="/profile" label="Profile" icon={<User />} disableRipple />
       </BottomNavigation>
     </Box>

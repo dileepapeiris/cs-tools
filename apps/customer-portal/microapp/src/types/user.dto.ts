@@ -21,6 +21,7 @@ export interface MeDto {
   lastName: string;
   phoneNumber: string | null;
   timeZone: string;
+  roles: string[];
 }
 
 export type UsersDto = UserDto[];

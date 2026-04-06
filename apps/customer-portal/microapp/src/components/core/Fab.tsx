@@ -16,7 +16,7 @@
 
 import { useProject } from "@root/src/context/project";
 import { Fab as MuiFab, useTheme } from "@wso2/oxygen-ui";
-import { MessageSquareIcon, PencilIcon } from "@wso2/oxygen-ui-icons-react";
+import { MessageSquareIcon } from "@wso2/oxygen-ui-icons-react";
 import { Link } from "react-router-dom";
 
 export function Fab() {
@@ -37,13 +37,8 @@ export function Fab() {
         bottom: "calc(var(--tab-bar-height) + 60px)",
       }}
       to={noveraEnabled ? "/chat" : "/create"}
-      disabled
     >
-      {noveraEnabled ? (
-        <MessageSquareIcon fill={theme.palette.primary.contrastText} />
-      ) : (
-        <PencilIcon fill={theme.palette.primary.contrastText} />
-      )}
+      <MessageSquareIcon fill={theme.palette.primary.contrastText} />
     </MuiFab>
   );
 }

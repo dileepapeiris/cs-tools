@@ -102,7 +102,6 @@ export const MAIN_LAYOUT_CONFIG: MainLayoutConfigType[] = [
   {
     path: "/create",
     title: "Create Support Case",
-    subtitleSlot: "Auto-populated from chat",
     appBarVariant: "minimal",
     hasBackAction: true,
     tabIndex: 1,

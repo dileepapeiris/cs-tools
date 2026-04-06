@@ -1,7 +1,7 @@
 openapi: 3.0.1
 info:
   title: Service Openapi Yaml
-  version: 1.0.0-rc.2
+  version: 1.0.0-rc.3
 servers:
 - url: "{server}:{port}/"
   variables:

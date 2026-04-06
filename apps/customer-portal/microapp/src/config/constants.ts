@@ -18,6 +18,7 @@ import { colors } from "@wso2/oxygen-ui";
 import { CircleAlert, Cloud, MessageSquare, Moon, type LucideIcon } from "@wso2/oxygen-ui-icons-react";
 import type { ProjectMetricKey, ProjectStatus, ProjectType } from "@src/types";
 import type { ProjectMetricMeta } from "@components/features/projects";
+import type { ProgressTimelineEntryProps } from "../components/features/detail";
 
 export const INPUT_INVALID_MSG_GATEWAY = "INPUT_INVALID_MSG_GATEWAY";
 
@@ -53,3 +54,50 @@ export const ENGAGEMENTS_TYPE_PIE_COLORS: Record<string, string> = {
 };
 
 export const ADMIN_USER_ROLE = "sn_customerservice.customer_admin";
+
+export const TIMELINE_META: Omit<ProgressTimelineEntryProps, "variant">[] = [
+  {
+    title: "New",
+    description: "Change request created",
+  },
+  {
+    title: "Assess",
+    description: "Technical assessment completed",
+  },
+  {
+    title: "Authorize",
+    description: "Internal authorization obtained",
+  },
+  {
+    title: "Customer Approval",
+    description: "Customer approval received",
+  },
+  {
+    title: "Scheduled",
+    description: "Maintenance window scheduled",
+  },
+  {
+    title: "Implement",
+    description: "Change implementation",
+  },
+  {
+    title: "Review",
+    description: "Internal review",
+  },
+  {
+    title: "Customer Review",
+    description: "Customer validation",
+  },
+  {
+    title: "Rollback",
+    description: "Change rollback if needed",
+  },
+  {
+    title: "Closed",
+    description: "Change request completed",
+  },
+  {
+    title: "Canceled",
+    description: "Change request canceled",
+  },
+];

@@ -43,7 +43,7 @@ export interface ChangeRequestDto {
   case: (EntityReference & { number: string }) | null;
   deployment: (EntityReference & { number: string }) | null;
   endDate: string | null;
-  approvedBy: string | null;
+  approvedBy: EntityReference | null;
   approvedOn: string | null;
   duration: string | null;
   hasCustomerApproved: boolean;

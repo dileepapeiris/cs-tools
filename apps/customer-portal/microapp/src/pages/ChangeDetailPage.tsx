@@ -23,7 +23,6 @@ import {
   StakeholderItem,
   StakeholderItemSkeleton,
   TimelineEntry,
-  type ProgressTimelineEntryProps,
 } from "@components/features/detail";
 import { PriorityChip, StatusChip } from "@components/features/support";
 import { User, Users } from "@wso2/oxygen-ui-icons-react";
@@ -36,6 +35,7 @@ import { stripHtmlTags } from "@utils/others";
 import { Timeline } from "../components/ui";
 import { useProject } from "../context/project";
 import { cases } from "../services/cases";
+import { TIMELINE_META } from "../config/constants";
 
 export default function ChangeDetailPage() {
   const layout = useLayout();
@@ -249,50 +249,3 @@ export default function ChangeDetailPage() {
     </>
   );
 }
-
-const TIMELINE_META: Omit<ProgressTimelineEntryProps, "variant">[] = [
-  {
-    title: "New",
-    description: "Change request created",
-  },
-  {
-    title: "Assess",
-    description: "Technical assessment completed",
-  },
-  {
-    title: "Authorize",
-    description: "Internal authorization obtained",
-  },
-  {
-    title: "Customer Approval",
-    description: "Customer approval received",
-  },
-  {
-    title: "Scheduled",
-    description: "Maintenance window scheduled",
-  },
-  {
-    title: "Implement",
-    description: "Change implementation",
-  },
-  {
-    title: "Review",
-    description: "Internal review",
-  },
-  {
-    title: "Customer Review",
-    description: "Customer validation",
-  },
-  {
-    title: "Rollback",
-    description: "Change rollback if needed",
-  },
-  {
-    title: "Closed",
-    description: "Change request completed",
-  },
-  {
-    title: "Canceled",
-    description: "Change request canceled",
-  },
-];

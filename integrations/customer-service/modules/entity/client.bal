@@ -15,7 +15,12 @@
 // under the License.
 import ballerina/http;
 
-configurable string baseUrl = ?;
+// Sales Entity Configurations
+configurable string salesEntityBaseUrl = ?;
+
+// CS Entity Configurations
+configurable string csEntityBaseUrl = ?;
+configurable ClientCredentialsOauth2Config clientCredentialsOauth2Config = ?;
 
 @display {
     label: "Sales Entity Service",

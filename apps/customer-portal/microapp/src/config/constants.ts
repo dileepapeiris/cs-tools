@@ -19,6 +19,7 @@ import { CircleAlert, Cloud, MessageSquare, Moon, type LucideIcon } from "@wso2/
 import type { ProjectMetricKey, ProjectStatus, ProjectType } from "@src/types";
 import type { ProjectMetricMeta } from "@components/features/projects";
 import type { ProgressTimelineEntryProps } from "../components/features/detail";
+import type { ItemCardProps } from "../components/features/support";
 
 export const INPUT_INVALID_MSG_GATEWAY = "INPUT_INVALID_MSG_GATEWAY";
 
@@ -101,3 +102,17 @@ export const TIMELINE_META: Omit<ProgressTimelineEntryProps, "variant">[] = [
     description: "Change request canceled",
   },
 ];
+
+export const TAB_CONFIG = {
+  case: { title: "Open Cases", subtitle: "Active support tickets" },
+  chat: { title: "Chat History", subtitle: "Recent Novera conversations" },
+  service: { title: "Service Requests", subtitle: "Managed cloud service requests" },
+  change: { title: "Change Requests", subtitle: "Scheduled and pending changes" },
+};
+
+export const ITEM_DETAIL_PATHS: Record<ItemCardProps["type"], (id: string) => string> = {
+  case: (id) => `/cases/${id}`,
+  chat: (id) => `/chats/${id}`,
+  service: (id) => `/services/${id}`,
+  change: (id) => `/changes/${id}`,
+};

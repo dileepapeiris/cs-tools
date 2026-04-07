@@ -44,7 +44,7 @@ export function MessageBubble({ author, blocks, timestamp = "Just Now", sx }: Ch
         sx={{ ...sx, bgcolor: "background.paper" }}
       >
         {!you && (
-          <Stack direction="row" justifyContent="start" gap={1} mb={1}>
+          <Stack direction="row" justifyContent="start" gap={1} mb={0.5}>
             <Box color="primary.main">
               <Sparkle size={pxToRem(18)} />
             </Box>
@@ -59,7 +59,12 @@ export function MessageBubble({ author, blocks, timestamp = "Just Now", sx }: Ch
             switch (block.type) {
               case "text":
                 return (
-                  <Typography key={index} variant="body2" component="span">
+                  <Typography
+                    key={index}
+                    variant="body2"
+                    component="span"
+                    sx={{ "& > *": { margin: 0, lineHeight: 1.7 } }}
+                  >
                     <Markdown>{block.value}</Markdown>
                   </Typography>
                 );

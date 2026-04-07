@@ -59,7 +59,7 @@ const getDeploymentsByProject = async (
   id: string,
   body: Partial<Omit<Pagination, "totalRecords">>,
 ): Promise<PaginatedArray<Deployment>> => {
-  const response = (await apiClient.get<ProjectDeploymentsDto>(PROJECT_DEPLOYMENTS_ENDPOINT(id), { params: body }))
+  const response = (await apiClient.post<ProjectDeploymentsDto>(PROJECT_DEPLOYMENTS_ENDPOINT(id), { pagination: body }))
     .data;
   const result = response.deployments.map(toDeployment) as PaginatedArray<Deployment>;
   result.pagination = {
@@ -76,7 +76,9 @@ const getProductsByDeployment = async (
   body: Partial<Omit<Pagination, "totalRecords">>,
 ): Promise<PaginatedArray<Product>> => {
   const response = (
-    await apiClient.get<DeploymentProductsDto>(PROJECT_DEPLOYMENT_PRODUCTS_ENDPOINT(deploymentId), { params: body })
+    await apiClient.post<DeploymentProductsDto>(PROJECT_DEPLOYMENT_PRODUCTS_ENDPOINT(deploymentId), {
+      pagination: body,
+    })
   ).data;
   const result = response.deployedProducts.map(toProduct) as PaginatedArray<Product>;
   result.pagination = {

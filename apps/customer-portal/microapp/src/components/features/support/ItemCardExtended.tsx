@@ -88,12 +88,21 @@ export function ItemCardExtended(props: ItemCardExtendedProps) {
           </Stack>
 
           <Stack gap={0.2}>
-            <Typography variant="body1" color="text.primary">
+            <Typography variant="body1" color="text.primary" noWrap>
               {(type === "case" || type === "service" || type === "change") && props.title}
               {type === "chat" && props.description}
             </Typography>
             {(type === "case" || type === "service" || type === "change") && (
-              <Typography variant="subtitle2" color="text.secondary">
+              <Typography
+                variant="subtitle2"
+                color="text.secondary"
+                sx={{
+                  display: "-webkit-box",
+                  WebkitLineClamp: 3,
+                  WebkitBoxOrient: "vertical",
+                  overflow: "hidden",
+                }}
+              >
                 {stripHtmlTags(props.description)}
               </Typography>
             )}

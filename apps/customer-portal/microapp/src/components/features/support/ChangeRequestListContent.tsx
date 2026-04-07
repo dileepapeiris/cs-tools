@@ -7,7 +7,7 @@ import { InfiniteScroll } from "../../shared";
 import EmptyState from "../../shared/EmptyState";
 import { Typography } from "@wso2/oxygen-ui";
 import { ItemCardExtended } from "./ItemCardExtended";
-import { ITEM_DETAIL_PATHS } from "@root/src/pages/SupportPage";
+import { ITEM_DETAIL_PATHS } from "@root/src/config/constants";
 
 export function ChangeRequestListContent({ filter, search }: { filter: string; search: string }) {
   const { projectId } = useProject();

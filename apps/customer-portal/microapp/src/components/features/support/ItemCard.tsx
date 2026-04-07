@@ -92,7 +92,7 @@ export function ItemCard(props: ItemCardProps) {
           <ChevronRight size={pxToRem(18)} color={theme.palette.text.secondary} />
         </Stack>
 
-        <Typography variant="body1" color="text.primary">
+        <Typography variant="body1" color="text.primary" mr={1} noWrap>
           {(type === "case" || type === "service" || type === "change") && props.title}
           {type === "chat" && props.description}
         </Typography>
@@ -106,6 +106,7 @@ export function ItemCard(props: ItemCardProps) {
             {type === "service" && (props.issueType ?? "N/A")}
             {type === "change" && (props.requestType ?? "N/A")}
           </Typography>
+
           {type === "chat" && (
             <>
               <Circle sx={(theme) => ({ color: "text.tertiary", fontSize: theme.typography.pxToRem(4) })} />

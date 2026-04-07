@@ -28,8 +28,9 @@ export const PROJECT_CHATS_ENDPOINT = (id: string) => `/projects/${id}/conversat
 export const PROJECT_CHANGE_REQUESTS_ENDPOINT = (id: string) => `/projects/${id}/change-requests/search`;
 export const PROJECT_SERVICE_REQUESTS_ENDPOINT = (id: string) => `/projects/${id}/service-requests/search`;
 export const PROJECT_CASES_FILTERS_ENDPOINT = (id: string) => `/projects/${id}/filters`;
-export const PROJECT_DEPLOYMENTS_ENDPOINT = (id: string) => `/projects/${id}/deployments`;
-export const PROJECT_DEPLOYMENT_PRODUCTS_ENDPOINT = (deploymentId: string) => `/deployments/${deploymentId}/products`;
+export const PROJECT_DEPLOYMENTS_ENDPOINT = (id: string) => `/projects/${id}/deployments/search`;
+export const PROJECT_DEPLOYMENT_PRODUCTS_ENDPOINT = (deploymentId: string) =>
+  `/deployments/${deploymentId}/products/search`;
 export const PROJECT_USERS_ENDPOINT = (id: string) => `/projects/${id}/contacts`;
 export const PROJECT_USERS_VALIDATION_ENDPOINT = (id: string) => `/projects/${id}/contacts/validate`;
 export const CREATE_CASE_ENDPOINT = "/cases";

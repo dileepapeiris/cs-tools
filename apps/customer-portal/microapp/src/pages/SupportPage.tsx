@@ -30,20 +30,7 @@ import { changeRequests } from "../services/changes";
 import { serviceRequests } from "../services/services";
 import EmptyState from "../components/shared/EmptyState";
 import { useNotify } from "../context/snackbar";
-
-export const TAB_CONFIG = {
-  case: { title: "Open Cases", subtitle: "Active support tickets" },
-  chat: { title: "Chat History", subtitle: "Recent Novera conversations" },
-  service: { title: "Service Requests", subtitle: "Managed cloud service requests" },
-  change: { title: "Change Requests", subtitle: "Scheduled and pending changes" },
-};
-
-export const ITEM_DETAIL_PATHS: Record<ItemCardProps["type"], (id: string) => string> = {
-  case: (id) => `/cases/${id}`,
-  chat: (id) => `/chats/${id}`,
-  service: (id) => `/services/${id}`,
-  change: (id) => `/changes/${id}`,
-};
+import { ITEM_DETAIL_PATHS, TAB_CONFIG } from "../config/constants";
 
 type TabType = ItemCardProps["type"];
 

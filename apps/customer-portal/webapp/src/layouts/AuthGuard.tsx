@@ -14,7 +14,7 @@
 // specific language governing permissions and limitations
 // under the License.
 
-import { type JSX, useEffect, useRef } from "react";
+import { type JSX, useEffect, useRef, useState } from "react";
 import { useAsgardeo } from "@asgardeo/react";
 import { useLocation, useNavigate } from "react-router";
 import AppLayout from "@layouts/AppLayout";
@@ -23,18 +23,12 @@ import { getLastSelectedProjectId } from "@utils/settingsStorage";
 const POST_LOGIN_REDIRECT_KEY = "post_login_redirect";
 
 /**
- * AuthGuard renders AppLayout (header/footer) so loading state is visible
- * and Asgardeo authentication flow can be observed.
+ * AuthGuard protects all nested routes.
  *
  * @returns {JSX.Element} AppLayout.
  */
 export default function AuthGuard(): JSX.Element {
-  const {
-    isSignedIn,
-    isLoading: isAuthLoading,
-    signIn,
-    signInSilently,
-  } = useAsgardeo();
+  const { isSignedIn, isLoading: isAuthLoading, signIn } = useAsgardeo();
   const location = useLocation();
   const navigate = useNavigate();
   const silentAttempted = useRef(false);

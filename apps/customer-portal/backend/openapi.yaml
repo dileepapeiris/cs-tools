@@ -2661,12 +2661,10 @@ components:
           type: string
           description: Allowed domain list of the account
           nullable: true
-          default: ""
         classification:
           type: string
           description: Account classification
           nullable: true
-          default: ""
         isPartner:
           type: boolean
           description: Whether the account is a partner or not
@@ -2843,6 +2841,9 @@ components:
             is 2)
           items:
             $ref: '#/components/schemas/DateTime'
+        durationInMinutes:
+          type: integer
+          description: New duration in minutes for the call (mandatory when stateKey is 2)
       additionalProperties: false
       description: Request payload for updating a call request.
     Case:

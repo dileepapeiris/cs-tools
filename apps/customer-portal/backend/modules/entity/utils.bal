@@ -84,26 +84,27 @@ public isolated function getAttachments(string idToken, string id, ReferenceType
 public isolated function validateCallRequestUpdatePayload(CallRequestUpdatePayload payload) returns string? {
     int stateKey = payload.stateKey;
     string[]? utcTimes = payload.utcTimes;
+    int? durationInMinutes = payload.durationInMinutes;
     string? cancellationReason = payload?.cancellationReason;
     boolean hasUtcTimes = utcTimes !is () && utcTimes.length() > 0;
 
     if stateKey == PENDING_ON_WSO2 {
-        if !hasUtcTimes {
-            return "At least one UTC time is required when the status is Pending on WSO2.";
+        if !hasUtcTimes && durationInMinutes is () {
+            return "Either UTC times or duration should be provided when the status is Pending on WSO2.";
         }
         if cancellationReason !is () {
             return "Cancellation reason should not be provided when the status is Pending on WSO2.";
         }
     } else if stateKey == CUSTOMER_REJECTED {
-        if utcTimes !is () {
-            return "UTC times should not be provided when the status is Customer Rejected.";
+        if utcTimes !is () || durationInMinutes !is () {
+            return "UTC times or duration should not be provided when the status is Customer Rejected.";
         }
         if cancellationReason !is () {
             return "Cancellation reason should not be provided when the status is Customer Rejected.";
         }
     } else if stateKey == CANCELED {
-        if utcTimes !is () {
-            return "UTC times should not be provided when the status is Canceled.";
+        if utcTimes !is () || durationInMinutes !is () {
+            return "UTC times or duration should not be provided when the status is Canceled.";
         }
         if cancellationReason is () || cancellationReason.trim().length() == 0 {
             return "Cancellation reason is required when the status is Canceled.";

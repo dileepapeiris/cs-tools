@@ -37,6 +37,7 @@ import { requestDeviceSafeAreaInsets } from "@components/microapp-bridge";
 import UpdateProfileSettingsPage from "./pages/UpdateProfileSettingsPage";
 import { useScrollControl } from "./utils/others";
 import SecurityReportAnalysisDetailPage from "./pages/SecurityReportAnalysisDetailPage";
+import EngagementDetailPage from "./pages/EngagementDetailPage";
 
 const App: React.FC = () => {
   useLayoutEffect(() => {
@@ -97,7 +98,7 @@ const App: React.FC = () => {
               </Route>
               <Route path="/engagements">
                 <Route path="all" element={<AllItemsPage type="engagement" />} />
-                <Route path=":id" element={<ChangeDetailPage />} />
+                <Route path=":id" element={<EngagementDetailPage />} />
               </Route>
             </Route>
           </Route>

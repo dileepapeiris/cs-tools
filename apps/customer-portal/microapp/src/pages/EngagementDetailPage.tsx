@@ -18,7 +18,7 @@ import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { Grid, Skeleton, Stack, Typography } from "@wso2/oxygen-ui";
 import { User, Users } from "@wso2/oxygen-ui-icons-react";
 import { Comment, CommentSkeleton, InfoField, OverlineSlot, StickyCommentBar } from "@components/features/detail";
-import { PriorityChip, StatusChip } from "@components/features/support";
+import { CallRequestCard, PriorityChip, StatusChip } from "@components/features/support";
 import { useLayout } from "@context/layout";
 
 import { RichText, SectionCard } from "@components/shared";
@@ -29,10 +29,11 @@ import { stripHtmlTags } from "@utils/others";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 import EmptyState from "../components/shared/EmptyState";
+import { engagements } from "../services/engagements";
 
 dayjs.extend(relativeTime);
 
-export default function SecurityReportAnalysisDetailPage() {
+export default function EngagementDetailPage() {
   const layout = useLayout();
   const queryClient = useQueryClient();
   const [comment, setComment] = useState("");
@@ -43,6 +44,8 @@ export default function SecurityReportAnalysisDetailPage() {
     ...cases.comments(id!),
     select: (data) => [...data].sort((a, b) => a.createdOn.getTime() - b.createdOn.getTime()),
   });
+
+  const { data: calls } = useQuery(engagements.callRequests(id!));
 
   const mutation = useMutation({
     ...cases.createComment(id!),
@@ -173,6 +176,13 @@ export default function SecurityReportAnalysisDetailPage() {
               <InfoField label="Deployment" value={isLoading ? undefined : data?.deployment || "N/A"} />
             </Grid>
           </Grid>
+        </SectionCard>
+        <SectionCard title="Call Requests">
+          <Stack gap={2}>
+            {calls?.callRequests.map((call) => (
+              <CallRequestCard {...call} />
+            ))}
+          </Stack>
         </SectionCard>
         <SectionCard title="Updates">
           <Stack gap={2} pt={1}>

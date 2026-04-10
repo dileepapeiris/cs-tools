@@ -19,7 +19,8 @@ import type { Case, CaseDto, CasesDto, CaseSummary, GetCasesRequestDto, Paginate
 import { infiniteQueryOptions, queryOptions } from "@tanstack/react-query";
 import { toCase, toCaseSummary } from "./cases";
 
-import { CASE_DETAILS_ENDPOINT, PROJECT_CASES_ENDPOINT } from "@config/endpoints";
+import { CASE_CALL_REQUESTS_ENDPOINT, CASE_DETAILS_ENDPOINT, PROJECT_CASES_ENDPOINT } from "@config/endpoints";
+import type { CallRequestsDto } from "../types/engagement.dto";
 
 const getAllEngagements = async (
   id: string,
@@ -49,6 +50,10 @@ const getEngagement = async (id: string): Promise<Case> => {
   return toCase(response);
 };
 
+const getCallRequests = async (id: string): Promise<CallRequestsDto> => {
+  return (await apiClient.post<CallRequestsDto>(CASE_CALL_REQUESTS_ENDPOINT(id), {})).data;
+};
+
 /* Query Options */
 export const engagements = {
   get: (id: string) => queryOptions({ queryKey: ["engagements", id], queryFn: () => getEngagement(id) }),
@@ -72,4 +77,7 @@ export const engagements = {
         return nextOffset >= totalPages ? undefined : nextOffset;
       },
     }),
+
+  callRequests: (id: string) =>
+    queryOptions({ queryKey: ["engagements", "call-requests", id], queryFn: () => getCallRequests(id) }),
 };

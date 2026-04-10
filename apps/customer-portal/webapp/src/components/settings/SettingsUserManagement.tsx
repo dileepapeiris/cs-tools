@@ -445,24 +445,19 @@ export default function SettingsUserManagement({
                   {canAddOrRemoveUsers && (
                     <TableCell align="right">
                       <Box sx={{ display: "flex", gap: 0.5, justifyContent: "flex-end" }}>
-                        <Tooltip
-                          title={
-                            contact.isCsIntegrationUser
-                              ? "System Users cannot be security contacts"
-                              : "Edit user"
-                          }
-                        >
-                          <span>
-                            <IconButton
-                              size="small"
-                              aria-label="Edit user"
-                              disabled={contact.isCsIntegrationUser}
-                              onClick={() => setEditTarget(contact)}
-                            >
-                              <PencilLine size={16} />
-                            </IconButton>
-                          </span>
-                        </Tooltip>
+                        {!contact.isCsIntegrationUser && (
+                          <Tooltip title="Edit user">
+                            <span>
+                              <IconButton
+                                size="small"
+                                aria-label="Edit user"
+                                onClick={() => setEditTarget(contact)}
+                              >
+                                <PencilLine size={16} />
+                              </IconButton>
+                            </span>
+                          </Tooltip>
+                        )}
                         <Tooltip title="Remove user">
                           <span>
                             <IconButton

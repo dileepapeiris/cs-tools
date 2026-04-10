@@ -23,10 +23,11 @@ import {
   DialogActions,
   DialogContent,
   DialogTitle,
-  FormControlLabel,
   IconButton,
   Switch,
   Typography,
+  alpha,
+  useTheme,
 } from "@wso2/oxygen-ui";
 import { Shield, X } from "@wso2/oxygen-ui-icons-react";
 import type { ProjectContact } from "@models/responses";
@@ -56,6 +57,7 @@ export default function EditUserModal({
   onClose,
   onSubmit,
 }: EditUserModalProps): JSX.Element {
+  const theme = useTheme();
   const [isSecurity, setIsSecurity] = useState(false);
 
   useEffect(() => {
@@ -103,8 +105,24 @@ export default function EditUserModal({
       </IconButton>
       <DialogTitle id="edit-user-modal-title">Edit User</DialogTitle>
       <DialogContent>
+        <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+          Manage this user&apos;s security contact status for the project.
+        </Typography>
+
         {contact && (
-          <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, mb: 2.5 }}>
+          <Box
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              gap: 1.5,
+              p: 1.5,
+              mb: 2.5,
+              borderRadius: 1,
+              border: "1px solid",
+              borderColor: "divider",
+              bgcolor: alpha(theme.palette.text.primary, 0.02),
+            }}
+          >
             <Box
               sx={{
                 width: 44,
@@ -117,13 +135,16 @@ export default function EditUserModal({
                 justifyContent: "center",
                 typography: "body1",
                 fontWeight: 600,
+                flexShrink: 0,
               }}
             >
               {getInitials(contact.firstName, contact.lastName, contact.email)}
             </Box>
-            <Box>
-              <Typography variant="body2">{displayName}</Typography>
-              <Typography variant="caption" color="text.secondary">
+            <Box sx={{ minWidth: 0 }}>
+              <Typography variant="body2" sx={{ fontWeight: 600 }} noWrap>
+                {displayName}
+              </Typography>
+              <Typography variant="caption" color="text.secondary" noWrap>
                 {contact.email ?? NULL_PLACEHOLDER}
               </Typography>
             </Box>
@@ -131,32 +152,120 @@ export default function EditUserModal({
         )}
 
         {isSystemUser ? (
-          <Typography variant="body2" color="error">
-            System Users cannot be security contacts. To change this, remove the
-            user and re-add them as a Portal User or Security User.
-          </Typography>
-        ) : (
-          <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
-            <FormControlLabel
-              control={
-                <Switch
-                  checked={isSecurity}
-                  onChange={(e) => setIsSecurity(e.target.checked)}
-                  disabled={isSubmitting}
-                  color="error"
-                />
-              }
-              label={
-                <Box sx={{ display: "flex", alignItems: "center", gap: 0.75 }}>
-                  <Shield size={16} />
-                  <Typography variant="body2">Security Contact</Typography>
-                </Box>
-              }
-            />
-            <Typography variant="caption" color="text.secondary">
-              Security contacts receive WSO2 security advisories and CVE
-              notifications for this project.
+          <Box
+            sx={{
+              p: 2,
+              borderRadius: 1,
+              border: "1px solid",
+              borderColor: alpha(theme.palette.error.main, 0.3),
+              bgcolor: alpha(theme.palette.error.main, 0.06),
+            }}
+          >
+            <Typography variant="subtitle2" color="error" sx={{ mb: 0.5 }}>
+              Not available for System Users
             </Typography>
+            <Typography variant="caption" color="text.secondary">
+              System Users are used for machine-to-machine integrations and
+              cannot receive security advisories. To designate a security
+              contact, remove this user and invite them again as a Security
+              User.
+            </Typography>
+          </Box>
+        ) : (
+          <Box
+            sx={{
+              p: 2,
+              borderRadius: 1,
+              border: "1px solid",
+              borderColor: isSecurity
+                ? alpha(theme.palette.error.main, 0.3)
+                : "divider",
+              bgcolor: isSecurity
+                ? alpha(theme.palette.error.main, 0.04)
+                : "transparent",
+              transition: "background-color 0.2s, border-color 0.2s",
+            }}
+          >
+            <Box
+              sx={{
+                display: "flex",
+                alignItems: "flex-start",
+                justifyContent: "space-between",
+                gap: 2,
+              }}
+            >
+              <Box sx={{ display: "flex", gap: 1.25, flex: 1, minWidth: 0 }}>
+                <Box
+                  sx={{
+                    width: 32,
+                    height: 32,
+                    borderRadius: 1,
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    bgcolor: alpha(theme.palette.error.main, 0.12),
+                    color: theme.palette.error.main,
+                    flexShrink: 0,
+                  }}
+                >
+                  <Shield size={18} />
+                </Box>
+                <Box>
+                  <Typography variant="subtitle2">Security Contact</Typography>
+                  <Typography
+                    variant="caption"
+                    color="text.secondary"
+                    sx={{ display: "block", mt: 0.25 }}
+                  >
+                    Designate this user to receive WSO2 security advisories,
+                    CVE notifications, and vulnerability reports for the
+                    project. They will also be able to create security cases.
+                  </Typography>
+                </Box>
+              </Box>
+              <Switch
+                checked={isSecurity}
+                onChange={(e) => setIsSecurity(e.target.checked)}
+                disabled={isSubmitting}
+                color="error"
+                inputProps={{ "aria-label": "Toggle security contact" }}
+              />
+            </Box>
+
+            <Box
+              sx={{
+                mt: 1.5,
+                pt: 1.5,
+                borderTop: "1px dashed",
+                borderColor: "divider",
+              }}
+            >
+              <Typography variant="caption" color="text.secondary">
+                {isSecurity && !initialValue && (
+                  <>
+                    <strong>{displayName}</strong> will be promoted to a
+                    Security User and start receiving security notifications
+                    once you save.
+                  </>
+                )}
+                {!isSecurity && initialValue && (
+                  <>
+                    <strong>{displayName}</strong> will be reverted to a
+                    regular Portal User and will no longer receive security
+                    notifications.
+                  </>
+                )}
+                {isSecurity === initialValue && (
+                  <>
+                    This user is currently{" "}
+                    <strong>
+                      {initialValue ? "a Security Contact" : "not a Security Contact"}
+                    </strong>
+                    . Toggle the switch to change it.
+                  </>
+                )}
+              </Typography>
+            </Box>
           </Box>
         )}
       </DialogContent>
@@ -173,7 +282,13 @@ export default function EditUserModal({
             isSubmitting ? <CircularProgress size={16} color="inherit" /> : undefined
           }
         >
-          {isSubmitting ? "Saving..." : "Save"}
+          {isSubmitting
+            ? "Saving..."
+            : isDirty
+              ? isSecurity
+                ? "Make Security Contact"
+                : "Remove Security Contact"
+              : "Save Changes"}
         </Button>
       </DialogActions>
     </Dialog>

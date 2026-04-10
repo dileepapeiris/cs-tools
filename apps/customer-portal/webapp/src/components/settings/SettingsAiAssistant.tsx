@@ -36,6 +36,7 @@ import { setNoveraChatEnabled } from "@utils/settingsStorage";
 
 interface SettingsAiAssistantProps {
   projectId: string;
+  canEdit?: boolean;
 }
 
 type PatchSuccessKind = "novera" | "kb";
@@ -48,6 +49,7 @@ type PatchSuccessKind = "novera" | "kb";
  */
 export default function SettingsAiAssistant({
   projectId,
+  canEdit = true,
 }: SettingsAiAssistantProps): JSX.Element {
   const theme = useTheme();
   const { showSuccess } = useSuccessBanner();
@@ -170,7 +172,7 @@ export default function SettingsAiAssistant({
   const disabledCount = 2 - enabledCount;
 
   const disabledForSwitches =
-    isProjectDetailsLoading || patchProject.isPending;
+    !canEdit || isProjectDetailsLoading || patchProject.isPending;
 
   const indigoMain = colors.indigo?.[600] ?? colors.purple[600];
 

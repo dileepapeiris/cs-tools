@@ -15,33 +15,25 @@
 // under the License.
 
 import { type JSX } from "react";
-import { Box, Button, Stack, Typography } from "@wso2/oxygen-ui";
-import { useNavigate } from "react-router";
+import { Box, Stack, Typography } from "@wso2/oxygen-ui";
 
 interface ErrorPageProps {
   illustration: string;
   illustrationAlt: string;
-  title: string;
-  description: string;
+  description?: string;
 }
 
 export default function ErrorPage({
   illustration,
   illustrationAlt,
-  title,
   description,
 }: ErrorPageProps): JSX.Element {
-  const navigate = useNavigate();
-
   return (
     <Box
       sx={{
-        minHeight: "100vh",
         display: "flex",
-        alignItems: "center",
         justifyContent: "center",
         px: 3,
-        py: 6,
       }}
     >
       <Stack spacing={3} alignItems="center" sx={{ maxWidth: 640 }}>
@@ -55,24 +47,12 @@ export default function ErrorPage({
             height: "auto",
           }}
         />
-        <Typography variant="h4" component="h1" textAlign="center">
-          {title}
-        </Typography>
-        <Typography
-          variant="body1"
-          color="text.secondary"
-          textAlign="center"
-        >
-          {description}
-        </Typography>
-        <Stack direction="row" spacing={2}>
-          <Button variant="outlined" onClick={() => navigate(-1)}>
-            Go back
-          </Button>
-          <Button variant="contained" onClick={() => navigate("/")}>
-            Go home
-          </Button>
-        </Stack>
+
+        {description && (
+          <Typography variant="body1" color="text.secondary" textAlign="center">
+            {description}
+          </Typography>
+        )}
       </Stack>
     </Box>
   );

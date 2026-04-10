@@ -29,7 +29,6 @@ export interface Case {
   severityId?: string;
   issueTypeId?: string;
   product?: string;
-  productVersion?: string;
   reporter?: string;
   account?: string;
   parentCaseId?: string;

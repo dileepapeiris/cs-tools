@@ -14,48 +14,40 @@
 // specific language governing permissions and limitations
 // under the License.
 
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
+import { Grid, Skeleton, Stack, Typography } from "@wso2/oxygen-ui";
+import { User, Users } from "@wso2/oxygen-ui-icons-react";
+import { Comment, CommentSkeleton, InfoField, OverlineSlot, StickyCommentBar } from "@components/features/detail";
+import { PriorityChip, StatusChip } from "@components/features/support";
+import { useLayout } from "@context/layout";
+
+import { RichText, SectionCard } from "@components/shared";
+import { useParams } from "react-router-dom";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { cases } from "@src/services/cases";
+import { formatDuration, stripHtmlTags } from "@utils/others";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
-import { useEffect, useLayoutEffect, useRef, useState } from "react";
-import { User, Users } from "@wso2/oxygen-ui-icons-react";
-import { Grid, Skeleton, Stack, Typography } from "@wso2/oxygen-ui";
-import { CommentSkeleton, InfoField, OverlineSlot, StickyCommentBar } from "@components/features/detail";
-import { PriorityChip, StatusChip } from "@components/features/support";
-import { RichText, SectionCard } from "@components/shared";
-import { useLayout } from "@context/layout";
-import { cases } from "@src/services/cases";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useParams } from "react-router-dom";
-import { useProject } from "@context/project";
-import ms from "ms";
-import { Comment } from "@components/features/detail";
+import EmptyState from "../components/shared/EmptyState";
 
 dayjs.extend(relativeTime);
 
-export default function CaseDetailPage() {
+export default function SecurityReportAnalysisDetailPage() {
   const layout = useLayout();
   const queryClient = useQueryClient();
   const [comment, setComment] = useState("");
 
   const { id } = useParams();
-  const { projectId } = useProject();
   const { data, isLoading } = useQuery(cases.get(id!));
-  const { data: filters, isLoading: isFiltersLoading } = useQuery(cases.filters(projectId!));
   const { data: comments, isFetching: isCommentsRefetching } = useQuery({
     ...cases.comments(id!),
     select: (data) => [...data].sort((a, b) => a.createdOn.getTime() - b.createdOn.getTime()),
   });
 
-  const issueType = filters?.issueTypes.find((issueType) => issueType.id === data?.issueTypeId)?.label;
-
-  const slaResponseTimeInMilliseconds = Number.isFinite(Number(data?.slaResponseTime))
-    ? Number(data?.slaResponseTime)
-    : undefined;
-
   const mutation = useMutation({
     ...cases.createComment(id!),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["comments", id] });
+      queryClient.invalidateQueries({ queryKey: cases.comments(id!).queryKey });
       setComment("");
     },
   });
@@ -97,7 +89,7 @@ export default function CaseDetailPage() {
 
   useLayoutEffect(() => {
     layout.setTitleOverride(
-      <OverlineSlot variant={overlineSlotVariant} type="case" id={data?.number} title={data?.title} />,
+      <OverlineSlot variant={overlineSlotVariant} type="sra" id={data?.number} title={data?.title} />,
     );
 
     return () => {
@@ -117,14 +109,17 @@ export default function CaseDetailPage() {
         <Typography ref={ref} variant="h5" fontWeight="medium">
           {data?.title}
         </Typography>
-        <SectionCard title="Case Information">
+        <SectionCard title="Request Information">
           <Grid spacing={1.5} container>
+            <Grid size={12}>
+              <InfoField label="Description" value={data?.description ? stripHtmlTags(data.description) : undefined} />
+            </Grid>
             <Grid size={6}>
               <InfoField
                 label="Status"
                 value={
                   data?.statusId ? (
-                    <StatusChip type="case" id={data.statusId} size="small" />
+                    <StatusChip type="service" id={data.statusId} size="small" />
                   ) : (
                     <Skeleton variant="text" width={50} height={30} />
                   )
@@ -144,25 +139,10 @@ export default function CaseDetailPage() {
               />
             </Grid>
             <Grid size={6}>
-              <InfoField label="Assignee" value={isLoading ? undefined : (data?.assigned ?? "N/A")} icon={Users} />
+              <InfoField label="Requested By" value={isLoading ? undefined : (data?.createdBy ?? "N/A")} icon={User} />
             </Grid>
             <Grid size={6}>
-              <InfoField label="Reporter" value={isLoading ? undefined : (data?.reporter ?? "N/A")} icon={User} />
-            </Grid>
-            <Grid size={6}>
-              <InfoField label="Category" value={isLoading || isFiltersLoading ? undefined : (issueType ?? "N/A")} />
-            </Grid>
-            <Grid size={6}>
-              <InfoField
-                label="SLA Response Time"
-                value={
-                  isLoading
-                    ? undefined
-                    : slaResponseTimeInMilliseconds !== undefined
-                      ? ms(slaResponseTimeInMilliseconds, { long: true })
-                      : "N/A"
-                }
-              />
+              <InfoField label="Assigned To" value={isLoading ? undefined : (data?.assigned ?? "N/A")} icon={Users} />
             </Grid>
             <Grid size={6}>
               <InfoField
@@ -182,6 +162,12 @@ export default function CaseDetailPage() {
             <Grid size={6}>
               <InfoField label="Last Updated" value={data?.updatedOn && dayjs(data.updatedOn).fromNow()} />
             </Grid>
+            <Grid size={12}>
+              <InfoField
+                label="SLA Response Time"
+                value={data?.slaResponseTime ? formatDuration(Number(data.slaResponseTime)) : undefined}
+              />
+            </Grid>
           </Grid>
         </SectionCard>
         <SectionCard title="Product & Environment">
@@ -194,20 +180,18 @@ export default function CaseDetailPage() {
             </Grid>
           </Grid>
         </SectionCard>
-        <SectionCard title="Activity Timeline">
+        <SectionCard title="Updates">
           <Stack gap={2} pt={1}>
-            {comments ? (
+            {!comments ? (
+              Array.from({ length: 5 }).map((_, index) => <CommentSkeleton key={index} />)
+            ) : comments.length === 0 ? (
+              <EmptyState />
+            ) : (
               <>
                 {comments.map(({ id, content, createdOn, createdBy }) => (
                   <Comment key={id} author={createdBy} timestamp={dayjs(createdOn).fromNow()}>
                     <RichText dangerouslySetInnerHTML={{ __html: content }} />
                   </Comment>
-                ))}
-              </>
-            ) : (
-              <>
-                {Array.from({ length: 5 }).map((_, index) => (
-                  <CommentSkeleton key={index} />
                 ))}
               </>
             )}

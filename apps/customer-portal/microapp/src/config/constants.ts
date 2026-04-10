@@ -117,8 +117,8 @@ export const ITEM_DETAIL_PATHS: Record<ItemCardProps["type"], (id: string) => st
   chat: (id) => `/chats/${id}`,
   service: (id) => `/services/${id}`,
   change: (id) => `/changes/${id}`,
-  sra: (id) => `/sra/${id}`,
-  engagement: (id) => `/sra/${id}`,
+  sra: (id) => `/sras/${id}`,
+  engagement: (id) => `/engagements/${id}`,
 };
 
 export const LOCAL_STORAGE_LAST_VISITED_PROJECT_KEY = "last-active-project-id";

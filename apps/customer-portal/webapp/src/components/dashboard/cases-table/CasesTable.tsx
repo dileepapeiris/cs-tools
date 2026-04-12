@@ -29,7 +29,7 @@ import CasesList from "@components/dashboard/cases-table/CasesList";
 import { mapSeverityToDisplay, isS0Case, deriveFilterLabels } from "@utils/support";
 import { isS0SeverityLabel } from "@constants/dashboardConstants";
 import { CaseType, ALL_CASES_FILTER_DEFINITIONS } from "@constants/supportConstants";
-import type { CaseListItem, CaseSearchResponse } from "@models/responses";
+import type { CaseListItem, CaseSearchResponse } from "@/types/cases";
 
 const OUTSTANDING_STATUS_IDS = [1, 10, 18, 1003, 1006] as const;
 

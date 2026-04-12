@@ -43,7 +43,8 @@ import {
   SEVERITY_LABEL_TO_DISPLAY,
   isS0SeverityLabel,
 } from "@constants/dashboardConstants";
-import type { CaseComment, MetadataItem } from "@models/responses";
+import type { CaseComment } from "@/types/cases";
+import type { MetadataItem } from "@/types/common";
 import { alpha, colors, type Theme } from "@wso2/oxygen-ui";
 import DOMPurify from "dompurify";
 import { createElement, type ComponentType, type ReactNode } from "react";

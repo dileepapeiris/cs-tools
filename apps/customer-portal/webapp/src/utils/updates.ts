@@ -16,11 +16,7 @@
 
 import { UPDATES_STATS } from "@constants/updatesConstants";
 import type { StatCardColor } from "@constants/dashboardConstants";
-import type {
-  ProductUpdateLevelsResponse,
-  RecommendedUpdateLevelItem,
-  UpdatesStats,
-} from "@models/responses";
+import type { ProductUpdateLevelsResponse, RecommendedUpdateLevelItem, UpdatesStats } from "@/types/updates";
 
 /**
  * Returns the StatCard-compatible chip colour for an update type.

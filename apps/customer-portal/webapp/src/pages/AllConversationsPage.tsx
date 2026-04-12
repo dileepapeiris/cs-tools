@@ -38,10 +38,7 @@ import { useLoader } from "@context/linear-loader/LoaderContext";
 import useGetProjectFilters from "@api/useGetProjectFilters";
 import { useSearchConversations } from "@api/useSearchConversations";
 import { useGetConversationStats } from "@api/useGetConversationStats";
-import type {
-  AllConversationsFilterValues,
-  Conversation,
-} from "@models/responses";
+import type { AllConversationsFilterValues, Conversation } from "@/types/conversations";
 import type { AllConversationsStatKey } from "@constants/supportConstants";
 import AllConversationsStatCards from "@components/support/all-conversations/AllConversationsStatCards";
 import AllConversationsSearchBar from "@components/support/all-conversations/AllConversationsSearchBar";

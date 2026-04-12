@@ -35,9 +35,9 @@ import {
 } from "@wso2/oxygen-ui-icons-react";
 import { useMemo, type JSX } from "react";
 import { useGetConversationMessages } from "@api/useGetConversationMessages";
-import type { ConversationMessage, ChatHistoryItem } from "@models/responses";
+import type { ConversationMessage, ChatHistoryItem } from "@/types/conversations";
 import Error500Page from "@components/common/error/Error500Page";
-import type { Message } from "@models/chatTypes";
+import type { Message } from "@/types/conversations";
 import ChatMessageBubble from "@components/support/novera-ai-assistant/novera-chat-page/ChatMessageBubble";
 import { alpha, useTheme } from "@wso2/oxygen-ui";
 import {

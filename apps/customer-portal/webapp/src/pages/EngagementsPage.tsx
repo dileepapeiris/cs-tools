@@ -40,7 +40,7 @@ import { useLoader } from "@context/linear-loader/LoaderContext";
 import { CaseType } from "@constants/supportConstants";
 import { shouldExcludeS0 } from "@utils/subscriptionUtils";
 import { hasListSearchOrFilters } from "@utils/support";
-import type { AllCasesFilterValues } from "@models/responses";
+import type { AllCasesFilterValues } from "@/types/cases";
 import { isS0Case } from "@utils/support";
 import AllCasesList from "@components/support/all-cases/AllCasesList";
 import AllCasesSearchBar from "@components/support/all-cases/AllCasesSearchBar";

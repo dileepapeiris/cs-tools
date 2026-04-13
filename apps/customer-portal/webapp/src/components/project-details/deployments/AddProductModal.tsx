@@ -214,8 +214,11 @@ export default function AddProductModal({
     setProducts([...prevProducts, ...newProductItems]);
   }, [productsPage, products]);
 
-  const productsTotalRecords =
-    cachedProductsTotalRecords ?? productsPage?.totalRecords ?? products.length;
+  const productsTotalRecords = Number.isFinite(cachedProductsTotalRecords)
+    ? (cachedProductsTotalRecords as number)
+    : Number.isFinite(productsPage?.totalRecords)
+      ? (productsPage!.totalRecords as number)
+      : products.length;
   const canLoadMoreProducts = products.length < productsTotalRecords;
 
   const handleProductsScroll = useCallback(
@@ -322,8 +325,11 @@ export default function AddProductModal({
   }, [form.productId, versionsPage, versions]);
   /* eslint-enable react-hooks/set-state-in-effect */
 
-  const versionsTotalRecords =
-    cachedVersionsTotalRecords ?? versionsPage?.totalRecords ?? versions.length;
+  const versionsTotalRecords = Number.isFinite(cachedVersionsTotalRecords)
+    ? (cachedVersionsTotalRecords as number)
+    : Number.isFinite(versionsPage?.totalRecords)
+      ? (versionsPage!.totalRecords as number)
+      : versions.length;
   const canLoadMoreVersions = versions.length < versionsTotalRecords;
 
   /**

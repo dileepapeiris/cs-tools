@@ -23,6 +23,7 @@ import { countListSearchAndFilters } from "@utils/support";
 
 export interface ListSearchPanelProps {
   searchTerm: string;
+  searchPlaceholder?: string;
   onSearchChange: (value: string) => void;
   isFiltersOpen: boolean;
   onFiltersToggle: () => void;
@@ -51,6 +52,7 @@ export interface ListSearchPanelProps {
  */
 export default function ListSearchPanel({
   searchTerm,
+  searchPlaceholder = "Search cases by ID, title, or description...",
   onSearchChange,
   isFiltersOpen,
   onFiltersToggle,
@@ -67,7 +69,7 @@ export default function ListSearchPanel({
 }: ListSearchPanelProps): JSX.Element {
   return (
     <ListSearchBar
-      searchPlaceholder="Search cases by ID, title, or description..."
+      searchPlaceholder={searchPlaceholder}
       searchTerm={searchTerm}
       onSearchChange={onSearchChange}
       isFiltersOpen={isFiltersOpen}

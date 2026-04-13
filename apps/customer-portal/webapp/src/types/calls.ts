@@ -14,11 +14,18 @@
 // specific language governing permissions and limitations
 // under the License.
 
-import type { IdLabelRef } from "./common";
+import type { IdLabelRef, PaginationResponse } from "@/types/common";
 
-// Call request structure (from POST /cases/:caseId/call-requests/search).
-// Backend: modules/types/types.bal `CallRequest` — `reason`, `scheduleTime`,
-// and `meetingLink` are nullable; `durationMin` is a required int.
+// Request type for patching a call request.
+export type PatchCallRequest = {
+  reason?: string;
+  cancellationReason?: string;
+  stateKey: number;
+  utcTimes?: string[];
+  durationInMinutes?: number;
+};
+
+// Item type for a call request.
 export type CallRequest = {
   id: string;
   number: string;
@@ -31,35 +38,21 @@ export type CallRequest = {
   createdOn: string;
   updatedOn: string;
   state: IdLabelRef;
-}
+};
 
-export type CallRequestsResponse = {
+// Response type for get call requests.
+export type CallRequestsResponse = PaginationResponse & {
   callRequests: CallRequest[];
-  totalRecords?: number;
-  offset?: number;
-  limit?: number;
-}
+};
 
-// Response for creating or updating a call request (POST/PATCH).
+// Response type for creating a call.
 export type CreateCallResponse = {
   id: string;
-}
+};
 
-/** Alias for create/update call request response (shared shape). */
-export type CallRequestResponse = CreateCallResponse;
-
-// Request body for creating a call request.
+// Request type for creating a call.
 export type CreateCallRequest = {
   durationInMinutes: number;
   reason: string;
   utcTimes: string[];
-}
-
-// Request body for updating a call request (PATCH /cases/:caseId/call-requests/:id).
-export type PatchCallRequest = {
-  reason?: string;
-  cancellationReason?: string;
-  stateKey: number;
-  utcTimes?: string[];
-  durationInMinutes?: number;
-}
+};

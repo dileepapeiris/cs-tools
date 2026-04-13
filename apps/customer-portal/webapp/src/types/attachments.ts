@@ -14,43 +14,41 @@
 // specific language governing permissions and limitations
 // under the License.
 
-// Inline attachment for comment images.
-export type CaseCommentInlineAttachment = {
+import type { AuditMetadata } from "@/types/common";
+
+// Item type for inline attachment for comment images.
+export type CaseCommentInlineAttachment = AuditMetadata & {
   id: string;
   fileName: string;
   contentType: string;
   downloadUrl: string;
-  createdOn: string;
-  createdBy: string;
   sys_id?: string;
   url?: string;
-}
+};
 
-// GET /attachments/:id — full payload with base64 or data URL in `content`.
-export type AttachmentDownloadResponse = {
+// Response type for downloading an attachment.
+export type AttachmentDownloadResponse = AuditMetadata & {
   content: string;
   id: string;
   referenceId?: string;
   name: string;
   type: string;
   sizeBytes?: number;
-  createdBy?: string;
-  createdOn?: string;
   downloadUrl?: string | null;
   description?: string | null;
-}
+};
 
-// Request body for PATCHing an attachment (cases or deployments).
+// Request type for patching an attachment.
 export type PatchAttachmentRequest = {
   name?: string;
   description?: string;
-}
+};
 
-// Request body for posting a case attachment.
+// Request type for posting a case attachment.
 export type PostCaseAttachmentRequest = {
   name: string;
   type: string;
   content: string;
   description?: string;
   referenceType?: string;
-}
+};

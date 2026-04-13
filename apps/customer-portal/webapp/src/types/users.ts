@@ -14,14 +14,7 @@
 // specific language governing permissions and limitations
 // under the License.
 
-// User profile information.
-export type UserProfile = {
-  name: string;
-  email: string;
-  avatar: string;
-}
-
-// User details response from API.
+// Response type for user details.
 export type UserDetails = {
   id: string;
   email: string;
@@ -32,38 +25,27 @@ export type UserDetails = {
   avatar?: string | null;
   roles?: string[];
   lastPasswordUpdateTime?: string;
-}
+};
 
-// Project user (invited/registered) for project users list.
-export type ProjectUser = {
-  id: string;
-  firstName: string;
-  lastName: string;
-  email: string;
-  status: "Invited" | "Registered";
-}
-
-// Response from POST /projects/:projectId/contacts/validate.
+// Response type for contact validation.
 export type ValidateContactResponse = {
   isContactValid: boolean;
   message: string;
-  contactDetails?: {
-    id: string;
-    email: string;
-    firstName: string;
-    lastName: string;
-    isCsAdmin: boolean;
-    isCsIntegrationUser: boolean;
-    account?: {
-      id: string;
-      domainList: string | null;
-      classification: string;
-      isPartner: boolean;
-    };
-  };
-}
+  contactDetails?: ContactDetails;
+};
 
-// Project contact from GET /projects/:projectId/contacts.
+// Item type for contact details.
+export type ContactDetails = {
+  id: string;
+  email: string;
+  firstName: string;
+  lastName: string;
+  isCsAdmin: boolean;
+  isCsIntegrationUser: boolean;
+  account?: AccountInfo;
+};
+
+// Item type for a project contact.
 export type ProjectContact = {
   id: string;
   email: string;
@@ -73,38 +55,41 @@ export type ProjectContact = {
   isCsIntegrationUser: boolean;
   isSecurityContact: boolean;
   membershipStatus: string;
-  account?: {
-    id: string;
-    domainList?: string[] | null;
-    classification: string;
-    isPartner: boolean;
-  };
-}
+  account?: AccountInfo;
+};
 
-// Integration user from GET /projects/projectId/integration-users.
+// Item type for account information.
+export type AccountInfo = {
+  id: string;
+  domainList?: string[] | null;
+  classification: string;
+  isPartner: boolean;
+};
+
+// Item type for an integration user.
 export type IntegrationUser = {
   id: string;
   email: string;
-}
+};
 
-// Request body for PATCH /users/me (partial update, only changed fields).
+// Request type for patching the current user's profile.
 export type PatchUserMeRequest = {
   phoneNumber?: string;
   timeZone?: string;
   firstName?: string;
   lastName?: string;
-}
+};
 
-// Request body for creating a project contact (POST /projects/:projectId/contacts).
+// Request type for creating a project contact.
 export type CreateProjectContactRequest = {
   contactEmail: string;
   contactFirstName: string;
   contactLastName: string;
   isCsIntegrationUser: boolean;
   isSecurityContact: boolean;
-}
+};
 
-// Request body for validating a project contact (POST /projects/:projectId/contacts/validate).
+// Request type for validating a contact.
 export type ValidateContactRequest = {
   contactEmail: string;
-}
+};

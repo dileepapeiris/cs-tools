@@ -14,22 +14,34 @@
 // specific language governing permissions and limitations
 // under the License.
 
-import type { PaginationRequest } from "./common";
+import type {
+  PaginationResponse,
+  IdLabelRef,
+  SearchRequestBase,
+} from "@/types/common";
 
-// Response for GET /projects/:projectId/stats/usage.
+// Filter type for instance metrics and usage requests.
+export type DateRangeFilter = {
+  startDate: string;
+  endDate: string;
+};
+
+// Enum for usage time ranges.
+export enum UsageTimeRange {
+  THREE_MONTHS = "3m",
+  SIX_MONTHS = "6m",
+  TWELVE_MONTHS = "12m",
+  CUSTOM = "custom",
+}
+
+// Response type for GET /projects/:projectId/stats/usage.
 export type UsageStatsResponse = {
   deploymentCount: number;
   deployedProductCount: number;
   instanceCount: number;
-}
+};
 
-// Reference item used in instance responses.
-export type InstanceReferenceItem = {
-  id: string;
-  label: string;
-}
-
-// Deployment metadata within instance metadata.
+// Model type for deployment metadata within instance metadata.
 export type InstanceDeploymentMetadata = {
   os?: string;
   osVersion?: string;
@@ -38,9 +50,9 @@ export type InstanceDeploymentMetadata = {
   jdkVendor?: string;
   updateLevel?: string;
   numberOfCores?: string;
-}
+};
 
-// Instance metadata nested inside an InstanceItem.
+// Model type for instance metadata nested inside an InstanceItem.
 export type InstanceMetadata = {
   id: string;
   coreCount: number | null;
@@ -51,55 +63,52 @@ export type InstanceMetadata = {
   updatedOn: string;
   customCreatedOn: string | null;
   customUpdatedOn: string | null;
-}
+};
 
-// Single instance object from POST .../instances/search.
+// Item type for a single instance object from POST .../instances/search.
 export type InstanceItem = {
   id: string;
   key: string;
-  project: InstanceReferenceItem | null;
-  deployment: InstanceReferenceItem | null;
-  product: InstanceReferenceItem | null;
-  deployedProduct: InstanceReferenceItem | null;
+  project: IdLabelRef | null;
+  deployment: IdLabelRef | null;
+  product: IdLabelRef | null;
+  deployedProduct: IdLabelRef | null;
   createdOn: string;
   updatedOn: string;
   metadata: InstanceMetadata | null;
-}
+};
 
-// Response for POST .../instances/search.
-export type InstancesResponse = {
+// Response type for POST .../instances/search.
+export type InstancesResponse = PaginationResponse & {
   instances: InstanceItem[];
-  totalRecords: number;
-  offset: number;
-  limit: number;
-}
+};
 
-// Single period summary entry within an instance usage.
+// Item type for a single period summary entry within an instance usage.
 export type InstancePeriodSummary = {
   period: string;
   counts: Record<string, number>;
-}
+};
 
-// Per-instance entry in an instance usage response.
+// Item type for per-instance entry in an instance usage response.
 export type InstanceUsageEntry = {
   instanceId: string;
   instanceKey: string;
-  project: InstanceReferenceItem | null;
-  deployment: InstanceReferenceItem | null;
-  product: InstanceReferenceItem | null;
-  deployedProduct: InstanceReferenceItem | null;
+  project: IdLabelRef | null;
+  deployment: IdLabelRef | null;
+  product: IdLabelRef | null;
+  deployedProduct: IdLabelRef | null;
   periodSummaries: InstancePeriodSummary[];
-}
+};
 
-// Response for POST .../instances/usages/search.
+// Response type for POST .../instances/usages/search.
 export type InstanceUsageResponse = {
   usages: InstanceUsageEntry[];
   totalInstances: number;
   startDate: string;
   endDate: string;
-}
+};
 
-// Single data point within an instance metric entry.
+// Item type for a single data point within an instance metric entry.
 export type InstanceMetricDataPoint = {
   date: string;
   createdOn: string;
@@ -107,68 +116,59 @@ export type InstanceMetricDataPoint = {
   jdkVersion: string | null;
   updates: number | null;
   deploymentMetadata: InstanceDeploymentMetadata | null;
-}
+};
 
-// Per-instance entry in an instance metrics response.
+// Item type for per-instance entry in an instance metrics response.
 export type InstanceMetricEntry = {
   instanceId: string;
   instanceKey: string;
-  project: InstanceReferenceItem | null;
-  deployment: InstanceReferenceItem | null;
-  product: InstanceReferenceItem | null;
-  deployedProduct: InstanceReferenceItem | null;
+  project: IdLabelRef | null;
+  deployment: IdLabelRef | null;
+  product: IdLabelRef | null;
+  deployedProduct: IdLabelRef | null;
   dataPoints: InstanceMetricDataPoint[];
-}
+};
 
-// Response for POST .../instances/metrics/search.
+// Response type for POST .../instances/metrics/search.
 export type InstanceMetricsResponse = {
   metrics: InstanceMetricEntry[];
   totalInstances: number;
   startDate: string;
   endDate: string;
-}
+};
 
-// Request body for POST .../instances/search.
-export type InstanceSearchRequest = {
-  filters?: {
-    startDate?: string;
-    endDate?: string;
-  };
-  pagination?: PaginationRequest;
-}
+// Instance Search Filters
+export type InstanceSearchFilters = {
+  startDate?: string;
+  endDate?: string;
+};
 
-// Request body for POST .../instances/usages/search and POST .../instances/metrics/search.
+// Request type for POST .../instances/search.
+export type InstanceSearchRequest = SearchRequestBase & {
+  filters?: InstanceSearchFilters;
+};
+
+// Request type for POST .../instances/usages/search and POST .../instances/metrics/search.
 export type InstanceMetricsRequest = {
-  filters: {
-    startDate: string;
-    endDate: string;
-  };
-}
+  filters: DateRangeFilter;
+};
 
-// --- Usage metrics UI view-model types (from former usageMetrics.types.ts) ---
-
-/** Preset time range for usage charts (placeholder until API exists). */
-export type UsageTimeRangePreset = "3m" | "6m" | "12m" | "custom";
-
-/** Environment bucket identifier — the deployment type.id from the API (e.g. "1", "2", "5"). */
-export type UsageEnvironmentKind = string;
-
-/** Single point for Recharts / LineChart x-axis rows. */
+// Item type for a single point for Recharts / LineChart x-axis rows.
 export type UsageTrendRow = {
   name: string;
   value?: number;
   current?: number;
   average?: number;
-}
+};
 
-/** Summary counts on the overview tab. */
+// Model type for summary counts on the overview tab.
 export type UsageOverviewSummary = {
   environments: number;
   products: number;
   instances: number;
-}
+};
 
-/** Product row inside an expanded environment on the overview tab. */
+// Item type for a product row inside an expanded environment on the overview tab.
 export type UsageOverviewProductCard = {
   id: string;
   name: string;
@@ -176,18 +176,18 @@ export type UsageOverviewProductCard = {
   instances: number;
   cores: number;
   transactionsLabel: string;
-}
+};
 
-/** Collapsible environment row on the overview tab. */
+// Item type for a collapsible environment row on the overview tab.
 export type UsageEnvironmentBreakdownRow = {
   id: string;
-  kind: UsageEnvironmentKind;
+  kind: string;
   title: string;
   subtitle: string;
   totalCores: number;
   transactionsLabel: string;
   products: UsageOverviewProductCard[];
-}
+};
 
 export type UsageAggregatedMetricDefinition = {
   id: string;
@@ -199,9 +199,9 @@ export type UsageAggregatedMetricDefinition = {
   data: UsageTrendRow[];
   secondaryStroke?: string;
   secondaryName?: string;
-}
+};
 
-/** Mini line chart shown when an instance row is expanded. */
+// Item type for a mini line chart shown when an instance row is expanded.
 export type UsageInstanceChartBlock = {
   title: string;
   caption: string;
@@ -210,9 +210,15 @@ export type UsageInstanceChartBlock = {
   deltaPositive: boolean;
   stroke: string;
   data: UsageTrendRow[];
-}
+};
 
-/** Per-instance row when a product is expanded (header + optional drill-down charts). */
+// Item type for chart blocks for a product instance row.
+export type UsageInstanceCharts = {
+  transactions: UsageInstanceChartBlock;
+  cores: UsageInstanceChartBlock;
+};
+
+// Item type for per-instance row when a product is expanded.
 export type UsageProductInstanceRow = {
   id: string;
   hostName: string;
@@ -220,19 +226,16 @@ export type UsageProductInstanceRow = {
   u2Level: string;
   transactionsLabel: string;
   coreCount: number;
-  charts: {
-    transactions: UsageInstanceChartBlock;
-    cores: UsageInstanceChartBlock;
-  };
-}
+  charts: UsageInstanceCharts;
+};
 
-/** Core metric pill labels on the environment product row. */
+// Item type for core metric pill labels on the environment product row.
 export type UsageCoreMetricStat = {
   label: string;
   value: string;
-}
+};
 
-/** Expandable product within Production / Test / Development tabs. */
+// Item type for an expandable product within Production / Test / Development tabs.
 export type UsageEnvironmentProduct = {
   id: string;
   name: string;
@@ -245,4 +248,4 @@ export type UsageEnvironmentProduct = {
   transactionTrend: UsageTrendRow[];
   coreUsageTrend: UsageTrendRow[];
   instances: UsageProductInstanceRow[];
-}
+};

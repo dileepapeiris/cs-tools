@@ -14,17 +14,20 @@
 // specific language governing permissions and limitations
 // under the License.
 
-// Updates statistics response.
+// Model type for update level breakdown.
+export type UpdateLevelBreakdown = { regular: number; security: number };
+
+// Response type for updates statistics.
 export type UpdatesStats = {
   productsTracked: number | null;
   totalUpdatesInstalled: number | null;
-  totalUpdatesInstalledBreakdown?: { regular: number; security: number };
+  totalUpdatesInstalledBreakdown?: UpdateLevelBreakdown;
   totalUpdatesPending: number | null;
-  totalUpdatesPendingBreakdown?: { regular: number; security: number };
+  totalUpdatesPendingBreakdown?: UpdateLevelBreakdown;
   securityUpdatesPending: number | null;
 }
 
-// Single product recommended update level item.
+// Item type for a single product recommended update level item.
 export type RecommendedUpdateLevelItem = {
   productName: string;
   productBaseVersion: string;
@@ -39,23 +42,20 @@ export type RecommendedUpdateLevelItem = {
   availableSecurityUpdatesCount: number;
 }
 
-// Product update levels.
+// Item type for product update levels.
 export type ProductUpdateLevelEntry = {
   productBaseVersion: string;
   channel: string;
   updateLevels: number[];
 }
 
-// One product's update levels.
+// Item type for one product's update levels.
 export type ProductUpdateLevelsItem = {
   productName: string;
   productUpdateLevels: ProductUpdateLevelEntry[];
 }
 
-// Product update levels response.
-export type ProductUpdateLevelsResponse = ProductUpdateLevelsItem[];
-
-// Security advisory item inside an update description level.
+// Item type for a security advisory item inside an update description level.
 export type SecurityAdvisory = {
   id: string;
   overview: string;
@@ -67,7 +67,7 @@ export type SecurityAdvisory = {
   credits: string;
 }
 
-// Single update description entry within an update level.
+// Item type for a single update description entry within an update level.
 export type UpdateDescriptionLevel = {
   updateLevel: number;
   productName: string;
@@ -87,16 +87,16 @@ export type UpdateDescriptionLevel = {
   securityAdvisories: SecurityAdvisory[];
 }
 
-// Entry for a single update level key from POST /updates/levels/search.
+// Item type for a single update level key from POST /updates/levels/search.
 export type UpdateLevelEntry = {
   updateType: string;
   updateDescriptionLevels: UpdateDescriptionLevel[];
 }
 
-// Response for POST /updates/levels/search (map keyed by update level string).
+// Response type for POST /updates/levels/search.
 export type UpdateLevelsSearchResponse = Record<string, UpdateLevelEntry>;
 
-// Request body for POST /updates/levels/search.
+// Request type for searching update levels.
 export type UpdateLevelsSearchRequest = {
   startingUpdateLevel: number;
   endingUpdateLevel: number;

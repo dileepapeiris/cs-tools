@@ -16,6 +16,7 @@
 
 import { useState, type ReactNode } from "react";
 import {
+  alpha,
   Avatar,
   Box,
   Button,
@@ -217,13 +218,19 @@ function SectionCard({ title, children }: { title: string; children: ReactNode }
 }
 
 function InvitationNotice() {
+  const theme = useTheme();
+
   return (
-    <Card component={Stack} direction="row" gap={2} sx={{ bgcolor: colors.blue[50], p: 1.5 }}>
-      <Box color={colors.indigo[500]}>
+    <Card
+      component={Stack}
+      direction="row"
+      sx={(theme) => ({ bgcolor: alpha(theme.palette.info.main, 0.2), p: 1.5, gap: 2 })}
+    >
+      <Box color={theme.palette.info.main}>
         <Info size={pxToRem(18)} />
       </Box>
       <Stack>
-        <Typography variant="body2" fontWeight="medium" color={colors.indigo[500]}>
+        <Typography variant="body2" fontWeight="medium" color="info">
           Direct User Invitation
         </Typography>
         <Typography variant="subtitle2" color="text.secondary">
@@ -262,8 +269,8 @@ function ExpirationNotice() {
 
 function PermissionDetails() {
   return (
-    <Card component={Stack} sx={{ bgcolor: colors.blue[50], p: 1.5 }}>
-      <Typography variant="body2" fontWeight="medium" color={colors.indigo[500]}>
+    <Card component={Stack} sx={(theme) => ({ bgcolor: alpha(theme.palette.info.main, 0.2), p: 1.5 })}>
+      <Typography variant="body2" fontWeight="medium" color="info">
         Permission Details
       </Typography>
       <ul style={{ margin: 0, marginTop: 3, paddingLeft: 20 }}>
@@ -328,7 +335,7 @@ function DangerZone({ isPending, onDelete }: { isPending: boolean; onDelete: () 
 
   return (
     <>
-      <Card component={Stack} sx={{ bgcolor: colors.red[50], p: 1.5 }}>
+      <Card component={Stack} sx={(theme) => ({ bgcolor: alpha(theme.palette.error.main, 0.2), p: 1.5 })}>
         <Typography variant="body2" fontWeight="medium" color="error">
           Danger Zone
         </Typography>

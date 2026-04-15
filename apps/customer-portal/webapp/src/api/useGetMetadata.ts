@@ -16,10 +16,10 @@
 
 import { useQuery, type UseQueryResult } from "@tanstack/react-query";
 import { useAsgardeo } from "@asgardeo/react";
-import { useAuthApiClient } from "@api/useAuthApiClient";
+import { useAuthApiClient } from "@/utils/useAuthApiClient";
 import { useLogger } from "@hooks/useLogger";
-import { ApiQueryKeys } from "@constants/apiConstants";
-import type { PortalMetadataResponse } from "@/types/projects";
+import { ApiQueryKeys } from "@/constants/apiConstants";
+import type { PortalMetadataResponse } from "@features/project-hub/types/projects";
 
 /**
  * Fetches global metadata used by customer portal (time zones, etc).

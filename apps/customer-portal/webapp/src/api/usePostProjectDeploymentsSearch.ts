@@ -22,14 +22,14 @@ import {
   type UseQueryResult,
 } from "@tanstack/react-query";
 import { useAsgardeo } from "@asgardeo/react";
-import { useAuthApiClient } from "@api/useAuthApiClient";
+import { useAuthApiClient } from "@/utils/useAuthApiClient";
 import { useLogger } from "@hooks/useLogger";
-import { ApiQueryKeys } from "@constants/apiConstants";
-import type { DeploymentSearchRequest } from "@/types/deployments";
+import { ApiQueryKeys } from "@/constants/apiConstants";
+import type { DeploymentSearchRequest } from "@features/project-details/types/deployments";
 import type {
   ProjectDeploymentItem,
   ProjectDeploymentsListResponse,
-} from "@/types/deployments";
+} from "@features/project-details/types/deployments";
 
 const DEFAULT_PAGE_SIZE = 10;
 

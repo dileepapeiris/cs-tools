@@ -21,7 +21,7 @@ import { describe, expect, it, vi } from "vitest";
 import { useContext } from "react";
 import LoggerContext from "@context/logger/LoggerContext";
 import LoggerProvider from "@context/logger/LoggerProvider";
-import { type ILogger } from "@utils/logger";
+import { type ILogger } from "@hooks/logger";
 
 const TestConsumer = () => {
   const context = useContext(LoggerContext);

@@ -35,58 +35,59 @@ export default defineConfig({
         new URL("./src/components", import.meta.url),
       ),
       "@update-cards": fileURLToPath(
-        new URL("./src/components/updates/update-cards", import.meta.url),
+        new URL(
+          "./src/features/updates/components/update-cards",
+          import.meta.url,
+        ),
       ),
       "@case-details": fileURLToPath(
         new URL(
-          "./src/components/support/case-details/header",
+          "./src/features/support/components/case-details/header",
           import.meta.url,
         ),
       ),
       "@case-details-attachments": fileURLToPath(
         new URL(
-          "./src/components/support/case-details/attachments-tab",
+          "./src/features/support/components/case-details/attachments-tab",
           import.meta.url,
         ),
       ),
       "@case-details-details": fileURLToPath(
         new URL(
-          "./src/components/support/case-details/details-tab",
+          "./src/features/support/components/case-details/details-tab",
           import.meta.url,
         ),
       ),
       "@case-details-activity": fileURLToPath(
         new URL(
-          "./src/components/support/case-details/activity-tab",
+          "./src/features/support/components/case-details/activity-tab",
           import.meta.url,
         ),
       ),
       "@case-details-calls": fileURLToPath(
         new URL(
-          "./src/components/support/case-details/calls-tab",
+          "./src/features/support/components/case-details/calls-tab",
           import.meta.url,
         ),
       ),
       "@config": fileURLToPath(new URL("./src/config", import.meta.url)),
-      "@constants": fileURLToPath(new URL("./src/constants", import.meta.url)),
       "@context": fileURLToPath(new URL("./src/context", import.meta.url)),
       "@hooks": fileURLToPath(new URL("./src/hooks", import.meta.url)),
       "@layouts": fileURLToPath(new URL("./src/layouts", import.meta.url)),
-      "@pages": fileURLToPath(new URL("./src/pages", import.meta.url)),
+      "@features": fileURLToPath(new URL("./src/features", import.meta.url)),
       "@providers": fileURLToPath(new URL("./src/providers", import.meta.url)),
       "@time-tracking": fileURLToPath(
         new URL(
-          "./src/components/project-details/time-tracking",
+          "./src/features/project-details/components/time-tracking",
           import.meta.url,
         ),
       ),
       "@deployments": fileURLToPath(
         new URL(
-          "./src/components/project-details/deployments",
+          "./src/features/project-details/components/deployments",
           import.meta.url,
         ),
       ),
-      "@utils": fileURLToPath(new URL("./src/utils", import.meta.url)),
       buffer: "buffer",
       "buffer/": "buffer/index.js",
     },

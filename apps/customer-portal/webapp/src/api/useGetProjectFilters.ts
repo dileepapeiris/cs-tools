@@ -16,11 +16,11 @@
 
 import { useQuery, type UseQueryResult } from "@tanstack/react-query";
 import { useAsgardeo } from "@asgardeo/react";
-import { useAuthApiClient } from "@api/useAuthApiClient";
+import { useAuthApiClient } from "@/utils/useAuthApiClient";
 import { useLogger } from "@hooks/useLogger";
-import { ApiQueryKeys } from "@constants/apiConstants";
-import { CALL_REQUEST_STATE_CANCELLED } from "@constants/supportConstants";
-import type { CaseMetadataResponse } from "@/types/cases";
+import { ApiQueryKeys } from "@/constants/apiConstants";
+import { CALL_REQUEST_STATE_CANCELLED } from "@features/support/constants/supportConstants";
+import type { CaseMetadataResponse } from "@features/support/types/cases";
 
 /**
  * Custom hook to fetch all filters (cases, conversations, change requests, etc.) for a specific project.

@@ -17,44 +17,41 @@
 import { type JSX } from "react";
 import { Route, Routes, Navigate } from "react-router";
 import AuthGuard from "@layouts/AuthGuard";
-import ProjectHub from "@pages/ProjectHub";
-import ProjectPage from "@pages/ProjectPage";
-import ProjectDetails from "@pages/ProjectDetails";
 import ProjectGuard from "@layouts/ProjectGuard";
-import DashboardPage from "@pages/DashboardPage";
-import SupportPage from "@pages/SupportPage";
-import UpdatesPage from "@pages/UpdatesPage";
-import PendingUpdatesPage from "@pages/PendingUpdatesPage";
-import UpdateLevelDetailsPage from "@pages/UpdateLevelDetailsPage";
-import AllCasesPage from "@pages/AllCasesPage";
-import ChangeRequestsPage from "@pages/support/change-requests/ChangeRequestsPage";
-import ChangeRequestDetailsPage from "@pages/support/change-requests/ChangeRequestDetailsPage";
-import AnnouncementsPage from "@pages/AnnouncementsPage";
-import AnnouncementDetailsPage from "@pages/AnnouncementDetailsPage";
-import AllConversationsPage from "@pages/AllConversationsPage";
-import ConversationDetailsPage from "@pages/ConversationDetailsPage";
-import CaseDetailsPage from "@pages/CaseDetailsPage";
-import ServiceRequestsPage from "@pages/ServiceRequestsPage";
-import ServiceRequestDetailsPage from "@pages/ServiceRequestDetailsPage";
-import CreateServiceRequestPage from "@pages/CreateServiceRequestPage";
-import NoveraChatPage from "@pages/NoveraChatPage";
-import DescribeIssuePage from "@pages/DescribeIssuePage";
-import CreateCasePage from "@pages/CreateCasePage";
+import ProjectHubPage from "@features/project-hub/pages/ProjectHub";
+import ProjectDetailsPage from "@features/project-details/pages/ProjectDetails";
+import DashboardPage from "@features/dashboard/pages/DashboardPage";
+import SupportPage from "@features/support/pages/SupportPage";
+import AllCasesPage from "@features/support/pages/AllCasesPage";
+import CaseDetailsPage from "@features/support/pages/CaseDetailsPage";
+import AllConversationsPage from "@features/support/pages/AllConversationsPage";
+import ConversationDetailsPage from "@features/support/pages/ConversationDetailsPage";
+import ServiceRequestsPage from "@features/operations/pages/ServiceRequestsPage";
+import ServiceRequestDetailsPage from "@features/operations/pages/ServiceRequestDetailsPage";
+import CreateServiceRequestPage from "@features/operations/pages/CreateServiceRequestPage";
+import NoveraChatPage from "@features/support/pages/NoveraChatPage";
+import DescribeIssuePage from "@features/support/pages/DescribeIssuePage";
+import CreateCasePage from "@features/support/pages/CreateCasePage";
+import ChangeRequestsPage from "@features/operations/pages/ChangeRequestsPage";
+import ChangeRequestDetailsPage from "@features/operations/pages/ChangeRequestDetailsPage";
+import UpdatesPage from "@features/updates/pages/UpdatesPage";
+import PendingUpdatesPage from "@features/updates/pages/PendingUpdatesPage";
+import UpdateLevelDetailsPage from "@features/updates/pages/UpdateLevelDetailsPage";
+import AnnouncementsPage from "@features/updates/pages/AnnouncementsPage";
+import AnnouncementDetailsPage from "@features/updates/pages/AnnouncementDetailsPage";
+import OperationsPage from "@features/operations/pages/OperationsPage";
+import SecurityPage from "@features/security/pages/SecurityPage";
+import VulnerabilityDetailsPage from "@features/security/pages/VulnerabilityDetailsPage";
+import EngagementsPage from "@features/engagements/pages/EngagementsPage";
+import UsageMetricsPage from "@features/usage-metrics/pages/UsageMetricsPage";
+import SettingsPage from "@features/settings/pages/SettingsPage";
+import ServiceNowCaseRedirectPage from "@features/support/pages/ServiceNowCaseRedirectPage";
+import Error401Page from "@components/error/Error401Page";
+import Error403Page from "@components/error/Error403Page";
+import Error404Page from "@components/error/Error404Page";
 import { ErrorBannerProvider } from "@context/error-banner/ErrorBannerContext";
 import { SuccessBannerProvider } from "@context/success-banner/SuccessBannerContext";
 import { LoaderProvider } from "@context/linear-loader/LoaderContext";
-import SecurityPage from "@pages/SecurityPage";
-import SettingsPage from "@pages/SettingsPage";
-import VulnerabilityDetailsPage from "@pages/VulnerabilityDetailsPage";
-import OperationsPage from "@pages/OperationsPage";
-import EngagementsPage from "@pages/EngagementsPage";
-import UsageMetricsPage from "@pages/UsageMetricsPage";
-import ServiceNowCaseRedirectPage from "@pages/ServiceNowCaseRedirectPage";
-import {
-  Error401Page,
-  Error403Page,
-  Error404Page,
-} from "@components/common/error";
 
 export default function App(): JSX.Element {
   return (
@@ -69,7 +66,7 @@ export default function App(): JSX.Element {
 
             <Route element={<AuthGuard />}>
               {/* ProjectHub Page */}
-              <Route path="/" element={<ProjectHub />} />
+              <Route path="/" element={<ProjectHubPage />} />
 
               {/* ServiceNow deep-link redirect */}
               <Route path="support" element={<ServiceNowCaseRedirectPage />} />
@@ -80,7 +77,7 @@ export default function App(): JSX.Element {
                 <Route index element={<Navigate to="dashboard" replace />} />
                 <Route path="dashboard" element={<DashboardPage />} />
                 {/* Project Details */}
-                <Route path="project-details" element={<ProjectDetails />} />
+                <Route path="project-details" element={<ProjectDetailsPage />} />
                 {/* Operations */}
                 <Route path="operations">
                   <Route index element={<OperationsPage />} />
@@ -184,16 +181,6 @@ export default function App(): JSX.Element {
                   <Route path=":caseId" element={<CaseDetailsPage />} />
                 </Route>
                 <Route path="usage-metrics" element={<UsageMetricsPage />} />
-                {/* LegalContracts */}
-                <Route
-                  path="legal-contracts"
-                  element={<ProjectPage title="Legal Contracts" />}
-                />
-                {/* Community */}
-                <Route
-                  path="community"
-                  element={<ProjectPage title="Community" />}
-                />
                 {/* Announcements */}
                 <Route path="announcements">
                   <Route index element={<AnnouncementsPage />} />

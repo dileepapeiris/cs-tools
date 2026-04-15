@@ -18,7 +18,7 @@ import { type JSX, useEffect } from "react";
 import { useAsgardeo } from "@asgardeo/react";
 import { useLocation, useNavigate } from "react-router";
 import AppLayout from "@layouts/AppLayout";
-import { getLastSelectedProjectId } from "@utils/settingsStorage";
+import { getLastSelectedProjectId } from "@features/settings/utils/settingsStorage";
 
 const POST_LOGIN_REDIRECT_KEY = "post_login_redirect";
 

@@ -15,13 +15,14 @@
 // under the License.
 
 import { describe, expect, it } from "vitest";
+import type { ActivityItem } from "@features/project-details/constants/projectDetailsConstants";
 import { ProjectType as PROJECT_TYPE_LABELS } from "@features/project-details/types/subscriptions";
 import {
   calculateProjectStats,
   getProjectPermissions,
   getRecentActivityItems,
   shouldExcludeS0,
-} from "@utils/project-details/utils/permissions";
+} from "@features/project-details/utils/permissions";
 
 describe("getProjectPermissions", () => {
   it("should enable full features for Managed Cloud Subscription", () => {
@@ -123,8 +124,12 @@ describe("getRecentActivityItems", () => {
       { totalHours: 60, billableHours: 30, lastDeploymentOn: "2025-01-01" },
       PROJECT_TYPE_LABELS.CLOUD_SUPPORT,
     );
-    expect(items.some((i) => i.label === "Total Time Logged")).toBe(false);
-    expect(items.some((i) => i.label === "Last Deployment")).toBe(false);
+    expect(
+      items.some((i: ActivityItem) => i.label === "Total Time Logged"),
+    ).toBe(false);
+    expect(
+      items.some((i: ActivityItem) => i.label === "Last Deployment"),
+    ).toBe(false);
   });
 
   it("should include time and deployment rows for Managed Cloud", () => {
@@ -132,7 +137,11 @@ describe("getRecentActivityItems", () => {
       { totalHours: 60, billableHours: 30, lastDeploymentOn: "2025-01-01" },
       PROJECT_TYPE_LABELS.MANAGED_CLOUD_SUBSCRIPTION,
     );
-    expect(items.some((i) => i.label === "Total Time Logged")).toBe(true);
-    expect(items.some((i) => i.label === "Last Deployment")).toBe(true);
+    expect(
+      items.some((i: ActivityItem) => i.label === "Total Time Logged"),
+    ).toBe(true);
+    expect(
+      items.some((i: ActivityItem) => i.label === "Last Deployment"),
+    ).toBe(true);
   });
 });

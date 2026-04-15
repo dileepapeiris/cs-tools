@@ -18,7 +18,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import {
   getNoveraChatEnabled,
   setNoveraChatEnabled,
-} from "@utils/settingsStorage";
+} from "@features/settings/utils/settingsStorage";
 
 describe("settingsStorage", () => {
 

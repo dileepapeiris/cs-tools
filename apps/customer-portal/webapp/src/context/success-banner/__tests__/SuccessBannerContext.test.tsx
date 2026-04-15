@@ -20,7 +20,7 @@ import {
   SuccessBannerProvider,
   useSuccessBanner,
 } from "@context/success-banner/SuccessBannerContext";
-import { ERROR_BANNER_TIMEOUT_MS } from "@constants/errorBannerConstants";
+import { ERROR_BANNER_TIMEOUT_MS } from "@features/shared/constants/errorBannerConstants";
 
 vi.mock("@wso2/oxygen-ui", () => ({
   Alert: ({ children, onClose, severity }: any) => (

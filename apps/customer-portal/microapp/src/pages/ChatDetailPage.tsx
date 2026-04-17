@@ -99,7 +99,10 @@ export default function ChatDetailPage() {
         <SectionCard>
           <Grid spacing={1.5} container>
             <Grid size={6}>
-              <InfoField label="Started" value={dayjs(data?.createdOn).format("MMM D, YYYY h:mm A")} />
+              <InfoField
+                label="Started"
+                value={data?.createdOn ? dayjs(data.createdOn).format("MMM D, YYYY h:mm A") : undefined}
+              />
             </Grid>
             <Grid size={6}>
               <InfoField

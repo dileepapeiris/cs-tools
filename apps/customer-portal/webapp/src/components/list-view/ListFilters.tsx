@@ -24,16 +24,23 @@ import {
 } from "@wso2/oxygen-ui";
 import type { JSX, UIEvent } from "react";
 import type { SelectChangeEvent } from "@wso2/oxygen-ui";
-import type { CaseMetadataResponse, AllCasesFilterValues } from "@features/support/types/cases";
+import type {
+  CaseMetadataResponse,
+  AllCasesFilterValues,
+} from "@features/support/types/cases";
 import type { ProjectDeploymentItem } from "@features/project-details/types/deployments";
-import { SelectMenuLoadMoreRow, SELECT_MENU_LOAD_MORE_ROW_VALUE } from "@components/select-menu-load-more-row/SelectMenuLoadMoreRow";
 import {
-  EMPTY_DROPDOWN_PLACEHOLDER,
-  paginatedSelectMenuListProps,
-} from "@features/shared/constants/dropdownConstants";
+  SelectMenuLoadMoreRow,
+  SELECT_MENU_LOAD_MORE_ROW_VALUE,
+} from "@components/select-menu-load-more-row/SelectMenuLoadMoreRow";
+import { EMPTY_DROPDOWN_PLACEHOLDER } from "@constants/common";
+import { paginatedSelectMenuListProps } from "@utils/common";
 import { ALL_CASES_FILTER_DEFINITIONS } from "@features/support/constants/supportConstants";
 import { isS0SeverityLabel } from "@features/dashboard/utils/dashboard";
-import { deriveFilterLabels, mapSeverityToDisplay } from "@features/support/utils/support";
+import {
+  deriveFilterLabels,
+  mapSeverityToDisplay,
+} from "@features/support/utils/support";
 
 export interface ListFiltersProps {
   filters: AllCasesFilterValues;
@@ -41,6 +48,7 @@ export interface ListFiltersProps {
   deployments?: ProjectDeploymentItem[];
   onFilterChange: (field: string, value: string) => void;
   excludeS0?: boolean;
+  restrictSeverityToLow?: boolean;
   onLoadMoreDeployments?: () => void;
   hasMoreDeployments?: boolean;
   isFetchingMoreDeployments?: boolean;
@@ -58,6 +66,7 @@ export default function ListFilters({
   deployments,
   onFilterChange,
   excludeS0 = false,
+  restrictSeverityToLow = false,
   onLoadMoreDeployments,
   hasMoreDeployments = false,
   isFetchingMoreDeployments = false,
@@ -73,15 +82,20 @@ export default function ListFilters({
   return (
     <Grid container spacing={2} sx={{ mt: 1 }}>
       {ALL_CASES_FILTER_DEFINITIONS.map((def) => {
+        if (def.metadataKey === "severities" && restrictSeverityToLow) {
+          return null;
+        }
         const { label, allLabel } = deriveFilterLabels(def.id);
 
         const isDeploymentFilter = def.id === "deployment";
         const options = (() => {
           if (isDeploymentFilter) {
-            return deployments?.map((deployment) => ({
-              label: deployment.type?.label || deployment.name,
-              value: deployment.id,
-            })) ?? [];
+            return (
+              deployments?.map((deployment) => ({
+                label: deployment.type?.label || deployment.name,
+                value: deployment.id,
+              })) ?? []
+            );
           }
           const metadataOptions = filterMetadata?.[def.metadataKey];
           if (!Array.isArray(metadataOptions)) return [];
@@ -91,13 +105,21 @@ export default function ListFilters({
                   (item: { label: string }) => !isS0SeverityLabel(item.label),
                 )
               : metadataOptions;
-          return filtered.map((item: { label: string; id: string }) => ({
-            label:
-              def.metadataKey === "severities"
-                ? mapSeverityToDisplay(item.label)
-                : item.label,
-            value: def.useLabelAsValue ? item.label : item.id,
-          }));
+          const severityFiltered =
+            def.metadataKey === "severities" && restrictSeverityToLow
+              ? filtered.filter((item: { label: string }) =>
+                  mapSeverityToDisplay(item.label).startsWith("S4"),
+                )
+              : filtered;
+          return severityFiltered.map(
+            (item: { label: string; id: string }) => ({
+              label:
+                def.metadataKey === "severities"
+                  ? mapSeverityToDisplay(item.label)
+                  : item.label,
+              value: def.useLabelAsValue ? item.label : item.id,
+            }),
+          );
         })();
 
         const hasNoOptions = (options?.length ?? 0) === 0;
@@ -153,10 +175,10 @@ export default function ListFilters({
                 <SelectMenuLoadMoreRow
                   visible={Boolean(
                     isDeploymentFilter &&
-                      onLoadMoreDeployments &&
-                      hasMoreDeployments &&
-                      isFetchingMoreDeployments &&
-                      (options?.length ?? 0) > 0,
+                    onLoadMoreDeployments &&
+                    hasMoreDeployments &&
+                    isFetchingMoreDeployments &&
+                    (options?.length ?? 0) > 0,
                   )}
                 />
               </Select>

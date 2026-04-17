@@ -40,7 +40,7 @@ import {
   type UIEvent,
 } from "react";
 import { SelectMenuLoadMoreRow } from "@components/select-menu-load-more-row/SelectMenuLoadMoreRow";
-import { paginatedSelectMenuListProps } from "@features/shared/constants/dropdownConstants";
+import { paginatedSelectMenuListProps } from "@utils/common";
 import { useGetProducts } from "@features/project-details/api/useGetProducts";
 import { useSearchProductVersions } from "@features/project-details/api/useSearchProductVersions";
 import { usePostDeploymentProduct } from "@features/project-details/api/usePostDeploymentProduct";

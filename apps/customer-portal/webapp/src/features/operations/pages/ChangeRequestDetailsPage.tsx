@@ -314,15 +314,6 @@ export default function ChangeRequestDetailsPage(): JSX.Element {
                       }}
                     />
                   )}
-                </Box>
-                <Box
-                  sx={{
-                    display: "flex",
-                    gap: 1,
-                    flexWrap: "wrap",
-                    justifyContent: "flex-end",
-                  }}
-                >
                   {changeRequest.impact?.label &&
                     typeof changeRequest.impact.label === "string" && (
                       <Chip
@@ -488,7 +479,7 @@ export default function ChangeRequestDetailsPage(): JSX.Element {
         sx={{
           display: "flex",
           flexDirection: { xs: "column", md: "row" },
-          gap: 2,
+          gap: 3,
           flex: 1,
           overflow: { xs: "visible", md: "hidden" },
         }}
@@ -501,8 +492,30 @@ export default function ChangeRequestDetailsPage(): JSX.Element {
             display: "flex",
             flexDirection: "column",
             gap: 2,
+            pr: { xs: 0, md: 0.5 },
           }}
         >
+          {/* Change Description Card */}
+          <Paper variant="outlined">
+            <Box sx={{ px: 3, pt: 3 }}>
+              <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                <FileText size={20} color={colors.grey[600]} />
+                <Typography variant="h6">Change Description</Typography>
+              </Box>
+            </Box>
+
+            <Box sx={{ px: 3, py: 3 }}>
+              <Stack spacing={3}>
+                <Box>
+                  {renderHtmlContent(
+                    changeRequest.description,
+                    "No description available",
+                  )}
+                </Box>
+              </Stack>
+            </Box>
+          </Paper>
+
           {/* Scheduled Maintenance Window Card */}
           <ScheduledMaintenanceWindowCard changeRequest={changeRequest} />
 
@@ -558,24 +571,19 @@ export default function ChangeRequestDetailsPage(): JSX.Element {
             </Box>
           </Paper>
 
-          {/* Change Description Card */}
           <Paper variant="outlined">
             <Box sx={{ px: 3, pt: 3 }}>
               <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                <FileText size={20} color={colors.grey[600]} />
-                <Typography variant="h6">Change Description</Typography>
+                <TriangleAlert size={20} color={colors.grey[600]} />
+                <Typography variant="h6">Service Outage Details</Typography>
               </Box>
             </Box>
 
             <Box sx={{ px: 3, py: 3 }}>
-              <Stack spacing={3}>
-                <Box>
-                  {renderHtmlContent(
-                    changeRequest.description,
-                    "No description available",
-                  )}
-                </Box>
-              </Stack>
+              {renderHtmlContent(
+                changeRequest.serviceOutage,
+                "No service outage details available.",
+              )}
             </Box>
           </Paper>
 
@@ -597,22 +605,6 @@ export default function ChangeRequestDetailsPage(): JSX.Element {
                   )}
                 </Box>
               </Stack>
-            </Box>
-          </Paper>
-
-          <Paper variant="outlined">
-            <Box sx={{ px: 3, pt: 3 }}>
-              <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                <TriangleAlert size={20} color={colors.grey[600]} />
-                <Typography variant="h6">Service Outage Details</Typography>
-              </Box>
-            </Box>
-
-            <Box sx={{ px: 3, py: 3 }}>
-              {renderHtmlContent(
-                changeRequest.serviceOutage,
-                "No service outage details available.",
-              )}
             </Box>
           </Paper>
 
@@ -733,6 +725,7 @@ export default function ChangeRequestDetailsPage(): JSX.Element {
             width: { xs: "100%", md: 400 },
             flexShrink: 0,
             overflow: { xs: "visible", md: "auto" },
+            pl: { xs: 0, md: 0.5 },
           }}
         >
           <Paper variant="outlined">

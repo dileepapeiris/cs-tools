@@ -31,6 +31,7 @@ import {
   Play,
 } from "@wso2/oxygen-ui-icons-react";
 import type { JSX } from "react";
+import { NULL_PLACEHOLDER } from "@constants/common";
 import {
   formatDateTime,
   getStatusColor,
@@ -82,7 +83,12 @@ export default function AllConversationsList({
 
   if (isError) {
     return (
-      <Box sx={{ textAlign: "center", py: ALL_CONVERSATIONS_LIST_EMPTY_CONTAINER_PY }}>
+      <Box
+        sx={{
+          textAlign: "center",
+          py: ALL_CONVERSATIONS_LIST_EMPTY_CONTAINER_PY,
+        }}
+      >
         <ErrorIndicator
           entityName={ALL_CONVERSATIONS_LIST_ERROR_ENTITY_NAME}
           size="medium"
@@ -110,7 +116,8 @@ export default function AllConversationsList({
               width: ALL_CONVERSATIONS_LIST_ILLUSTRATION_WIDTH_PX,
               maxWidth: "100%",
               height: "auto",
-              marginBottom: ALL_CONVERSATIONS_LIST_ILLUSTRATION_MARGIN_BOTTOM_PX,
+              marginBottom:
+                ALL_CONVERSATIONS_LIST_ILLUSTRATION_MARGIN_BOTTOM_PX,
             }}
           />
           <Typography variant="body1" color="text.secondary">
@@ -177,12 +184,12 @@ export default function AllConversationsList({
                     fontWeight={500}
                     color="text.primary"
                   >
-                    {conv.number || "--"}
+                    {conv.number || NULL_PLACEHOLDER}
                   </Typography>
                   <Chip
                     size="small"
                     variant="outlined"
-                    label={conv.state?.label || "--"}
+                    label={conv.state?.label || NULL_PLACEHOLDER}
                     icon={<StatusIcon size={12} />}
                     sx={{
                       bgcolor: alpha(resolvedColor, 0.1),
@@ -211,7 +218,7 @@ export default function AllConversationsList({
                 color="text.primary"
                 sx={{ mb: 1, fontWeight: 500 }}
               >
-                {conv.initialMessage || "--"}
+                {conv.initialMessage || NULL_PLACEHOLDER}
               </Typography>
 
               <Stack
@@ -234,7 +241,7 @@ export default function AllConversationsList({
                     color="text.secondary"
                     sx={{ lineHeight: 1 }}
                   >
-                    {formatDateTime(conv.createdOn) || "--"}
+                    {formatDateTime(conv.createdOn) || NULL_PLACEHOLDER}
                   </Typography>
                 </Box>
                 <Box

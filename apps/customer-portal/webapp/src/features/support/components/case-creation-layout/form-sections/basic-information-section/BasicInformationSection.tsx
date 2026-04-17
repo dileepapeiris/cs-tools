@@ -30,10 +30,8 @@ import {
 import { Sparkles } from "@wso2/oxygen-ui-icons-react";
 import { type JSX, type UIEvent } from "react";
 import { SelectMenuLoadMoreRow } from "@components/select-menu-load-more-row/SelectMenuLoadMoreRow";
-import {
-  EMPTY_DROPDOWN_PLACEHOLDER,
-  paginatedSelectMenuListProps,
-} from "@features/shared/constants/dropdownConstants";
+import { EMPTY_DROPDOWN_PLACEHOLDER } from "@constants/common";
+import { paginatedSelectMenuListProps } from "@utils/common";
 
 /**
  * Renders the Basic Information section used during case creation.
@@ -66,12 +64,17 @@ export function BasicInformationSection({
   isFetchingMoreProducts = false,
 }: BasicInformationSectionProps): JSX.Element {
   const handleDeploymentsMenuScroll = (e: UIEvent<HTMLElement>) => {
-    if (!onLoadMoreDeployments || !hasMoreDeployments || isFetchingMoreDeployments) {
+    if (
+      !onLoadMoreDeployments ||
+      !hasMoreDeployments ||
+      isFetchingMoreDeployments
+    ) {
       return;
     }
     const el = e.currentTarget;
     const threshold = 24;
-    const isNearBottom = el.scrollHeight - el.scrollTop - el.clientHeight < threshold;
+    const isNearBottom =
+      el.scrollHeight - el.scrollTop - el.clientHeight < threshold;
     if (isNearBottom) {
       onLoadMoreDeployments();
     }
@@ -83,7 +86,8 @@ export function BasicInformationSection({
     }
     const el = e.currentTarget;
     const threshold = 24;
-    const isNearBottom = el.scrollHeight - el.scrollTop - el.clientHeight < threshold;
+    const isNearBottom =
+      el.scrollHeight - el.scrollTop - el.clientHeight < threshold;
     if (isNearBottom) {
       onLoadMoreProducts();
     }
@@ -154,70 +158,78 @@ export function BasicInformationSection({
 
         {/* deployment selection field wrapper */}
         {!hideDeploymentField && (
-        <Grid size={{ xs: 12 }}>
-          {/* deployment field label container */}
-          <Box sx={{ mb: 1, display: "flex", alignItems: "center", gap: 1 }}>
-            <Typography variant="caption">
-              Deployment Type{" "}
-              {!isDeploymentDisabled && (
-                <Box component="span" sx={{ color: "warning.main" }}>
-                  *
-                </Box>
+          <Grid size={{ xs: 12 }}>
+            {/* deployment field label container */}
+            <Box sx={{ mb: 1, display: "flex", alignItems: "center", gap: 1 }}>
+              <Typography variant="caption">
+                Deployment Type{" "}
+                {!isDeploymentDisabled && (
+                  <Box component="span" sx={{ color: "warning.main" }}>
+                    *
+                  </Box>
+                )}
+              </Typography>
+              {!isRelatedCaseMode && isDeploymentAutoDetected && (
+                <Chip
+                  label="Auto detected"
+                  size="small"
+                  variant="outlined"
+                  icon={<Sparkles size={10} />}
+                  sx={{ height: 20, fontSize: "0.65rem", p: 0.5 }}
+                />
               )}
-            </Typography>
-            {!isRelatedCaseMode && isDeploymentAutoDetected && (
-              <Chip
-                label="Auto detected"
-                size="small"
-                variant="outlined"
-                icon={<Sparkles size={10} />}
-                sx={{ height: 20, fontSize: "0.65rem", p: 0.5 }}
+            </Box>
+            {isDeploymentLoading ? (
+              <Skeleton
+                variant="rounded"
+                height={40}
+                sx={{ maxWidth: "100%" }}
               />
-            )}
-          </Box>
-          {isDeploymentLoading ? (
-            <Skeleton variant="rounded" height={40} sx={{ maxWidth: "100%" }} />
-          ) : (
-            <FormControl fullWidth size="small" disabled={isDeploymentDisabled}>
-              <Select
-                value={deployment}
-                onChange={(e) => setDeployment(e.target.value)}
-                displayEmpty
-                renderValue={(value) => {
-                  if (value === "") {
-                    if (showNoDeploymentsHint) {
-                      return EMPTY_DROPDOWN_PLACEHOLDER;
-                    }
-                    return "Select Deployment Type...";
-                  }
-                  return value;
-                }}
-                MenuProps={{
-                  MenuListProps: deploymentMenuListProps,
-                }}
+            ) : (
+              <FormControl
+                fullWidth
+                size="small"
+                disabled={isDeploymentDisabled}
               >
-                <MenuItem value="" disabled>
-                  {showNoDeploymentsHint
-                    ? EMPTY_DROPDOWN_PLACEHOLDER
-                    : "Select Deployment Type..."}
-                </MenuItem>
-                {deploymentOptions.map((d) => (
-                  <MenuItem key={d} value={d}>
-                    {d}
+                <Select
+                  value={deployment}
+                  onChange={(e) => setDeployment(e.target.value)}
+                  displayEmpty
+                  renderValue={(value) => {
+                    if (value === "") {
+                      if (showNoDeploymentsHint) {
+                        return EMPTY_DROPDOWN_PLACEHOLDER;
+                      }
+                      return "Select Deployment Type...";
+                    }
+                    return value;
+                  }}
+                  MenuProps={{
+                    MenuListProps: deploymentMenuListProps,
+                  }}
+                >
+                  <MenuItem value="" disabled>
+                    {showNoDeploymentsHint
+                      ? EMPTY_DROPDOWN_PLACEHOLDER
+                      : "Select Deployment Type..."}
                   </MenuItem>
-                ))}
-                <SelectMenuLoadMoreRow
-                  visible={Boolean(
-                    onLoadMoreDeployments &&
+                  {deploymentOptions.map((d) => (
+                    <MenuItem key={d} value={d}>
+                      {d}
+                    </MenuItem>
+                  ))}
+                  <SelectMenuLoadMoreRow
+                    visible={Boolean(
+                      onLoadMoreDeployments &&
                       hasMoreDeployments &&
                       isFetchingMoreDeployments &&
                       deploymentOptions.length > 0,
-                  )}
-                />
-              </Select>
-            </FormControl>
-          )}
-        </Grid>
+                    )}
+                  />
+                </Select>
+              </FormControl>
+            )}
+          </Grid>
         )}
 
         {/* product selection field wrapper */}
@@ -296,11 +308,11 @@ export function BasicInformationSection({
                 <SelectMenuLoadMoreRow
                   visible={Boolean(
                     onLoadMoreProducts &&
-                      hasMoreProducts &&
-                      isFetchingMoreProducts &&
-                      (useProductOptionList
-                        ? hasProductRows
-                        : productOptionsLegacy.length > 0),
+                    hasMoreProducts &&
+                    isFetchingMoreProducts &&
+                    (useProductOptionList
+                      ? hasProductRows
+                      : productOptionsLegacy.length > 0),
                   )}
                 />
               </Select>

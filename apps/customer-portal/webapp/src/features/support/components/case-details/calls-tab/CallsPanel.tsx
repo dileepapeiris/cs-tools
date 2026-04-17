@@ -49,7 +49,7 @@ import {
   CALL_SCHEDULABLE_CASE_STATUSES,
   type CaseStatus,
 } from "@features/support/constants/supportConstants";
-import { ERROR_BANNER_TIMEOUT_MS } from "@features/shared/constants/errorBannerConstants";
+import { ERROR_BANNER_TIMEOUT_MS } from "@constants/common";
 
 /**
  * CallsPanel displays call requests for a specific case.
@@ -235,7 +235,7 @@ export default function CallsPanel({
   const handleOpenModal = () => {
     setSuccessMessage(null);
     setErrorMessage(null);
-    if (!userDetails?.timeZone?.trim()) {
+    if (!resolvedUserTimeZone) {
       setPendingCallAfterTz({ type: "create" });
       setIsProfileModalOpen(true);
       return;
@@ -248,7 +248,7 @@ export default function CallsPanel({
     setEditCall(null);
   };
   const handleEditClick = (call: CallRequest) => {
-    if (!userDetails?.timeZone?.trim()) {
+    if (!resolvedUserTimeZone) {
       setPendingCallAfterTz({ type: "edit", call });
       setIsProfileModalOpen(true);
       return;
@@ -522,6 +522,7 @@ export default function CallsPanel({
         }}
         onError={(message) => setErrorMessage(message)}
         userTimeZone={userTimeZone}
+        severityAllocationMinutes={severityAllocationMinutes}
         approveStateKey={approveStateKey}
       />
 
@@ -539,7 +540,11 @@ export default function CallsPanel({
           setIsProfileModalOpen(false);
           void refetchUserDetails()
             .then((result) => {
-              const tz = result.data?.timeZone?.trim();
+              const tz =
+                result.data?.timeZone?.trim() ||
+                (
+                  result.data as { timezone?: string } | undefined
+                )?.timezone?.trim();
               if (!pendingCallAfterTz || !tz) {
                 return;
               }

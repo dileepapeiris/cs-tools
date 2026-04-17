@@ -27,6 +27,7 @@ import {
 } from "@wso2/oxygen-ui";
 import { Clock } from "@wso2/oxygen-ui-icons-react";
 import type { JSX } from "react";
+import { NULL_PLACEHOLDER } from "@constants/common";
 import ErrorIndicator from "@components/error-indicator/ErrorIndicator";
 import EmptyIcon from "@components/empty-state/EmptyIcon";
 import OutstandingCasesSkeleton from "./OutstandingCasesSkeleton";
@@ -168,7 +169,7 @@ export default function OutstandingCasesList({
               <Chip
                 size="small"
                 variant="outlined"
-                label={c.status?.label ?? "—"}
+                label={c.status?.label ?? NULL_PLACEHOLDER}
                 icon={<Clock size={12} />}
                 sx={{
                   bgcolor: alpha(resolvedColor, 0.1),

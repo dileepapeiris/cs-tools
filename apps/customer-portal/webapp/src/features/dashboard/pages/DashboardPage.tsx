@@ -23,7 +23,7 @@ import { useLoader } from "@context/linear-loader/LoaderContext";
 import { useErrorBanner } from "@context/error-banner/ErrorBannerContext";
 import useInfiniteProjects, { flattenProjectPages } from "@api/useGetProjects";
 import useGetProjectDetails from "@api/useGetProjectDetails";
-import { isForbiddenError, getForbiddenMessage } from "@/utils/ApiError";
+import { isForbiddenError, getForbiddenMessage } from "@utils/ApiError";
 import Error403Page from "@components/error/Error403Page";
 import { useGetProjectCasesStats } from "@features/dashboard/api/useGetProjectCasesStats";
 import { useGetProjectChangeRequestsStats } from "@features/dashboard/api/useGetProjectChangeRequestsStats";
@@ -38,7 +38,8 @@ import {
   calculateProjectStats,
   getProjectPermissions,
   shouldExcludeS0,
-} from "@/utils/permission";
+  shouldForceSeverityS4,
+} from "@utils/permission";
 import { StatCard } from "@features/dashboard/components/stats/StatCard";
 import ChartLayout from "@features/dashboard/components/charts/ChartLayout";
 import CasesTable from "@features/dashboard/components/cases-table/CasesTable";
@@ -119,6 +120,9 @@ export default function DashboardPage(): JSX.Element {
 
   // exclude S0
   const excludeS0 = shouldExcludeS0(resolvedProject?.type?.label);
+  const restrictSeverityToLow = shouldForceSeverityS4(
+    resolvedProject?.type?.label,
+  );
 
   // has agent
   const hasAgent = resolvedProject?.hasAgent ?? false;
@@ -541,6 +545,7 @@ export default function DashboardPage(): JSX.Element {
         }
         isErrorEngagements={isErrorEngagement}
         excludeS0={excludeS0}
+        restrictSeverityToLow={restrictSeverityToLow}
         showOperationsChart={showOpsChart}
         operationsChartMode={operationsChartMode}
       />
@@ -550,6 +555,7 @@ export default function DashboardPage(): JSX.Element {
           <CasesTable
             projectId={projectId}
             excludeS0={excludeS0}
+            restrictSeverityToLow={restrictSeverityToLow}
             hasAgent={hasAgent}
             includeDeploymentFilter={permissions.hasDeployments}
           />

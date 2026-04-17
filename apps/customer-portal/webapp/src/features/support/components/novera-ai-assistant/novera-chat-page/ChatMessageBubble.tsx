@@ -216,52 +216,72 @@ export default function ChatMessageBubble({
   }
 
   if (isUser) {
+    const createdByLabel = message.createdBy?.trim() || "Unknown";
+    const createdOnLabel = message.createdOnRaw?.trim() || "--";
+
     // User message with avatar
     return (
       <Box
         sx={{
           display: "flex",
-          justifyContent: "flex-end",
-          gap: 1.5,
+          flexDirection: "column",
           alignItems: "flex-end",
+          gap: 1,
         }}
       >
-        <Box sx={{ maxWidth: "80%" }}>
-          <Paper
-            sx={{
-              p: 2,
-              bgcolor: "action.hover",
-              color: "text.primary",
-              borderRadius: (theme) =>
-                `${theme.spacing(2)} ${theme.spacing(2)} ${theme.spacing(0.5)} ${theme.spacing(2)}`,
-              boxShadow: "none",
-              border: "1px solid",
-              borderColor: "divider",
-            }}
-          >
-            <Typography variant="body2" sx={{ whiteSpace: "pre-line" }}>
-              {displayText}
-            </Typography>
-          </Paper>
-        </Box>
-        <Paper
+        <Box
           sx={{
-            width: (theme) => theme.spacing(4),
-            height: (theme) => theme.spacing(4),
-            borderRadius: "50%",
             display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            flexShrink: 0,
-            bgcolor: "primary.lighter",
-            color: "primary.main",
+            justifyContent: "flex-end",
+            gap: 1.5,
+            alignItems: "flex-end",
+            maxWidth: "80%",
           }}
         >
-          <User size={16} />
-        </Paper>
+          <Box sx={{ maxWidth: "100%" }}>
+            <Paper
+              sx={{
+                p: 2,
+                bgcolor: "action.hover",
+                color: "text.primary",
+                borderRadius: (theme) =>
+                  `${theme.spacing(2)} ${theme.spacing(2)} ${theme.spacing(0.5)} ${theme.spacing(2)}`,
+                boxShadow: "none",
+                border: "1px solid",
+                borderColor: "divider",
+              }}
+            >
+              <Typography variant="body2" sx={{ whiteSpace: "pre-line" }}>
+                {displayText}
+              </Typography>
+            </Paper>
+          </Box>
+          <Paper
+            sx={{
+              width: (theme) => theme.spacing(4),
+              height: (theme) => theme.spacing(4),
+              borderRadius: "50%",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              flexShrink: 0,
+              bgcolor: "primary.lighter",
+              color: "primary.main",
+            }}
+          >
+            <User size={16} />
+          </Paper>
+        </Box>
+        <Typography variant="caption" color="text.secondary">
+          {createdByLabel} - {createdOnLabel}
+        </Typography>
       </Box>
     );
   }
+
+  const createdByLabel = message.createdBy?.trim() || NOVERA_DISPLAY_NAME;
+  const createdOnLabel = message.createdOnRaw?.trim() || "--";
+  const hideBotIdentityLabel = message.showFeedbackActions === false;
 
   // Bot message - new custom layout
   return (
@@ -282,12 +302,14 @@ export default function ChatMessageBubble({
           >
             <Bot size={16} color="white" />
           </Box>
-          <Typography
-            variant="body2"
-            sx={{ fontWeight: 600, color: "text.primary" }}
-          >
-            {NOVERA_DISPLAY_NAME}
-          </Typography>
+          {!hideBotIdentityLabel && (
+            <Typography
+              variant="body2"
+              sx={{ fontWeight: 600, color: "text.primary" }}
+            >
+              {NOVERA_DISPLAY_NAME}
+            </Typography>
+          )}
         </Box>
 
         {/* Message content */}
@@ -392,6 +414,7 @@ export default function ChatMessageBubble({
 
         {/* Thumbs up/down and time — hide until final response */}
         {!hideFeedbackRow &&
+          message.showFeedbackActions !== false &&
           (!message.recommendations ||
             message.recommendations.length === 0) && (
             <Box sx={{ display: "flex", alignItems: "center", gap: 3, mt: 3 }}>
@@ -444,6 +467,9 @@ export default function ChatMessageBubble({
               </Typography>
             </Box>
           )}
+        <Typography variant="caption" color="text.secondary" sx={{ mt: 1 }}>
+          {hideBotIdentityLabel ? createdOnLabel : `${createdByLabel} - ${createdOnLabel}`}
+        </Typography>
       </Box>
 
       {/* Recommendations - shown after message content */}

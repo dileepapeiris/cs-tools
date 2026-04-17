@@ -16,9 +16,9 @@
 
 import { useQuery, type UseQueryResult } from "@tanstack/react-query";
 import { useAsgardeo } from "@asgardeo/react";
-import { useAuthApiClient } from "@/utils/useAuthApiClient";
+import { useAuthApiClient } from "@utils/useAuthApiClient";
 import { useLogger } from "@hooks/useLogger";
-import { ApiQueryKeys } from "@/constants/apiConstants";
+import { ApiQueryKeys } from "@constants/apiConstants";
 import type { ProjectSupportStats } from "@features/project-hub/types/projects";
 import { CaseType } from "@features/support/constants/supportConstants";
 import type { UseGetProjectSupportStatsOptions } from "@features/support/types/supportApi";

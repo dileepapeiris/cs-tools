@@ -47,6 +47,7 @@ import type { MetadataItem } from "@/types/common";
 import { alpha, colors, type Theme } from "@wso2/oxygen-ui";
 import DOMPurify from "dompurify";
 import { createElement, type ComponentType, type ReactNode } from "react";
+import { CASE_STATUS } from "@features/project-details/constants/projectDetailsConstants";
 
 /**
  * Extracts Incident and Query case type IDs from caseTypes metadata.
@@ -1129,7 +1130,14 @@ export function getStatusIconElement(
  */
 export function convertCodeTagsToHtml(content: string): string {
   if (!content || typeof content !== "string") return "";
-  return content.replace(/\[code\]([\s\S]*?)\[\/code\]/gi, "<code>$1</code>");
+  const normalized = content.replace(
+    /\[\/code\]\s*\[code\]/gi,
+    "[/code]\n[code]",
+  );
+  return normalized.replace(
+    /\[code\]([\s\S]*?)\[\/code\]/gi,
+    "<code>$1</code>",
+  );
 }
 
 /**
@@ -1141,7 +1149,7 @@ export function convertCodeTagsToHtml(content: string): string {
  */
 export function stripAllCodeBlocks(content: string): string {
   if (!content || typeof content !== "string") return "";
-  return content.replace(/\[code\]([\s\S]*?)\[\/code\]/gi, "$1");
+  return content.replace(/\[code\]([\s\S]*?)\[\/code\]/gi, "$1\n");
 }
 
 /**
@@ -1958,3 +1966,9 @@ export function computeMinScheduleDatetimeLocalForTimeZone(
 }
 
 export { hasListSearchOrFilters, countListSearchAndFilters } from "./listView";
+
+/** Hide terminal states from the Outstanding Cases overview list only. */
+export function isClosedLikeCaseStatus(statusLabel?: string | null): boolean {
+  const normalized = statusLabel?.trim().toLowerCase() ?? "";
+  return normalized === CASE_STATUS.CLOSED;
+}

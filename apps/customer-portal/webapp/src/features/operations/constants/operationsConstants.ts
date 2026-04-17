@@ -352,9 +352,6 @@ export const OPERATIONS_HUB_FOOTER_VIEW_ALL_CR = "View all change requests";
 
 /** Legend row order in the calendar view (matches `ChangeRequestStates`). */
 export const CHANGE_REQUEST_CALENDAR_LEGEND_STATES: ChangeRequestState[] = [
-  ChangeRequestStates.NEW,
-  ChangeRequestStates.ASSESS,
-  ChangeRequestStates.AUTHORIZE,
   ChangeRequestStates.CUSTOMER_APPROVAL,
   ChangeRequestStates.SCHEDULED,
   ChangeRequestStates.IMPLEMENT,
@@ -364,3 +361,17 @@ export const CHANGE_REQUEST_CALENDAR_LEGEND_STATES: ChangeRequestState[] = [
   ChangeRequestStates.CLOSED,
   ChangeRequestStates.CANCELED,
 ];
+
+/**
+ * Only these CR workflow states should be shown in operations surfaces.
+ */
+export const ALLOWED_CHANGE_REQUEST_STATE_IDS = [
+  5, // Customer Approval
+  -2, // Scheduled
+  -1, // Implement
+  0, // Review
+  1, // Customer Review
+  2, // Rollback
+  3, // Closed
+  4, // Canceled
+] as const;

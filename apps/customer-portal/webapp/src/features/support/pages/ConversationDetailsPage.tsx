@@ -91,11 +91,21 @@ export default function ConversationDetailsPage(): JSX.Element {
         const isBot =
           msg.type?.toLowerCase() === "bot" ||
           msg.createdBy?.toLowerCase() === "novera";
+        const createdByDisplayName = [
+          msg.createdByFirstName,
+          msg.createdByLastName,
+        ]
+          .filter((name) => Boolean(name && name.trim()))
+          .join(" ")
+          .trim();
         return {
           id: msg.id,
           text: msg.content,
           sender: isBot ? ChatSender.BOT : ChatSender.USER,
           timestamp: dateFromApiCreatedOn(msg.createdOn),
+          createdBy: createdByDisplayName || msg.createdBy || "Unknown",
+          createdOnRaw: msg.createdOn ?? "--",
+          showFeedbackActions: false,
         };
       }),
     [messages],

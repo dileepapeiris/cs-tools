@@ -14,6 +14,15 @@
 // specific language governing permissions and limitations
 // under the License.
 
+/** Max height for Select menu lists backed by paginated APIs (~10 rows visible, scrollbar when more). */
+export const PAGINATED_SELECT_MENU_MAX_HEIGHT_PX = 320;
+
+/** Standard empty-state label when a dropdown has no options after load. */
+export const EMPTY_DROPDOWN_PLACEHOLDER = "Not available";
+
+/** Generic placeholder for empty/null value displays. */
+export const NULL_PLACEHOLDER = "--";
+
 // Auto-dismiss timeout in milliseconds (error and success banners).
 export const ERROR_BANNER_TIMEOUT_MS = 5000;
 

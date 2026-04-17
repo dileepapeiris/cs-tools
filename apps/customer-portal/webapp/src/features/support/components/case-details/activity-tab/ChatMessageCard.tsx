@@ -98,15 +98,20 @@ export default function ChatMessageCard({
             fontFamily: "monospace",
             fontSize: "inherit",
             backgroundColor: "action.hover",
-            px: 0.5,
-            py: 0.25,
+            px: 1,
+            py: 0.75,
             whiteSpace: "pre",
             wordBreak: "normal",
+            display: "block",
+            width: "100%",
+            boxSizing: "border-box",
           },
           "& pre": {
             overflowX: "auto",
             maxWidth: "100%",
             whiteSpace: "pre",
+            width: "100%",
+            m: 0,
           },
         }}
         ref={contentRef}

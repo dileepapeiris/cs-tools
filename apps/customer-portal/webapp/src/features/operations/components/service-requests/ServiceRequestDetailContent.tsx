@@ -77,6 +77,7 @@ import ErrorIndicator from "@components/error-indicator/ErrorIndicator";
 import CaseDetailsAttachmentsPanel from "@case-details-attachments/CaseDetailsAttachmentsPanel";
 import Editor from "@components/rich-text-editor/Editor";
 import DOMPurify from "dompurify";
+import { CASE_STATUS } from "@features/project-details/constants/projectDetailsConstants";
 
 export interface ServiceRequestDetailContentProps {
   data: CaseDetails | undefined;
@@ -879,7 +880,7 @@ export default function ServiceRequestDetailContent({
             const displayableActions = CASE_STATUS_ACTIONS.filter((action) =>
               getAvailableCaseActions(statusLabel).includes(action.label),
             ).filter((action) => action.label !== "Open Related Case");
-            const isClosed = statusLabel?.toLowerCase() === "closed";
+            const isClosed = statusLabel?.toLowerCase() === CASE_STATUS.CLOSED;
             if (isClosed || displayableActions.length === 0) return null;
             return (
               <Paper variant="outlined" sx={{ p: 2, borderRadius: 0 }}>

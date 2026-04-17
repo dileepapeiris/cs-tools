@@ -25,6 +25,7 @@ import {
 } from "@wso2/oxygen-ui";
 import { Calendar, Layers, Package, Users } from "@wso2/oxygen-ui-icons-react";
 import type { JSX } from "react";
+import { NULL_PLACEHOLDER } from "@constants/common";
 import {
   formatDateTime,
   getAssignedEngineerLabel,
@@ -143,7 +144,7 @@ export default function ServiceRequestsList({
                     fontWeight={500}
                     color="text.primary"
                   >
-                    {sr.number || "--"}
+                    {sr.number || NULL_PLACEHOLDER}
                   </Typography>
                   <Box
                     sx={{
@@ -166,7 +167,7 @@ export default function ServiceRequestsList({
                   <Chip
                     size="small"
                     variant="outlined"
-                    label={sr.status?.label || "--"}
+                    label={sr.status?.label || NULL_PLACEHOLDER}
                     icon={<StatusIcon size={12} />}
                     sx={{
                       bgcolor: alpha(resolvedColor, 0.1),
@@ -188,7 +189,7 @@ export default function ServiceRequestsList({
                   {sr.issueType?.label && (
                     <Chip
                       size="small"
-                      label={sr.issueType.label || "--"}
+                      label={sr.issueType.label || NULL_PLACEHOLDER}
                       variant="outlined"
                       sx={{
                         height: 20,
@@ -206,7 +207,7 @@ export default function ServiceRequestsList({
                 color="text.primary"
                 sx={{ mb: 1, fontWeight: 500 }}
               >
-                {sr.title || "--"}
+                {sr.title || NULL_PLACEHOLDER}
               </Typography>
 
               <Typography
@@ -220,7 +221,7 @@ export default function ServiceRequestsList({
                   overflow: "hidden",
                 }}
               >
-                {stripHtml(sr.description) || "--"}
+                {stripHtml(sr.description) || NULL_PLACEHOLDER}
               </Typography>
             </Form.CardContent>
 
@@ -254,7 +255,7 @@ export default function ServiceRequestsList({
                     color="text.secondary"
                     sx={{ lineHeight: 1 }}
                   >
-                    {formatDateTime(sr.createdOn) || "--"}
+                    {formatDateTime(sr.createdOn) || NULL_PLACEHOLDER}
                   </Typography>
                 </Box>
                 {environmentLabel && (

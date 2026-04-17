@@ -47,7 +47,7 @@ import {
   formatChatHistoryForClassification,
   buildEnvProducts,
 } from "@features/support/utils/caseCreation";
-import { filterDeploymentsForCaseCreation } from "@/utils/permission";
+import { filterDeploymentsForCaseCreation } from "@utils/permission";
 import { htmlToPlainText } from "@features/support/utils/richTextEditor";
 import { ChatSender } from "@features/support/types/conversations";
 import type { ChatNavState, Message } from "@features/support/types/conversations";

@@ -52,7 +52,7 @@ import {
   flattenDeploymentDocuments,
 } from "@features/project-details/api/useInfiniteDeploymentDocuments";
 import { useQueryClient } from "@tanstack/react-query";
-import { ApiQueryKeys } from "@/constants/apiConstants";
+import { ApiQueryKeys } from "@constants/apiConstants";
 import {
   DEPLOYMENT_DOCUMENT_ARCHIVE_FILE_REGEX,
   DEPLOYMENT_DOCUMENT_IMAGE_FILE_REGEX,
@@ -283,7 +283,8 @@ function DocumentRow({
   const fileType = useMemo(() => {
     const ext = name.split(".").pop() ?? "";
     if (DEPLOYMENT_DOCUMENT_IMAGE_FILE_REGEX.test(`.${ext}`)) return "image";
-    if (DEPLOYMENT_DOCUMENT_ARCHIVE_FILE_REGEX.test(`.${ext}`)) return "archive";
+    if (DEPLOYMENT_DOCUMENT_ARCHIVE_FILE_REGEX.test(`.${ext}`))
+      return "archive";
     return "text";
   }, [name]);
 

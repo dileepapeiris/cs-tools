@@ -47,7 +47,7 @@ import { useAllDeploymentProducts } from "@features/support/hooks/useAllDeployme
 import { useChatWebSocket } from "@features/support/api/useChatWebSocket";
 import type { Message } from "@features/support/types/conversations";
 import { buildEnvProducts } from "@features/support/utils/caseCreation";
-import { filterDeploymentsForCaseCreation } from "@/utils/permission";
+import { filterDeploymentsForCaseCreation } from "@utils/permission";
 import { getFinalMessageFromPayload } from "@features/support/utils/chat";
 import { NOVERA_ANALYZING_PLACEHOLDER_TEXT } from "@features/support/constants/chatConstants";
 import { ChatSender } from "@features/support/types/conversations";

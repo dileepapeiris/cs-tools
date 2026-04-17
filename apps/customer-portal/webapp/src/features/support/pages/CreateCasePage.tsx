@@ -29,7 +29,7 @@ import { useLocation, useNavigate, useParams } from "react-router";
 import { useQueryClient } from "@tanstack/react-query";
 import useGetProjectFilters from "@api/useGetProjectFilters";
 import useGetProjectDetails from "@api/useGetProjectDetails";
-import { useAuthApiClient } from "@/utils/useAuthApiClient";
+import { useAuthApiClient } from "@utils/useAuthApiClient";
 import { usePostProjectDeploymentsSearchInfinite } from "@api/usePostProjectDeploymentsSearch";
 import {
   extractDeploymentProducts,
@@ -76,7 +76,7 @@ import {
   shouldExcludeS0,
   shouldForceSeverityS4,
   shouldRestrictToPrimaryProductionDeployments,
-} from "@/utils/permission";
+} from "@utils/permission";
 import {
   escapeHtml,
   htmlToPlainText,
@@ -222,6 +222,7 @@ export default function CreateCasePage(): JSX.Element {
   const { showError } = useErrorBanner();
   const { showSuccess } = useSuccessBanner();
   const { mutate: postCase, isPending: isCreatePending } = usePostCase();
+  const [isNavigatingAfterCreate, setIsNavigatingAfterCreate] = useState(false);
   const authFetch = useAuthApiClient();
   const logger = useLogger();
 
@@ -683,7 +684,7 @@ export default function CreateCasePage(): JSX.Element {
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
-    if (!projectId) return;
+    if (!projectId || isNavigatingAfterCreate) return;
 
     const titlePlain = htmlToPlainText(title).trim();
     const descriptionPlain = htmlToPlainText(description).trim();
@@ -784,6 +785,7 @@ export default function CreateCasePage(): JSX.Element {
 
     postCase(payload, {
       onSuccess: async (data) => {
+        setIsNavigatingAfterCreate(true);
         const caseId = data.id;
         const createdCase = data as {
           isSecurityReport?: boolean;
@@ -831,6 +833,7 @@ export default function CreateCasePage(): JSX.Element {
         }
       },
       onError: (error) => {
+        setIsNavigatingAfterCreate(false);
         const msg =
           error?.message?.trim() ||
           "We couldn't create your case. Please check required fields and try again.";
@@ -960,6 +963,7 @@ export default function CreateCasePage(): JSX.Element {
                 isProjectLoading ||
                 isFiltersLoading ||
                 isCreatePending ||
+                isNavigatingAfterCreate ||
                 isPreparingAttachments ||
                 !projectId ||
                 !selectedDeploymentId ||
@@ -973,6 +977,8 @@ export default function CreateCasePage(): JSX.Element {
                   ? isSecurityReport
                     ? "Submitting..."
                     : "Creating..."
+                  : isNavigatingAfterCreate
+                    ? "Opening case..."
                   : isSecurityReport
                     ? "Submit Security Report"
                     : relatedCase

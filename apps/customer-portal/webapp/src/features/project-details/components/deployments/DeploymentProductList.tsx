@@ -44,7 +44,7 @@ import { useMemo, useState, type JSX } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { usePostDeploymentProductsSearchAll } from "@features/project-details/api/usePostDeploymentProductsSearch";
 import { usePatchDeploymentProduct } from "@features/project-details/api/usePatchDeploymentProduct";
-import { ApiQueryKeys } from "@/constants/apiConstants";
+import { ApiQueryKeys } from "@constants/apiConstants";
 import ErrorIndicator from "@components/error-indicator/ErrorIndicator";
 import ErrorBanner from "@components/error-banner/ErrorBanner";
 import AddProductModal from "@features/project-details/components/deployments/AddProductModal";

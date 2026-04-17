@@ -25,7 +25,6 @@ import {
   CardContent,
   Chip,
   Divider,
-  Link,
   Typography,
 } from "@wso2/oxygen-ui";
 import DeploymentCardLicenseFooter from "@features/project-details/components/deployments/deployment-card/DeploymentCardLicenseFooter";
@@ -49,7 +48,7 @@ export default function DeploymentCard({
   selectedProduct,
   onToggleProductSelect,
 }: DeploymentCardProps): JSX.Element {
-  const { name, url, description, createdOn, updatedOn } = deployment;
+  const { name, description, createdOn, updatedOn } = deployment;
   const projectId = deployment.project?.id ?? "";
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
@@ -94,6 +93,12 @@ export default function DeploymentCard({
               <Typography variant="h6" sx={{ fontWeight: 600 }}>
                 {displayValue(name, "Not Available")}
               </Typography>
+              <Chip
+                label={deployment.id}
+                size="small"
+                variant="outlined"
+                sx={{ height: 20, fontSize: "0.75rem" }}
+              />
               {deployment.type?.label && (
                 <Chip
                   label={deployment.type.label}
@@ -101,23 +106,6 @@ export default function DeploymentCard({
                   variant="outlined"
                   sx={{ height: 20, fontSize: "0.75rem" }}
                 />
-              )}
-            </Box>
-            <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-              {url ? (
-                <Link
-                  href={url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  variant="body2"
-                  sx={{ color: "text.secondary" }}
-                >
-                  {url}
-                </Link>
-              ) : (
-                <Typography variant="body2" color="text.secondary">
-                  {displayValue(url, "Not Available")}
-                </Typography>
               )}
             </Box>
           </Box>

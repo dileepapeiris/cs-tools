@@ -103,12 +103,16 @@ export function CaseDetailsSection({
   const filteredBase = excludeS0
     ? baseSeverityLevels.filter((level) => !isS0SeverityLabel(level.label))
     : baseSeverityLevels;
+  const restrictedBase = isSeverityDisabled
+    ? filteredBase.filter((level) => level.label === CaseSeverity.LOW)
+    : filteredBase;
   const filteredExtra = (extraSeverityLevels ?? []).filter(
     (extra) =>
-      !filteredBase.some((level) => level.id === extra.id) &&
-      (!excludeS0 || !isS0SeverityLabel(extra.label)),
+      !restrictedBase.some((level) => level.id === extra.id) &&
+      (!excludeS0 || !isS0SeverityLabel(extra.label)) &&
+      (!isSeverityDisabled || extra.label === CaseSeverity.LOW),
   );
-  const severityLevels = [...filteredBase, ...filteredExtra].map((level) => ({
+  const severityLevels = [...restrictedBase, ...filteredExtra].map((level) => ({
     ...level,
     label: SEVERITY_LABEL_MAP[level.label] ?? level.label,
   }));

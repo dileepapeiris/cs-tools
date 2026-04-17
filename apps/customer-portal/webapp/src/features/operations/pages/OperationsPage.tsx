@@ -34,7 +34,7 @@ import useGetProjectCases from "@api/useGetProjectCases";
 import useGetChangeRequests from "@features/operations/api/useGetChangeRequests";
 import { useGetProjectCasesStats } from "@features/dashboard/api/useGetProjectCasesStats";
 import { useGetProjectChangeRequestsStats } from "@features/dashboard/api/useGetProjectChangeRequestsStats";
-import { getProjectPermissions } from "@/utils/permission";
+import { getProjectPermissions } from "@utils/permission";
 import { SortOrder } from "@/types/common";
 import ErrorIndicator from "@components/error-indicator/ErrorIndicator";
 import {
@@ -46,6 +46,7 @@ import {
   OPERATIONS_HUB_HEADER_ACTION_CREATE_SR,
   OPERATIONS_HUB_PROJECT_ERROR_MESSAGE,
   OPERATIONS_HUB_STAT_ENTITY_NAME,
+  ALLOWED_CHANGE_REQUEST_STATE_IDS,
 } from "@features/operations/constants/operationsConstants";
 import {
   formatOperationsOverviewChangeRequestsSubtitle,
@@ -103,7 +104,11 @@ export default function OperationsPage(): JSX.Element {
     isError: isCrError,
   } = useGetChangeRequests(
     projectId || "",
-    {},
+    {
+      filters: {
+        stateKeys: [...ALLOWED_CHANGE_REQUEST_STATE_IDS],
+      },
+    },
     0,
     OPERATIONS_OVERVIEW_LIST_LIMIT,
     { enabled: !!projectId && isChangeRequestEnabled },

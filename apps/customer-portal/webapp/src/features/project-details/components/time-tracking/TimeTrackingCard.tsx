@@ -33,11 +33,11 @@ export default function TimeTrackingCard({
   card,
 }: TimeTrackingCardProps): JSX.Element {
   const theme = useTheme();
-  const { case: caseData, state, hasBillable, totalTime, approvedBy } = card;
+  const { case: caseData, state, hasBillable, totalTime, reportedBy } = card;
 
   const label = caseData?.label?.trim() || "--";
   const caseNumber = caseData?.number?.trim() || "--";
-  const approvedByName = approvedBy?.label?.trim() || "--";
+  const reportedByName = reportedBy?.label?.trim() || "--";
 
   const totalTimeDisplay = formatMinutesAsHrMin(totalTime);
 
@@ -102,7 +102,7 @@ export default function TimeTrackingCard({
             {label}
           </Typography>
           <Typography variant="caption" color="text.secondary">
-            Approved by: {approvedByName}
+            Approved by: {reportedByName}
           </Typography>
         </Box>
         <Box sx={{ textAlign: "right" }}>

@@ -24,7 +24,7 @@ import {
   PROJECT_DETAILS_TABS,
 } from "@features/project-details/constants/projectDetailsConstants";
 import { ProjectDetailsTabId } from "@features/project-details/types/projectDetails";
-import { getProjectPermissions } from "@/utils/permission";
+import { getProjectPermissions } from "@utils/permission";
 import ProjectInformationCard from "@features/project-details/components/ProjectInformationCard";
 import ProjectStatisticsCard from "@features/project-details/components/ProjectStatisticsCard";
 import ContactInfoCard from "@features/project-details/components/project-overview/contact-info/ContactInfoCard";

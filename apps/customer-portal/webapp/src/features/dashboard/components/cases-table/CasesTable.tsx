@@ -63,6 +63,7 @@ import type {
 const CasesTable = ({
   projectId,
   excludeS0 = false,
+  restrictSeverityToLow = false,
   hasAgent = false,
   includeDeploymentFilter = true,
 }: CasesTableProps): JSX.Element => {
@@ -111,6 +112,7 @@ const CasesTable = ({
     return ALL_CASES_FILTER_DEFINITIONS.filter(
       (def) =>
         def.id !== "caseType" &&
+        !(restrictSeverityToLow && def.metadataKey === "severities") &&
         (includeDeploymentFilter || def.id !== "deployment"),
     ).map((def) => {
       const { label } = deriveFilterLabels(def.id);
@@ -132,6 +134,7 @@ const CasesTable = ({
             def.metadataKey,
             metadataOptions,
             excludeS0,
+            restrictSeverityToLow,
           );
           options = filtered.map((item) => ({
             label: mapCasesTableFilterOptionLabel(
@@ -168,6 +171,7 @@ const CasesTable = ({
     filtersMetadata,
     deploymentsList,
     excludeS0,
+    restrictSeverityToLow,
     includeDeploymentFilter,
     deploymentsQuery,
   ]);

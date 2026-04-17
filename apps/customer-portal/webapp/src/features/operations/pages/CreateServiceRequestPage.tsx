@@ -37,7 +37,7 @@ import {
   extractDeploymentProducts,
   usePostDeploymentProductsSearchInfinite,
 } from "@features/project-details/api/usePostDeploymentProductsSearch";
-import { useAuthApiClient } from "@/utils/useAuthApiClient";
+import { useAuthApiClient } from "@utils/useAuthApiClient";
 import { useSearchCatalogs } from "@features/operations/api/useSearchCatalogs";
 import { useGetCatalogItemVariables } from "@features/operations/api/useGetCatalogItemVariables";
 import { usePostCase } from "@features/operations/api/usePostCase";
@@ -65,7 +65,7 @@ import {
 import {
   filterDeploymentsForCaseCreation,
   shouldRestrictToPrimaryProductionDeployments,
-} from "@/utils/permission";
+} from "@utils/permission";
 import { htmlToPlainText } from "@features/support/utils/richTextEditor";
 import type { CreateServiceRequestPayload } from "@features/operations/types/serviceRequests";
 import CatalogSelector from "@features/operations/components/service-requests/CatalogSelector";

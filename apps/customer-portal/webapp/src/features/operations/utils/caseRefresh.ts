@@ -15,7 +15,7 @@
 // under the License.
 
 import type { QueryClient } from "@tanstack/react-query";
-import { ApiQueryKeys } from "@/constants/apiConstants";
+import { ApiQueryKeys } from "@constants/apiConstants";
 import { CaseType } from "@features/support/constants/supportConstants";
 
 type AuthFetch = (

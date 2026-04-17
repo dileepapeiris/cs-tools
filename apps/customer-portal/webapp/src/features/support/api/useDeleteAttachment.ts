@@ -20,9 +20,9 @@ import {
   type UseMutationResult,
 } from "@tanstack/react-query";
 import { useAsgardeo } from "@asgardeo/react";
-import { useAuthApiClient } from "@/utils/useAuthApiClient";
+import { useAuthApiClient } from "@utils/useAuthApiClient";
 import { useLogger } from "@hooks/useLogger";
-import { ApiQueryKeys } from "@/constants/apiConstants";
+import { ApiQueryKeys } from "@constants/apiConstants";
 import type { DeleteAttachmentVariables } from "@features/support/types/supportApi";
 
 export type { DeleteAttachmentVariables };

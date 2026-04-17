@@ -22,7 +22,7 @@ import useInfiniteProjects, { flattenProjectPages } from "@api/useGetProjects";
 import useGetMetadata from "@api/useGetMetadata";
 import { APP_SHELL_NAV_ITEMS } from "@features/project-hub/constants/appLayoutConstants";
 import type { AppShellNavItem } from "@features/project-hub/types/appLayout";
-import { getProjectPermissions } from "@/utils/permission";
+import { getProjectPermissions } from "@utils/permission";
 
 // Props for the SideBar component.
 interface SideBarProps {

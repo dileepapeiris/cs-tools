@@ -31,7 +31,6 @@ import {
 } from "@wso2/oxygen-ui";
 import { type JSX } from "react";
 import {
-  formatValue,
   getInitials,
   getStatusColor,
   mapSeverityToDisplay,
@@ -142,6 +141,20 @@ const CasesList = ({
                     cursor: onCaseClick ? "pointer" : "default",
                   }}
                 >
+                  {(() => {
+                    const assignedEngineerValue = row.assignedEngineer;
+                    const assignedEngineerName =
+                      typeof assignedEngineerValue === "string"
+                        ? assignedEngineerValue.trim()
+                        : assignedEngineerValue?.label?.trim() || "";
+                    const assignedEngineerDisplay =
+                      assignedEngineerName || "Not available";
+                    const assignedEngineerInitials = assignedEngineerName
+                      ? getInitials(assignedEngineerName)
+                      : "";
+
+                    return (
+                      <>
                   <TableCell>
                     <Box>
                       <Typography variant="body2" color="text.primary">
@@ -198,10 +211,10 @@ const CasesList = ({
                   <TableCell>
                     <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
                       <Avatar sx={{ width: 24, height: 24, fontSize: 12 }}>
-                        {getInitials(row.assignedEngineer)}
+                        {assignedEngineerInitials}
                       </Avatar>
                       <Typography variant="body2" color="text.primary">
-                        {formatValue(row.assignedEngineer)}
+                        {assignedEngineerDisplay}
                       </Typography>
                     </Box>
                   </TableCell>
@@ -222,6 +235,9 @@ const CasesList = ({
                       </Typography>
                     </Box>
                   </TableCell>
+                      </>
+                    );
+                  })()}
                 </TableRow>
               ))
             )}

@@ -301,6 +301,13 @@ export function getDeploymentProductDisplayLabel(
   } else if (typeof item.version === "string") {
     versionLabel = item.version.trim();
   }
+  if (
+    productLabel &&
+    versionLabel &&
+    productLabel.toLowerCase().includes(versionLabel.toLowerCase())
+  ) {
+    return productLabel;
+  }
   const combined = [productLabel, versionLabel].filter(Boolean).join(" ");
   return combined.trim();
 }

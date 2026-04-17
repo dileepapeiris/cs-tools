@@ -22,32 +22,37 @@ import {
   alpha,
   colors,
   useTheme,
-  type SxProps,
-  type Theme,
 } from "@wso2/oxygen-ui";
 import { ArrowRight } from "@wso2/oxygen-ui-icons-react";
-import type { ComponentType } from "react";
 import type { JSX } from "react";
 import ErrorIndicator from "@components/error-indicator/ErrorIndicator";
+import {
+  SupportOverviewIconVariant,
+  type SupportOverviewCardProps,
+} from "@features/support/types/supportOverview";
 
-export interface SupportOverviewCardProps {
-  title: string;
-  subtitle: string;
-  icon: ComponentType<{ size?: number; color?: string }>;
-  iconVariant?: "orange" | "blue";
-  children: React.ReactNode;
-  footerButtonLabel?: string;
-  onFooterClick?: () => void;
-  footerButtons?: Array<{
-    label: string;
-    onClick?: () => void;
-  }>;
-  sx?: SxProps<Theme>;
-  isError?: boolean;
-  headerAction?: {
-    label: string;
-    onClick?: () => void;
-  };
+function resolveSupportOverviewPaletteKey(
+  iconVariant: SupportOverviewIconVariant | undefined,
+): "info" | "warning" {
+  switch (iconVariant ?? SupportOverviewIconVariant.Orange) {
+    case SupportOverviewIconVariant.Blue:
+      return "info";
+    case SupportOverviewIconVariant.Orange:
+    default:
+      return "warning";
+  }
+}
+
+function resolveSupportOverviewIconHex(
+  iconVariant: SupportOverviewIconVariant | undefined,
+): string {
+  switch (iconVariant ?? SupportOverviewIconVariant.Orange) {
+    case SupportOverviewIconVariant.Blue:
+      return colors.blue[600];
+    case SupportOverviewIconVariant.Orange:
+    default:
+      return colors.orange[600];
+  }
 }
 
 /**
@@ -60,7 +65,7 @@ export default function SupportOverviewCard({
   title,
   subtitle,
   icon: Icon,
-  iconVariant = "orange",
+  iconVariant = SupportOverviewIconVariant.Orange,
   children,
   footerButtonLabel,
   onFooterClick,
@@ -70,9 +75,8 @@ export default function SupportOverviewCard({
   headerAction,
 }: SupportOverviewCardProps): JSX.Element {
   const theme = useTheme();
-  const paletteKey = iconVariant === "blue" ? "info" : "warning";
-  const iconColor =
-    iconVariant === "blue" ? colors.blue[600] : colors.orange[600];
+  const paletteKey = resolveSupportOverviewPaletteKey(iconVariant);
+  const iconColor = resolveSupportOverviewIconHex(iconVariant);
 
   return (
     <Paper
@@ -116,7 +120,7 @@ export default function SupportOverviewCard({
             variant="outlined"
             color="warning"
             onClick={headerAction.onClick}
-            sx={{textTransform: "none", flexShrink: 0 }}
+            sx={{ textTransform: "none", flexShrink: 0 }}
           >
             {headerAction.label}
           </Button>

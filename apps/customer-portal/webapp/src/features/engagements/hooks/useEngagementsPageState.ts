@@ -59,14 +59,6 @@ export function useEngagementsPageState() {
   const [sortOrder, setSortOrder] = useState<SortOrder>(SortOrder.DESC);
   const [page, setPage] = useState(1);
 
-  useEffect(() => {
-    setSortField((prev) =>
-      prev === EngagementsSortField.Severity
-        ? EngagementsSortField.CreatedOn
-        : prev,
-    );
-  }, []);
-
   const { data: project, isLoading: isProjectLoading } = useGetProjectDetails(
     projectId || "",
   );

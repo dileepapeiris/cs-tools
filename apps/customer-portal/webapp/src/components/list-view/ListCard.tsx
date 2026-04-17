@@ -27,6 +27,7 @@ import { Calendar, FileText, User } from "@wso2/oxygen-ui-icons-react";
 import type { JSX, KeyboardEvent } from "react";
 import type { CaseListItem } from "@features/support/types/cases";
 import { getSeverityLegendColor } from "@features/dashboard/utils/dashboard";
+import CaseCardDescriptionClamp from "@components/list-view/CaseCardDescriptionClamp";
 import {
   formatDateTime,
   getAssignedEngineerLabel,
@@ -35,7 +36,6 @@ import {
   hasSeverityLabelForChip,
   mapSeverityToDisplay,
   resolveColorFromTheme,
-  stripHtml,
 } from "@features/support/utils/support";
 
 export interface ListCardProps {
@@ -167,22 +167,7 @@ export default function ListCard({
         >
           {caseItem.title || "--"}
         </Typography>
-        <Typography
-          variant="body2"
-          color="text.secondary"
-          sx={{
-            mb: 2,
-            display: "-webkit-box",
-            WebkitLineClamp: 2,
-            WebkitBoxOrient: "vertical",
-            overflow: "hidden",
-            overflowWrap: "anywhere",
-            wordBreak: "break-word",
-            minWidth: 0,
-          }}
-        >
-          {stripHtml(caseItem.description) || "--"}
-        </Typography>
+        <CaseCardDescriptionClamp description={caseItem.description} />
       </Form.CardContent>
 
       <Form.CardActions

@@ -250,7 +250,9 @@ export default function CaseDetailsAttachmentsPanel({
                     onDelete={handleDeleteClick}
                     deleteDisabled={deleteDisabled}
                     deleteTooltip={deleteTooltip}
-                    onEdit={isCaseClosed ? undefined : handleEditClick}
+                    onEdit={
+                      isOwner && !isCaseClosed ? handleEditClick : undefined
+                    }
                     hideDescription
                     isDownloadLoading={isDownloading && downloadingId === att.id}
                   />

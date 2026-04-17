@@ -44,6 +44,7 @@ import {
   ANNOUNCEMENTS_BACK_LABEL,
 } from "@features/announcements/constants/announcementsConstants";
 import {
+  formatAnnouncementDateDisplay,
   isAnnouncementDescriptionEffectivelyEmpty,
   normalizeAnnouncementDescriptionHtml,
 } from "@features/announcements/utils/announcements";
@@ -118,6 +119,7 @@ export default function AnnouncementDetailsPanel({
   const statusColorPath = getStatusColor(statusLabel ?? undefined);
   const resolvedStatusColor = resolveColorFromTheme(statusColorPath, theme);
   const statusChipIcon = getStatusIconElement(statusLabel, 12);
+  const createdOnLabel = formatAnnouncementDateDisplay(data.createdOn);
 
   return (
     <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
@@ -201,7 +203,7 @@ export default function AnnouncementDetailsPanel({
               aria-hidden
             />
             <Typography variant="body2" color="text.secondary">
-              {data.createdOn || "--"}
+              {createdOnLabel}
             </Typography>
           </Stack>
           {data.issueType?.label && (

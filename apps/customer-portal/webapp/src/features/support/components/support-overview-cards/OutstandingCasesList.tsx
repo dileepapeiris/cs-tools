@@ -27,6 +27,7 @@ import {
 } from "@wso2/oxygen-ui";
 import type { JSX } from "react";
 import { NULL_PLACEHOLDER } from "@constants/common";
+import CaseCardDescriptionClamp from "@components/list-view/CaseCardDescriptionClamp";
 import ErrorIndicator from "@components/error-indicator/ErrorIndicator";
 import EmptyIcon from "@components/empty-state/EmptyIcon";
 import OutstandingCasesSkeleton from "./OutstandingCasesSkeleton";
@@ -110,7 +111,12 @@ export default function OutstandingCasesList({
             <Form.CardHeader
               sx={{ p: 0 }}
               title={
-                <Stack direction="row" spacing={1} alignItems="center" flexWrap="wrap">
+                <Stack
+                  direction="row"
+                  spacing={1}
+                  alignItems="center"
+                  flexWrap="wrap"
+                >
                   <Typography
                     variant="body2"
                     fontWeight={500}
@@ -145,7 +151,14 @@ export default function OutstandingCasesList({
             />
 
             <Form.CardContent sx={{ p: 0 }}>
-              <Box sx={{ minWidth: 0 }}>
+              <Box
+                sx={{
+                  minWidth: 0,
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: 0.5,
+                }}
+              >
                 <Typography
                   variant="body2"
                   color="text.primary"
@@ -159,6 +172,11 @@ export default function OutstandingCasesList({
                 >
                   {stripHtml(c.title)}
                 </Typography>
+                <CaseCardDescriptionClamp
+                  description={c.description}
+                  hideWhenEmpty
+                  sx={{ mb: 0 }}
+                />
               </Box>
             </Form.CardContent>
 

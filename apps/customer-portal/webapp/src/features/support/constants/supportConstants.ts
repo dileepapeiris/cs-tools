@@ -195,6 +195,10 @@ export const ATTACHMENT_DELETE_TOOLTIP_NOT_OWNER =
 export const DEPLOYMENT_DOCUMENT_DELETE_TOOLTIP_NOT_OWNER =
   "Only the person who uploaded this document can delete it.";
 
+/** Tooltip for deployment documents when edit is disabled for non-owners. */
+export const DEPLOYMENT_DOCUMENT_EDIT_TOOLTIP_NOT_OWNER =
+  "Only the person who uploaded this document can edit it.";
+
 /**
  * Valid keys for all cases statistics.
  */

@@ -157,6 +157,11 @@ export function buildServiceRequestsPageCaseSearchRequest(
   sortOrder: SortOrder,
   createdByMe: boolean,
 ): Omit<CaseSearchRequest, "pagination"> {
+  const normalizedSortField =
+    sortField === ServiceRequestCaseSortField.Severity
+      ? ServiceRequestCaseSortField.CreatedOn
+      : sortField;
+
   return {
     filters: {
       caseTypes: [CaseType.SERVICE_REQUEST],
@@ -167,7 +172,7 @@ export function buildServiceRequestsPageCaseSearchRequest(
       createdByMe: createdByMe || undefined,
     },
     sortBy: {
-      field: sortField,
+      field: normalizedSortField,
       order: sortOrder,
     },
   };

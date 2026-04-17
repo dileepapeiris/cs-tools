@@ -54,9 +54,11 @@ const useGetUserDetails = (): UseQueryResult<UserDetails, Error> => {
         logger.debug(`[useGetUserDetails] Response status: ${response.status}`);
 
         if (!response.ok) {
-          throw new Error(
-            `Error fetching user details: ${response.statusText}`,
-          );
+          const err = new Error(
+            `Error fetching user details: ${response.status} ${response.statusText}`,
+          ) as Error & { status?: number };
+          err.status = response.status;
+          throw err;
         }
 
         const data = (await response.json()) as Record<string, unknown>;
@@ -82,9 +84,31 @@ const useGetUserDetails = (): UseQueryResult<UserDetails, Error> => {
       }
     },
     enabled: isSignedIn && !isAuthLoading,
-    retry: (failureCount, error) =>
-      error.message.includes(AUTH_NOT_READY_ERROR_MESSAGE) && failureCount < 4,
-    retryDelay: (attemptIndex) => Math.min(500 * 2 ** attemptIndex, 4000),
+    retry: (failureCount, error) => {
+      if (failureCount >= 3) {
+        return false;
+      }
+      if (
+        error instanceof Error &&
+        error.message.includes(AUTH_NOT_READY_ERROR_MESSAGE)
+      ) {
+        return true;
+      }
+      const status = (error as Error & { status?: number }).status;
+      if (typeof status === "number") {
+        if (status >= 500) {
+          return true;
+        }
+        if (status >= 400 && status < 500) {
+          return false;
+        }
+      }
+      if (error instanceof TypeError) {
+        return true;
+      }
+      return false;
+    },
+    retryDelay: (attemptIndex) => Math.min(400 * 2 ** attemptIndex, 3000),
     staleTime: 0,
     refetchOnWindowFocus: false,
     refetchOnMount: true,

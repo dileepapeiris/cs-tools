@@ -68,6 +68,16 @@ describe("buildEngagementSearchRequest", () => {
     );
     expect(req.filters?.severityId).toBeUndefined();
   });
+
+  it("normalizes legacy Severity sort field to CreatedOn in API payload", () => {
+    const req = buildEngagementSearchRequest(
+      {},
+      "",
+      EngagementsSortField.Severity,
+      SortOrder.DESC,
+    );
+    expect(req.sortBy?.field).toBe(EngagementsSortField.CreatedOn);
+  });
 });
 
 describe("buildEngagementDetailPath", () => {

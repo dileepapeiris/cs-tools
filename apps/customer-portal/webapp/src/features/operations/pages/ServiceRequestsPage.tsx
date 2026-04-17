@@ -103,14 +103,6 @@ export default function ServiceRequestsPage(): JSX.Element {
   const [page, setPage] = useState(1);
   const pageSize = OPERATIONS_LIST_PAGE_SIZE;
 
-  useEffect(() => {
-    setSortField((prev) =>
-      prev === ServiceRequestCaseSortField.Severity
-        ? ServiceRequestCaseSortField.CreatedOn
-        : prev,
-    );
-  }, []);
-
   const { data: project, isLoading: isProjectLoading } = useGetProjectDetails(
     projectId || "",
   );

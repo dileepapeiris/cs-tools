@@ -26,13 +26,13 @@ import {
 import { Calendar, Layers, Package, Users } from "@wso2/oxygen-ui-icons-react";
 import type { JSX } from "react";
 import { NULL_PLACEHOLDER } from "@constants/common";
+import CaseCardDescriptionClamp from "@components/list-view/CaseCardDescriptionClamp";
 import {
   formatDateTime,
   getAssignedEngineerLabel,
   getStatusColor,
   getStatusIcon,
   resolveColorFromTheme,
-  stripHtml,
 } from "@features/support/utils/support";
 import ServiceRequestsListSkeleton from "@features/operations/components/service-requests/ServiceRequestsListSkeleton";
 import EmptyIcon from "@components/empty-state/EmptyIcon";
@@ -190,19 +190,10 @@ export default function ServiceRequestsList({
                 {sr.title || NULL_PLACEHOLDER}
               </Typography>
 
-              <Typography
-                variant="body2"
-                color="text.secondary"
-                sx={{
-                  mb: 2,
-                  display: "-webkit-box",
-                  WebkitLineClamp: 2,
-                  WebkitBoxOrient: "vertical",
-                  overflow: "hidden",
-                }}
-              >
-                {stripHtml(sr.description) || NULL_PLACEHOLDER}
-              </Typography>
+              <CaseCardDescriptionClamp
+                description={sr.description}
+                emptyLabel={NULL_PLACEHOLDER}
+              />
             </Form.CardContent>
 
             <Form.CardActions

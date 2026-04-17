@@ -68,6 +68,11 @@ export function buildEngagementSearchRequest(
   sortField: EngagementsSortField,
   sortOrder: SortOrder,
 ): Omit<CaseSearchRequest, "pagination"> {
+  const normalizedSortField =
+    sortField === EngagementsSortField.Severity
+      ? EngagementsSortField.CreatedOn
+      : sortField;
+
   return {
     filters: {
       caseTypes: [CaseType.ENGAGEMENT],
@@ -77,7 +82,7 @@ export function buildEngagementSearchRequest(
       searchQuery: searchTerm.trim() || undefined,
     },
     sortBy: {
-      field: sortField,
+      field: normalizedSortField,
       order: sortOrder,
     },
   };

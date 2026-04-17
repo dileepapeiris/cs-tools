@@ -198,16 +198,22 @@ export default function AttachmentListItem({
               cursor: "pointer",
               alignSelf: "flex-start",
               maxWidth: "100%",
+              maxHeight: 200,
+              overflow: "hidden",
+              display: "block",
             }}
           >
             <Box
               component="img"
               src={previewUrl}
               alt={attachment.name}
+              loading="lazy"
               sx={{
-                width: "auto",
                 maxWidth: "100%",
+                maxHeight: 200,
+                width: "auto",
                 height: "auto",
+                objectFit: "contain",
                 display: "block",
               }}
             />

@@ -1023,8 +1023,8 @@ export function hasSeverityLabelForChip(label?: string | null): boolean {
   if (label == null || String(label).trim() === "") {
     return false;
   }
-  const display = mapSeverityToDisplay(label);
-  return display !== "—" && display.trim() !== "";
+  const display = mapSeverityToDisplay(label).trim();
+  return display !== "—" && display !== "";
 }
 
 /**

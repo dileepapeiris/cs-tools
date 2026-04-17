@@ -31,6 +31,7 @@ const mockDocuments: DeploymentDocument[] = [
     sizeBytes: 1048576, // 1 MB
     uploadedAt: "2026-01-12",
     uploadedBy: "John Doe",
+    createdBy: "john.doe@example.com",
   },
   {
     id: "doc-2",
@@ -39,6 +40,7 @@ const mockDocuments: DeploymentDocument[] = [
     sizeBytes: 2097152, // 2 MB
     uploadedAt: "2026-01-15",
     uploadedBy: "Jane Smith",
+    createdBy: "john.doe@example.com",
   },
 ];
 
@@ -110,6 +112,15 @@ vi.mock("@features/project-details/api/useInfiniteDeploymentDocuments", () => ({
 vi.mock("@case-details-attachments/UploadAttachmentModal", () => ({
   default: ({ open }: { open: boolean }) =>
     open ? <div data-testid="upload-modal">Upload Modal</div> : null,
+}));
+
+vi.mock("@features/settings/api/useGetUserDetails", () => ({
+  __esModule: true,
+  default: () => ({
+    data: { email: "john.doe@example.com" },
+    isLoading: false,
+    isError: false,
+  }),
 }));
 
 const queryClient = new QueryClient({

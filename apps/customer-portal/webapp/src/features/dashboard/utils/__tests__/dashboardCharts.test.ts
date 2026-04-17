@@ -124,6 +124,30 @@ describe("buildEngagementsPieSlices", () => {
     );
   });
 
+  it("hides zero-value Services, Follow up, and Improvements only", () => {
+    const slices = buildEngagementsPieSlices(
+      {
+        categories: [
+          { name: "Services", value: 0 },
+          { name: "Follow up", value: 0 },
+          { name: "Improvements", value: 0 },
+          { name: "Onboarding", value: 0 },
+          { name: "Migration", value: 0 },
+        ],
+        total: 0,
+      },
+      false,
+      false,
+      errorGrey,
+      fallbackGrey,
+    );
+    expect(slices.some((s) => s.name === "Services")).toBe(false);
+    expect(slices.some((s) => s.name === "Follow up")).toBe(false);
+    expect(slices.some((s) => s.name === "Improvements")).toBe(false);
+    expect(slices.some((s) => s.name === "Onboarding")).toBe(true);
+    expect(slices.some((s) => s.name === "Migration")).toBe(true);
+  });
+
   it("uses error grey when error and not loading", () => {
     const slices = buildEngagementsPieSlices(
       { categories: [], total: 0 },

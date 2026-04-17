@@ -100,7 +100,6 @@ function ProductsSkeleton(): JSX.Element {
                   }}
                 >
                   <Skeleton variant="text" width="42%" height={22} />
-                  <Skeleton variant="rounded" width={56} height={20} />
                 </Box>
                 <Skeleton
                   variant="text"
@@ -330,13 +329,6 @@ function ProductItemRow({
 }: DeploymentProductItemRowProps): JSX.Element {
   const emptyVal = "Not Available";
   const name = displayValue(item.product?.label, emptyVal);
-  const versionLabel =
-    typeof item.version === "object" && item.version?.label
-      ? item.version.label
-      : typeof item.version === "string"
-        ? item.version
-        : "";
-  const version = displayValue(versionLabel, emptyVal);
   const description = displayValue(item.description, emptyVal);
   const coresStr =
     typeof item.cores === "number"
@@ -431,12 +423,6 @@ function ProductItemRow({
               >
                 {name}
               </Typography>
-              <Chip
-                label={version}
-                size="small"
-                variant="outlined"
-                sx={{ height: 20, fontSize: "0.75rem" }}
-              />
             </Box>
             <Typography
               variant="caption"

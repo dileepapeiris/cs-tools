@@ -42,6 +42,7 @@ import { useState, useMemo, type JSX } from "react";
 import { useErrorBanner } from "@context/error-banner/ErrorBannerContext";
 import { useDeleteAttachment } from "@features/support/api/useDeleteAttachment";
 import { useGetAttachment } from "@api/useGetAttachment";
+import useGetUserDetails from "@features/settings/api/useGetUserDetails";
 
 import ErrorIndicator from "@components/error-indicator/ErrorIndicator";
 import UploadAttachmentModal from "@case-details-attachments/UploadAttachmentModal";
@@ -73,6 +74,7 @@ export default function DeploymentDocumentList({
   deploymentId,
 }: DeploymentDocumentListProps): JSX.Element {
   const { showError } = useErrorBanner();
+  const { data: userDetails } = useGetUserDetails();
   const queryClient = useQueryClient();
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const {
@@ -85,6 +87,7 @@ export default function DeploymentDocumentList({
   } = useInfiniteDeploymentDocuments(deploymentId);
 
   const documents = flattenDeploymentDocuments(data);
+  const currentUserEmail = userDetails?.email?.trim().toLowerCase() ?? "";
 
   const handleAddSuccess = () => {
     setIsAddModalOpen(false);
@@ -158,6 +161,7 @@ export default function DeploymentDocumentList({
               key={doc.id}
               doc={doc}
               deploymentId={deploymentId}
+              currentUserEmail={currentUserEmail}
               onError={showError}
             />
           ))}
@@ -263,6 +267,7 @@ function DocumentsSkeleton(): JSX.Element {
 function DocumentRow({
   doc,
   deploymentId,
+  currentUserEmail,
   onError,
 }: DeploymentDocumentRowProps): JSX.Element {
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
@@ -276,6 +281,10 @@ function DocumentRow({
   const uploadedBy = displayValue(
     doc.uploadedBy ?? doc.createdBy,
     PROJECT_DETAILS_NOT_AVAILABLE_DISPLAY,
+  );
+  const isOwner = Boolean(
+    currentUserEmail &&
+      doc.createdBy?.trim().toLowerCase() === currentUserEmail,
   );
   const sizeStr = formatBytes(sizeBytes);
   const category = doc.category;
@@ -407,22 +416,26 @@ function DocumentRow({
               </Box>
             </Box>
             <Box sx={{ display: "flex", gap: 0.25, flexShrink: 0 }}>
-              <IconButton
-                size="small"
-                aria-label={`Edit ${name}`}
-                sx={{ color: "text.secondary" }}
-                onClick={() => setEditModalOpen(true)}
-              >
-                <PencilLine size={16} aria-hidden />
-              </IconButton>
-              <IconButton
-                size="small"
-                aria-label={`Delete ${name}`}
-                sx={{ color: "text.secondary" }}
-                onClick={() => setDeleteModalOpen(true)}
-              >
-                <Trash2 size={16} aria-hidden />
-              </IconButton>
+              {isOwner && (
+                <>
+                  <IconButton
+                    size="small"
+                    aria-label={`Edit ${name}`}
+                    sx={{ color: "text.secondary" }}
+                    onClick={() => setEditModalOpen(true)}
+                  >
+                    <PencilLine size={16} aria-hidden />
+                  </IconButton>
+                  <IconButton
+                    size="small"
+                    aria-label={`Delete ${name}`}
+                    sx={{ color: "text.secondary" }}
+                    onClick={() => setDeleteModalOpen(true)}
+                  >
+                    <Trash2 size={16} aria-hidden />
+                  </IconButton>
+                </>
+              )}
               <IconButton
                 size="small"
                 aria-label={`Download ${name}`}

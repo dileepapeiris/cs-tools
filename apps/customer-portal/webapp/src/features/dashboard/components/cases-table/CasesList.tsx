@@ -25,16 +25,11 @@ import {
   Typography,
   Chip,
   Paper,
-  Avatar,
   TablePagination,
   alpha,
 } from "@wso2/oxygen-ui";
 import { type JSX } from "react";
-import {
-  getInitials,
-  getStatusColor,
-  mapSeverityToDisplay,
-} from "@features/support/utils/support";
+import { getStatusColor, mapSeverityToDisplay } from "@features/support/utils/support";
 import { getSeverityLegendColor } from "@features/dashboard/utils/dashboard";
 import ErrorIndicator from "@components/error-indicator/ErrorIndicator";
 import CasesTableSkeleton from "@features/dashboard/components/cases-table/CasesTableSkeleton";
@@ -147,11 +142,7 @@ const CasesList = ({
                       typeof assignedEngineerValue === "string"
                         ? assignedEngineerValue.trim()
                         : assignedEngineerValue?.label?.trim() || "";
-                    const assignedEngineerDisplay =
-                      assignedEngineerName || "Not available";
-                    const assignedEngineerInitials = assignedEngineerName
-                      ? getInitials(assignedEngineerName)
-                      : "";
+                    const assignedEngineerDisplay = assignedEngineerName || "--";
 
                     return (
                       <>
@@ -209,14 +200,9 @@ const CasesList = ({
                     })()}
                   </TableCell>
                   <TableCell>
-                    <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                      <Avatar sx={{ width: 24, height: 24, fontSize: 12 }}>
-                        {assignedEngineerInitials}
-                      </Avatar>
-                      <Typography variant="body2" color="text.primary">
-                        {assignedEngineerDisplay}
-                      </Typography>
-                    </Box>
+                    <Typography variant="body2" color="text.primary">
+                      {assignedEngineerDisplay}
+                    </Typography>
                   </TableCell>
                   <TableCell>
                     <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>

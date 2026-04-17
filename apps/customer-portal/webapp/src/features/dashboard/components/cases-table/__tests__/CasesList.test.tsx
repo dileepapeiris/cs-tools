@@ -320,6 +320,6 @@ describe("CasesList", () => {
     // Note: title is rendered inside a Typography, date has two display parts
     const dashes = screen.getAllByText("--");
     expect(dashes.length).toBeGreaterThanOrEqual(3);
-    expect(screen.getByText("Not available")).toBeInTheDocument();
+    expect(dashes.length).toBeGreaterThanOrEqual(5);
   });
 });

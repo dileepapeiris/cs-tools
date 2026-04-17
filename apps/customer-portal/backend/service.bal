@@ -2065,7 +2065,7 @@ service http:InterceptableService / on new http:Listener(9090, listenerConf) {
             };
         }
 
-        entity:CommentCreateResponse|error createdCaseResponse = entity:createComment(userInfo.idToken,
+        entity:CommentCreateResponse|error createdCommentResponse = entity:createComment(userInfo.idToken,
                 {
                     referenceId: id,
                     referenceType: entity:CASE,
@@ -2073,8 +2073,8 @@ service http:InterceptableService / on new http:Listener(9090, listenerConf) {
                     'type: entity:COMMENTS,
                     createdBy: userInfo.email
                 });
-        if createdCaseResponse is error {
-            if getStatusCode(createdCaseResponse) == http:STATUS_UNAUTHORIZED {
+        if createdCommentResponse is error {
+            if getStatusCode(createdCommentResponse) == http:STATUS_UNAUTHORIZED {
                 log:printWarn(string `User: ${userInfo.userId} is not authorized to access the customer portal!`);
                 return <http:Unauthorized>{
                     body: {
@@ -2083,7 +2083,7 @@ service http:InterceptableService / on new http:Listener(9090, listenerConf) {
                 };
             }
 
-            if getStatusCode(createdCaseResponse) == http:STATUS_FORBIDDEN {
+            if getStatusCode(createdCommentResponse) == http:STATUS_FORBIDDEN {
                 log:printWarn(string `User: ${userInfo.userId} is forbidden to comment on case with ID: ${id}!`);
                 return <http:Forbidden>{
                     body: {
@@ -2093,9 +2093,9 @@ service http:InterceptableService / on new http:Listener(9090, listenerConf) {
                 };
             }
 
-            if getStatusCode(createdCaseResponse) == http:STATUS_BAD_REQUEST {
+            if getStatusCode(createdCommentResponse) == http:STATUS_BAD_REQUEST {
                 string customError = "Invalid request parameters for creating comment for the case.";
-                log:printWarn(customError, createdCaseResponse);
+                log:printWarn(customError, createdCommentResponse);
                 return <http:BadRequest>{
                     body: {
                         message: customError
@@ -2104,7 +2104,7 @@ service http:InterceptableService / on new http:Listener(9090, listenerConf) {
             }
 
             string customError = "Failed to create a new comment.";
-            log:printError(customError, createdCaseResponse);
+            log:printError(customError, createdCommentResponse);
             return <http:InternalServerError>{
                 body: {
                     message: customError
@@ -2112,7 +2112,7 @@ service http:InterceptableService / on new http:Listener(9090, listenerConf) {
             };
         }
 
-        return createdCaseResponse.comment;
+        return createdCommentResponse.comment;
     }
 
     # Create a new attachment for a specific case.

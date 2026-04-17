@@ -18,7 +18,7 @@ import { useQuery, type UseQueryResult } from "@tanstack/react-query";
 import { useAsgardeo } from "@asgardeo/react";
 import { useAuthApiClient } from "@/utils/useAuthApiClient";
 import { useLogger } from "@hooks/useLogger";
-import { ApiQueryKeys } from "@/constants/apiConstants";
+import { ApiQueryKeys } from "@constants/apiConstants";
 import { PRODUCT_CLASS } from "@features/project-details/constants/productConstants";
 import type { ProductsResponse } from "@features/project-details/types/products";
 

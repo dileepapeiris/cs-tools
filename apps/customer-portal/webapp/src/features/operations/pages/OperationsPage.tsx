@@ -46,6 +46,7 @@ import {
   OPERATIONS_HUB_HEADER_ACTION_CREATE_SR,
   OPERATIONS_HUB_PROJECT_ERROR_MESSAGE,
   OPERATIONS_HUB_STAT_ENTITY_NAME,
+  ALLOWED_CHANGE_REQUEST_STATE_IDS,
 } from "@features/operations/constants/operationsConstants";
 import {
   formatOperationsOverviewChangeRequestsSubtitle,
@@ -103,7 +104,11 @@ export default function OperationsPage(): JSX.Element {
     isError: isCrError,
   } = useGetChangeRequests(
     projectId || "",
-    {},
+    {
+      filters: {
+        stateKeys: [...ALLOWED_CHANGE_REQUEST_STATE_IDS],
+      },
+    },
     0,
     OPERATIONS_OVERVIEW_LIST_LIMIT,
     { enabled: !!projectId && isChangeRequestEnabled },

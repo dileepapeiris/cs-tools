@@ -44,7 +44,11 @@ import {
   ALL_CASES_STAT_CONFIGS,
   getAllCasesFlattenedStats,
 } from "@features/support/constants/supportConstants";
-import { getProjectPermissions, shouldExcludeS0 } from "@/utils/permission";
+import {
+  getProjectPermissions,
+  shouldExcludeS0,
+  shouldForceSeverityS4,
+} from "@/utils/permission";
 import { SortOrder } from "@/types/common";
 import type { AllCasesFilterValues } from "@features/support/types/cases";
 import ListStatGrid from "@components/list-view/ListStatGrid";
@@ -116,6 +120,12 @@ export default function ServiceRequestsPage(): JSX.Element {
       return false;
     }
     return shouldExcludeS0(project.type?.label);
+  }, [projectDetailsReady, project]);
+  const restrictSeverityToLow = useMemo(() => {
+    if (!projectDetailsReady || !project) {
+      return false;
+    }
+    return shouldForceSeverityS4(project.type?.label);
   }, [projectDetailsReady, project]);
 
   const { data: filterMetadata } = useGetProjectFilters(projectId || "");
@@ -354,6 +364,7 @@ export default function ServiceRequestsPage(): JSX.Element {
         onFilterChange={handleFilterChange}
         onClearFilters={handleClearFilters}
         excludeS0={excludeS0}
+        restrictSeverityToLow={restrictSeverityToLow}
         isProjectContextLoading={isProjectContextLoading}
       />
 

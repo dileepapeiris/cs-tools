@@ -33,6 +33,7 @@ import {
   OperationsNavSegment,
   ServiceRequestCaseSortField,
 } from "@features/operations/types/serviceRequests";
+import { ALLOWED_CHANGE_REQUEST_STATE_IDS } from "@features/operations/constants/operationsConstants";
 import type { SortOrder } from "@/types/common";
 
 /**
@@ -82,10 +83,19 @@ export function buildChangeRequestSearchRequest(
   filters: ChangeRequestFilterValues,
   searchTerm: string,
 ): Omit<ChangeRequestSearchRequest, "pagination"> {
+  const selectedStateId = filters.stateId ? Number(filters.stateId) : undefined;
+  const allowedStateIds: number[] = [...ALLOWED_CHANGE_REQUEST_STATE_IDS];
+  const stateKeys =
+    selectedStateId === undefined
+      ? allowedStateIds
+      : allowedStateIds.includes(selectedStateId)
+        ? [selectedStateId]
+        : [];
+
   return {
     filters: {
       searchQuery: searchTerm.trim() || undefined,
-      stateKeys: filters.stateId ? [Number(filters.stateId)] : undefined,
+      stateKeys,
       impactKey: filters.impactId ? Number(filters.impactId) : undefined,
     },
   };

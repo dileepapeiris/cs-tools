@@ -522,6 +522,7 @@ export default function CallsPanel({
         }}
         onError={(message) => setErrorMessage(message)}
         userTimeZone={userTimeZone}
+        severityAllocationMinutes={severityAllocationMinutes}
         approveStateKey={approveStateKey}
       />
 

@@ -319,6 +319,7 @@ export type ApproveCallRequestModalProps = {
   onSuccess?: () => void;
   onError?: (message: string) => void;
   userTimeZone?: string;
+  severityAllocationMinutes?: number;
   approveStateKey?: number;
 };
 

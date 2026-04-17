@@ -65,6 +65,7 @@ export default function ApproveCallRequestModal({
   onSuccess,
   onError,
   userTimeZone,
+  severityAllocationMinutes,
   approveStateKey,
 }: ApproveCallRequestModalProps): JSX.Element {
   const patchCallRequest = usePatchCallRequest(projectId, caseId);
@@ -106,8 +107,11 @@ export default function ApproveCallRequestModal({
 
   const minDatetimeLocal = useMemo(() => {
     void minTick;
-    return computeMinScheduleDatetimeLocalForTimeZone(null, userTimeZone);
-  }, [userTimeZone, minTick]);
+    return computeMinScheduleDatetimeLocalForTimeZone(
+      severityAllocationMinutes,
+      userTimeZone,
+    );
+  }, [severityAllocationMinutes, userTimeZone, minTick]);
   const isValid =
     preferredDateTimes.every((value) => value.trim() !== "") &&
     approveStateKey !== undefined;

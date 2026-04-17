@@ -31,6 +31,7 @@ export default defineConfig({
       "@": fileURLToPath(new URL("./src", import.meta.url)),
       "@api": fileURLToPath(new URL("./src/api", import.meta.url)),
       "@assets": fileURLToPath(new URL("./src/assets", import.meta.url)),
+      "@constants": fileURLToPath(new URL("./src/constants", import.meta.url)),
       "@components": fileURLToPath(
         new URL("./src/components", import.meta.url),
       ),

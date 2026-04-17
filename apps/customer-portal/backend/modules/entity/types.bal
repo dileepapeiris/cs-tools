@@ -1702,6 +1702,8 @@ public type TimeCard record {|
     boolean hasBillable;
     # State information (e.g., "Approved", "Submitted", etc.)
     ChoiceListItem? state;
+    # User who created the time card
+    ReferenceTableItem? user;
     # User who approved the time card
     ReferenceTableItem? approvedBy;
     # Associated project

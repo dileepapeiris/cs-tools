@@ -161,7 +161,6 @@ export function buildServiceRequestsPageCaseSearchRequest(
     filters: {
       caseTypes: [CaseType.SERVICE_REQUEST],
       statusIds: filters.statusId ? [Number(filters.statusId)] : undefined,
-      severityId: filters.severityId ? Number(filters.severityId) : undefined,
       issueId: filters.issueTypes ? Number(filters.issueTypes) : undefined,
       deploymentId: filters.deploymentId || undefined,
       searchQuery: searchTerm.trim() || undefined,

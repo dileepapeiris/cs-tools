@@ -70,6 +70,8 @@ export type ConversationMessage = AuditMetadata & {
   isEscalated: boolean;
   hasInlineAttachments: boolean;
   inlineAttachments: CaseCommentInlineAttachment[];
+  createdByFirstName?: string | null;
+  createdByLastName?: string | null;
 };
 
 // Response type for conversation messages list.
@@ -189,6 +191,9 @@ export type Message = {
   text: string;
   sender: ChatSender;
   timestamp: Date;
+  createdBy?: string;
+  createdOnRaw?: string;
+  showFeedbackActions?: boolean;
   showCreateCaseAction?: boolean;
   isLoading?: boolean;
   isError?: boolean;

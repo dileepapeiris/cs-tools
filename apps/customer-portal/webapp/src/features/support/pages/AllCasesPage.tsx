@@ -44,7 +44,11 @@ import {
   getAllCasesFlattenedStats,
 } from "@features/support/constants/supportConstants";
 import { SortOrder } from "@/types/common";
-import { getProjectPermissions, shouldExcludeS0 } from "@/utils/permission";
+import {
+  getProjectPermissions,
+  shouldExcludeS0,
+  shouldForceSeverityS4,
+} from "@/utils/permission";
 import type { AllCasesFilterValues } from "@features/support/types/cases";
 import ListStatGrid from "@components/list-view/ListStatGrid";
 import ListPageHeader from "@components/list-view/ListPageHeader";
@@ -93,6 +97,12 @@ export default function AllCasesPage(): JSX.Element {
       return false;
     }
     return shouldExcludeS0(project.type?.label);
+  }, [projectDetailsReady, project]);
+  const restrictSeverityToLow = useMemo(() => {
+    if (!projectDetailsReady || !project) {
+      return false;
+    }
+    return shouldForceSeverityS4(project.type?.label);
   }, [projectDetailsReady, project]);
 
   // Fetch filter metadata first to get Incident and Query IDs for stats API
@@ -258,7 +268,7 @@ export default function AllCasesPage(): JSX.Element {
   const listHasRefinement = hasListSearchOrFilters(searchTerm, filters);
 
   return (
-    <Stack spacing={3}>
+    <Stack spacing={3} sx={{ minWidth: 0 }}>
       <ListPageHeader
         title={createdByMe ? "My Cases" : "All Cases"}
         description={
@@ -306,6 +316,7 @@ export default function AllCasesPage(): JSX.Element {
         onFilterChange={handleFilterChange}
         onClearFilters={handleClearFilters}
         excludeS0={excludeS0}
+        restrictSeverityToLow={restrictSeverityToLow}
         isProjectContextLoading={isProjectContextLoading}
       />
 

@@ -29,10 +29,8 @@ import { NULL_PLACEHOLDER } from "@constants/common";
 import {
   formatDateTime,
   getAssignedEngineerLabel,
-  getSeverityColor,
   getStatusColor,
   getStatusIcon,
-  mapSeverityToDisplay,
   resolveColorFromTheme,
   stripHtml,
 } from "@features/support/utils/support";
@@ -146,24 +144,6 @@ export default function ServiceRequestsList({
                   >
                     {sr.number || NULL_PLACEHOLDER}
                   </Typography>
-                  <Box
-                    sx={{
-                      display: "flex",
-                      alignItems: "center",
-                      gap: 0.5,
-                    }}
-                  >
-                    <Box
-                      sx={{
-                        width: 8,
-                        height: 8,
-                        bgcolor: getSeverityColor(sr.severity?.label),
-                      }}
-                    />
-                    <Typography variant="caption" color="text.secondary">
-                      {mapSeverityToDisplay(sr.severity?.label)}
-                    </Typography>
-                  </Box>
                   <Chip
                     size="small"
                     variant="outlined"

@@ -775,8 +775,8 @@ export default function CreateCasePage(): JSX.Element {
       projectId,
       severityKey,
       title,
-      ...(relatedCase?.relatedCaseId && {
-        relatedCaseId: relatedCase.relatedCaseId,
+      ...(relatedCase?.parentCaseId && {
+        parentCaseId: relatedCase.parentCaseId,
       }),
       ...(conversationId && {
         conversationId,

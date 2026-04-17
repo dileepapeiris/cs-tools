@@ -42,6 +42,7 @@ const ChartLayout = ({
   isErrorActiveCases,
   isErrorEngagements,
   excludeS0 = false,
+  restrictSeverityToLow = false,
   engagements,
   showOperationsChart = true,
   operationsChartMode = OperationsChartMode.SrAndCr,
@@ -58,6 +59,7 @@ const ChartLayout = ({
           isLoading={isLoading}
           isError={isErrorOutstanding}
           excludeS0={excludeS0}
+          restrictSeverityToLow={restrictSeverityToLow}
         />
       </Grid>
 

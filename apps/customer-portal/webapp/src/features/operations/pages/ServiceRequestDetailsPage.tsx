@@ -90,7 +90,7 @@ export default function ServiceRequestDetailsPage(): JSX.Element {
     navigate(`/projects/${projectId}/support/chat/create-related-case`, {
       state: {
         relatedCase: {
-          relatedCaseId: data?.id ?? serviceRequestId ?? "",
+          parentCaseId: data?.id ?? serviceRequestId ?? "",
           number: data?.number ?? "",
           title: data?.title ?? "",
           description: data?.description ?? "",

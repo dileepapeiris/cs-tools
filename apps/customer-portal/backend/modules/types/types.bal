@@ -1076,6 +1076,8 @@ public type TimeCard record {|
     ReferenceItem? state;
     # User who approved the time card
     ReferenceItem? approvedBy;
+    # User who reported the time card
+    ReferenceItem? reportedBy;
     # Associated project
     ReferenceItem? project;
     # Associated case

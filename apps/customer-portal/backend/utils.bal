@@ -487,6 +487,7 @@ public isolated function mapProductVersionsResponse(entity:ProductVersionsRespon
 public isolated function mapTimeCardSearchResponse(entity:TimeCardsResponse response) returns types:TimeCardsResponse {
     types:TimeCard[] timeCards = from entity:TimeCard timeCard in response.timeCards
         let entity:ReferenceTableItem? approvedBy = timeCard.approvedBy
+        let entity:ReferenceTableItem? reportedBy = timeCard.user
         let entity:ReferenceTableItem? project = timeCard.project
         let entity:TimeCardCase? case = timeCard.case
         let entity:ChoiceListItem? state = timeCard.state
@@ -496,6 +497,7 @@ public isolated function mapTimeCardSearchResponse(entity:TimeCardsResponse resp
             createdOn: timeCard.createdOn,
             hasBillable: timeCard.hasBillable,
             state: state != () ? {id: state.id.toString(), label: state.label} : (),
+            reportedBy: reportedBy != () ? {id: reportedBy.id, label: reportedBy.name} : (),
             approvedBy: approvedBy != () ? {id: approvedBy.id, label: approvedBy.name} : (),
             project: project != () ? {id: project.id, label: project.name} : (),
             case: case != () ? {id: case.id, label: case.name, number: case.number} : ()

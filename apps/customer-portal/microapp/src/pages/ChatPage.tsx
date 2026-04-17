@@ -267,7 +267,7 @@ export default function ChatPage() {
 
       <StickyCommentBar
         loading={!!activeStreamingMessage}
-        disabled={ws?.readyState === WebSocket.CLOSED}
+        disabled={ws?.readyState !== WebSocket.OPEN}
         value={comment}
         placeholder="Type your message"
         onChange={setComment}

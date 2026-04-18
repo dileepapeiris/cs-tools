@@ -74,6 +74,6 @@ export default function useGetCaseDetails(
       }
     },
     enabled: !!caseId && !isAuthLoading && isSignedIn,
-    staleTime: 5 * 60 * 1000,
+    staleTime: 0,
   });
 }

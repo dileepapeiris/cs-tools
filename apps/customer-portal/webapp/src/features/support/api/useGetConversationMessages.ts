@@ -86,7 +86,7 @@ export function useGetConversationMessages(
       return data;
     },
     enabled: !!conversationId && isSignedIn && !isAuthLoading,
-    staleTime: 5 * 60 * 1000,
+    staleTime: 0,
     getNextPageParam: (lastPage) => {
       const nextOffset = lastPage.offset + lastPage.limit;
       if (nextOffset >= lastPage.totalRecords) {

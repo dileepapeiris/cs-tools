@@ -127,6 +127,6 @@ export function useGetCallRequests(
       return nextOffset < totalRecords ? nextOffset : undefined;
     },
     enabled: !!caseId && !isAuthLoading && isSignedIn,
-    staleTime: 5 * 60 * 1000,
+    staleTime: 0,
   });
 }

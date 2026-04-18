@@ -79,6 +79,6 @@ export default function useGetCaseComments(
       }
     },
     enabled: !!projectId && !!caseId && isSignedIn && !isAuthLoading,
-    staleTime: 5 * 60 * 1000, // 5 minutes
+    staleTime: 0,
   });
 }

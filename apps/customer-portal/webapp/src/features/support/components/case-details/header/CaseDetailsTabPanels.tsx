@@ -21,9 +21,11 @@ import CaseDetailsActivityPanel from "@case-details-activity/CaseDetailsActivity
 import CaseDetailsAttachmentsPanel from "@case-details-attachments/CaseDetailsAttachmentsPanel";
 import CaseDetailsDetailsPanel from "@case-details-details/CaseDetailsDetailsPanel";
 import CallsPanel from "@case-details-calls/CallsPanel";
+import CaseKnowledgeBaseRecommendations from "@features/support/components/knowledge-base/CaseKnowledgeBaseRecommendations";
 
 /**
- * Renders the active tab panel for case details (Activity, Details, Attachments, Calls, Knowledge Base).
+ * Renders the active tab panel for case details (Activity, Details, Attachments, Calls,
+ * Knowledge Base with API-driven recommendations).
  *
  * @param {CaseDetailsTabPanelsProps} props - Active tab index, case data, and error state.
  * @returns {JSX.Element | null} The panel content.
@@ -37,6 +39,7 @@ export default function CaseDetailsTabPanels({
   focusMode = false,
   isEngagement = false,
   isServiceRequest = false,
+  onKnowledgeBaseCountChange,
 }: CaseDetailsTabPanelsProps): JSX.Element | null {
   switch (panelIndex) {
     case 0: {
@@ -103,12 +106,17 @@ export default function CaseDetailsTabPanels({
         />
       );
     }
-    case 4:
+    case 4: {
+      const resolvedProjectId = data?.project?.id ?? projectId ?? "";
       return (
-        <Typography variant="body2" color="text.secondary">
-          Knowledge Base articles will appear here.
-        </Typography>
+        <CaseKnowledgeBaseRecommendations
+          caseId={caseId}
+          projectId={resolvedProjectId}
+          data={data}
+          onCountChange={onKnowledgeBaseCountChange}
+        />
       );
+    }
     default:
       return null;
   }

@@ -66,7 +66,7 @@ export default function ProjectDetails(): JSX.Element {
 
   const {
     data: project,
-    isFetching: isProjectFetching,
+    isLoading: isProjectLoading,
     error: projectError,
   } = useGetProjectDetails(projectId || "");
 
@@ -74,14 +74,14 @@ export default function ProjectDetails(): JSX.Element {
 
   const {
     data: stats,
-    isFetching: isStatsFetching,
+    isLoading: isStatsLoading,
     error: statsError,
   } = useGetProjectStat(projectId || "");
 
   const isDetailsLoading = getProjectDetailsLoadingState({
     isAuthLoading,
-    isProjectFetching,
-    isStatsFetching,
+    isProjectLoading,
+    isStatsLoading,
     project,
     projectError,
     stats,

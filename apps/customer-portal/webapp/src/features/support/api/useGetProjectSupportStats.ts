@@ -97,6 +97,6 @@ export function useGetProjectSupportStats(
       }
     },
     enabled: !!id && isSignedIn && !isAuthLoading && enabled,
-    staleTime: 5 * 60 * 1000,
+    staleTime: 0,
   });
 }

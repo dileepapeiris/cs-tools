@@ -97,7 +97,7 @@ export function useGetCaseAttachments(caseId: string) {
       return nextOffset < totalRecords ? nextOffset : undefined;
     },
     enabled: !!caseId && isSignedIn && !isAuthLoading,
-    staleTime: 5 * 60 * 1000,
+    staleTime: 0,
   });
 }
 

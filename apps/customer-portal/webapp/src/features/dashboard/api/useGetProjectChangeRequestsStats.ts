@@ -87,10 +87,6 @@ export function useGetProjectChangeRequestsStats(
       }
     },
     enabled,
-    staleTime: enabled ? 5 * 60 * 1000 : 0,
-    gcTime: enabled ? 10 * 60 * 1000 : 0,
-    refetchOnMount: true,
-    refetchOnWindowFocus: false,
-    refetchOnReconnect: false,
+    staleTime: 0,
   });
 }

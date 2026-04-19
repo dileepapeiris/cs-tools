@@ -88,8 +88,7 @@ export function useGetConversationStats(
       }
     },
     enabled: (enabled ?? true) && !!projectId && isSignedIn && !isAuthLoading,
-    staleTime: 5 * 60 * 1000, // 5 minutes
-    gcTime: 10 * 60 * 1000, // 10 minutes
+    staleTime: 0,
     retry: 2,
   });
 }

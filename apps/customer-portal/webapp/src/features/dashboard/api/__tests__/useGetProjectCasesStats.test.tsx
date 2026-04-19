@@ -91,11 +91,8 @@ describe("useGetProjectCasesStats", () => {
     })[0];
 
     expect((query?.options as Record<string, unknown>).staleTime).toBe(
-      5 * 60 * 1000,
+      0,
     );
-    expect(
-      (query?.options as Record<string, unknown>).refetchOnWindowFocus,
-    ).toBe(false);
   });
 
   it("should not fetch if id is missing", () => {

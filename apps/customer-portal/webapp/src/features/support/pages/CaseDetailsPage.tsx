@@ -39,7 +39,7 @@ export default function CaseDetailsPage(): JSX.Element {
   const { showLoader, hideLoader } = useLoader();
   const { showError } = useErrorBanner();
 
-  const { data, isLoading, isFetching, isError } = useGetCaseDetails(
+  const { data, isLoading, isError } = useGetCaseDetails(
     projectId || "",
     caseId || "",
   );
@@ -51,7 +51,7 @@ export default function CaseDetailsPage(): JSX.Element {
 
   // Show skeletons immediately when no data (avoid "-" flash on refresh) and when loading/refetching.
   const showSkeletons =
-    isLoading || isFetching || (data === undefined && !isError);
+    isLoading || (data === undefined && !isError);
 
   useEffect(() => {
     if (showSkeletons) {

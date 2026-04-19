@@ -85,7 +85,7 @@ export default function OperationsPage(): JSX.Element {
 
   const {
     data: srData,
-    isFetching: isSrLoading,
+    isLoading: isSrLoading,
     isError: isSrError,
   } = useGetProjectCases(
     projectId || "",

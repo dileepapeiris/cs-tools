@@ -135,7 +135,7 @@ export function usePostProjectDeploymentsSearchInfinite(
       return undefined;
     },
     enabled: enabled && !!projectId && isSignedIn && !isAuthLoading,
-    staleTime: 5 * 60 * 1000,
+    staleTime: 0,
   });
 }
 
@@ -215,6 +215,6 @@ export function usePostProjectDeploymentsSearchAll(
       return results;
     },
     enabled: enabled && !!projectId && isSignedIn && !isAuthLoading,
-    staleTime: 5 * 60 * 1000,
+    staleTime: 0,
   });
 }

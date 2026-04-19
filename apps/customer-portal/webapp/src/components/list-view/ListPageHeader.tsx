@@ -3,6 +3,7 @@
 // WSO2 LLC. licenses this file to you under the Apache License,
 // Version 2.0 (the "License"); you may not use this file except
 // in compliance with the License.
+//
 // You may obtain a copy of the License at
 //
 // http://www.apache.org/licenses/LICENSE-2.0
@@ -14,7 +15,7 @@
 // specific language governing permissions and limitations
 // under the License.
 
-import { Box, Button, Typography } from "@wso2/oxygen-ui";
+import { Box, Button, Stack, Typography } from "@wso2/oxygen-ui";
 import { ArrowLeft } from "@wso2/oxygen-ui-icons-react";
 import type { JSX, ReactNode } from "react";
 
@@ -41,25 +42,27 @@ export default function ListPageHeader({
   actions,
 }: ListPageHeaderProps): JSX.Element {
   return (
-    <Box>
+    <Stack spacing={2} sx={{ alignItems: "stretch" }}>
       <Button
         startIcon={<ArrowLeft size={16} />}
         onClick={onBack}
-        sx={{ mb: 2 }}
         variant="text"
+        sx={{
+          alignSelf: "flex-start",
+          px: 0,
+          minWidth: 0,
+          mb: 0,
+        }}
       >
         {backLabel}
       </Button>
-      <Box
-        sx={{
-          display: "flex",
-          flexDirection: { xs: "column", sm: "row" },
-          justifyContent: actions ? "space-between" : "flex-start",
-          alignItems: { xs: "flex-start", sm: actions ? "flex-start" : "flex-start" },
-          gap: 2,
-        }}
+      <Stack
+        direction={{ xs: "column", sm: actions ? "row" : "column" }}
+        spacing={2}
+        justifyContent={actions ? "space-between" : "flex-start"}
+        alignItems={{ xs: "stretch", sm: actions ? "flex-start" : "stretch" }}
       >
-        <Box>
+        <Box sx={{ minWidth: 0 }}>
           <Typography variant="h4" color="text.primary" sx={{ mb: 1 }}>
             {title}
           </Typography>
@@ -68,7 +71,7 @@ export default function ListPageHeader({
           </Typography>
         </Box>
         {actions && <Box sx={{ flexShrink: 0 }}>{actions}</Box>}
-      </Box>
-    </Box>
+      </Stack>
+    </Stack>
   );
 }

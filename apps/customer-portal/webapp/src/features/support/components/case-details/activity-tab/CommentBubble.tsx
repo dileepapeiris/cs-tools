@@ -15,7 +15,7 @@
 // under the License.
 
 import type { CommentBubbleProps } from "@features/support/types/supportComponents";
-import { Avatar, Stack, Typography, alpha, useTheme } from "@wso2/oxygen-ui";
+import { Avatar, Box, Skeleton, Stack, Typography, alpha, useTheme } from "@wso2/oxygen-ui";
 import { useMemo } from "react";
 import type { CaseComment } from "@features/support/types/cases";
 import {
@@ -32,6 +32,7 @@ import {
 } from "@features/support/utils/support";
 import DOMPurify from "dompurify";
 import ChatMessageCard from "@case-details-activity/ChatMessageCard";
+import { useResolvedInlineImageHtml } from "@features/support/hooks/useResolvedInlineImageHtml";
 
 function commentAuthorDisplayName(comment: CaseComment): string {
   const fromNames = [comment.createdByFirstName, comment.createdByLastName]
@@ -80,10 +81,9 @@ export default function CommentBubble({
     withoutLabel,
     comment.inlineAttachments,
   );
-  const htmlContent = DOMPurify.sanitize(
-    withImages,
-    INLINE_COMMENT_HTML_PURIFY,
-  );
+  const sanitizedHtml = DOMPurify.sanitize(withImages, INLINE_COMMENT_HTML_PURIFY);
+  const { resolvedHtml: htmlContent, isLoading: isImagesLoading } =
+    useResolvedInlineImageHtml(sanitizedHtml, comment.inlineAttachments);
   const displayName = useMemo(() => {
     if (isCurrentUser && userDetails) {
       const { firstName, lastName, email } = userDetails;
@@ -171,14 +171,18 @@ export default function CommentBubble({
             {formatCommentDate(comment.createdOn)}
           </Typography>
         </Stack>
-        <ChatMessageCard
-          htmlContent={htmlContent}
-          markdownContent={renderAsMarkdown ? rawContent : undefined}
-          renderAsMarkdown={renderAsMarkdown}
-          isCurrentUser={isCurrentUser}
-          primaryBg={primaryBg}
-          onImageClick={onImageClick}
-        />
+        {isImagesLoading ? (
+          <Box sx={{ width: "100%", display: "flex", flexDirection: "column", gap: 0.75 }}>
+            <Skeleton variant="rectangular" width="100%" height={160} sx={{ borderRadius: 1 }} />
+          </Box>
+        ) : (
+          <ChatMessageCard
+            htmlContent={htmlContent}
+            isCurrentUser={isCurrentUser}
+            primaryBg={primaryBg}
+            onImageClick={onImageClick}
+          />
+        )}
       </Stack>
     </Stack>
   );

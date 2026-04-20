@@ -30,7 +30,13 @@ import { useGetConversationMessages } from "@features/support/api/useGetConversa
 import { usePostCaseClassifications } from "@features/support/api/usePostCaseClassifications";
 import { useChatWebSocket } from "@features/support/api/useChatWebSocket";
 import useGetProjectDetails from "@api/useGetProjectDetails";
-import type { SlotState, NoveraAction } from "@features/support/types/conversations";
+import { useQueryClient, type InfiniteData } from "@tanstack/react-query";
+import type { SearchProjectsResponse } from "@features/project-hub/types/projects";
+import { ApiQueryKeys } from "@constants/apiConstants";
+import type {
+  SlotState,
+  NoveraAction,
+} from "@features/support/types/conversations";
 import { NoveraActionType } from "@features/support/types/conversations";
 import { useAllDeploymentProducts } from "@features/support/hooks/useAllDeploymentProducts";
 import {
@@ -51,7 +57,10 @@ import {
 import { filterDeploymentsForCaseCreation } from "@utils/permission";
 import { htmlToPlainText } from "@features/support/utils/richTextEditor";
 import { ChatSender } from "@features/support/types/conversations";
-import type { ChatNavState, Message } from "@features/support/types/conversations";
+import type {
+  ChatNavState,
+  Message,
+} from "@features/support/types/conversations";
 import ChatHeader from "@features/support/components/novera-ai-assistant/novera-chat-page/ChatHeader";
 import ChatInput from "@features/support/components/novera-ai-assistant/novera-chat-page/ChatInput";
 import ChatMessageList from "@features/support/components/novera-ai-assistant/novera-chat-page/ChatMessageList";
@@ -63,7 +72,10 @@ import {
   sanitizeStreamToken,
   splitTokenForTyping,
 } from "@features/support/utils/chat";
-import { compareByCreatedOnThenId, dateFromApiCreatedOn } from "@features/support/utils/support";
+import {
+  compareByCreatedOnThenId,
+  dateFromApiCreatedOn,
+} from "@features/support/utils/support";
 
 /**
  * NoveraChatPage component to provide AI-powered support assistance.
@@ -95,6 +107,20 @@ export default function NoveraChatPage(): JSX.Element {
     projectId || "",
   );
   const { data: projectDetails } = useGetProjectDetails(projectId || "");
+  const queryClient = useQueryClient();
+  const projectTypeId = useMemo(() => {
+    const cached = queryClient.getQueriesData<InfiniteData<SearchProjectsResponse>>({
+      queryKey: [ApiQueryKeys.PROJECTS, "infinite"],
+    });
+    for (const [, data] of cached) {
+      if (!data) continue;
+      for (const page of data.pages) {
+        const match = page.projects.find((p) => p.id === projectId);
+        if (match?.type?.id) return match.type.id;
+      }
+    }
+    return projectDetails?.type?.id ?? "";
+  }, [queryClient, projectId, projectDetails?.type?.id]);
   const projectDeployments = useMemo(
     () =>
       filterDeploymentsForCaseCreation(
@@ -244,6 +270,7 @@ export default function NoveraChatPage(): JSX.Element {
             envProducts,
             region: DEFAULT_CONVERSATION_REGION,
             tier: DEFAULT_CONVERSATION_TIER,
+            projectTypeId,
           });
           navigate(`/projects/${projectId}/support/chat/create-case`, {
             state: { messages, classificationResponse, conversationId },
@@ -269,6 +296,7 @@ export default function NoveraChatPage(): JSX.Element {
     envProducts,
     classifyCase,
     conversationId,
+    projectTypeId,
   ]);
 
   const handleCreateCase = useCallback(() => {
@@ -362,9 +390,12 @@ export default function NoveraChatPage(): JSX.Element {
     });
     if (appliedFinal) {
       setIsSending(false);
-      const hasSolutionProposed = pending?.payload &&
+      const hasSolutionProposed =
+        pending?.payload &&
         Array.isArray(pending.payload.actions) &&
-        (pending.payload.actions as NoveraAction[]).some((a) => a.type === NoveraActionType.SolutionProposed);
+        (pending.payload.actions as NoveraAction[]).some(
+          (a) => a.type === NoveraActionType.SolutionProposed,
+        );
       if (hasSolutionProposed) setShowRichText(true);
     }
   }, [setShowRichText]);
@@ -457,7 +488,10 @@ export default function NoveraChatPage(): JSX.Element {
           if (cleaned.length === 0) {
             break;
           }
-          for (const part of splitTokenForTyping(cleaned, TYPING_CHARS_PER_TICK)) {
+          for (const part of splitTokenForTyping(
+            cleaned,
+            TYPING_CHARS_PER_TICK,
+          )) {
             tokenQueueRef.current.push(part);
           }
           break;

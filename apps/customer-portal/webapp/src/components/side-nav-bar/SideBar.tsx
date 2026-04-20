@@ -77,10 +77,15 @@ export default function SideBar({
       items = items.filter((item: AppShellNavItem) => item.id !== "operations");
     }
 
+    if (!permissions.hasEngagements) {
+      items = items.filter((item: AppShellNavItem) => item.id !== "engagements");
+    }
+
     return items;
   }, [
     isProjectTypeResolved,
     permissions.hasOperations,
+    permissions.hasEngagements,
     usageMetricsEnabled,
   ]);
 

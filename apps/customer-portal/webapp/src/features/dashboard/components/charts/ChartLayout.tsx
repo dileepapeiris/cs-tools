@@ -46,10 +46,16 @@ const ChartLayout = ({
   engagements,
   showOperationsChart = true,
   operationsChartMode = OperationsChartMode.SrAndCr,
+  showEngagementsChart = true,
 }: ChartLayoutProps): JSX.Element => {
-  const chartSpan = showOperationsChart
-    ? DASHBOARD_CHART_SPAN
-    : { xs: 12 as const, md: 6 as const };
+  const visibleChartsCount =
+    1 + (showOperationsChart ? 1 : 0) + (showEngagementsChart ? 1 : 0);
+  const chartSpan =
+    visibleChartsCount === 1
+      ? ({ xs: 12 as const, md: 12 as const })
+      : showOperationsChart
+        ? DASHBOARD_CHART_SPAN
+        : ({ xs: 12 as const, md: 6 as const });
 
   return (
     <Grid container spacing={3} sx={{ mb: 3 }}>
@@ -74,13 +80,15 @@ const ChartLayout = ({
         </Grid>
       )}
 
-      <Grid size={chartSpan}>
-        <CasesTrendChart
-          data={engagements}
-          isLoading={isLoading}
-          isError={isErrorEngagements}
-        />
-      </Grid>
+      {showEngagementsChart && (
+        <Grid size={chartSpan}>
+          <CasesTrendChart
+            data={engagements}
+            isLoading={isLoading}
+            isError={isErrorEngagements}
+          />
+        </Grid>
+      )}
     </Grid>
   );
 };

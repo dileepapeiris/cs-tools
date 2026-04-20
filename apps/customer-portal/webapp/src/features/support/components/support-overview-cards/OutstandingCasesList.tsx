@@ -98,6 +98,9 @@ export default function OutstandingCasesList({
             onClick={() => onCaseClick?.(c)}
             sx={{
               p: 2,
+              width: "100%",
+              minWidth: 0,
+              overflow: "hidden",
               display: "flex",
               flexDirection: "column",
               alignItems: "stretch",
@@ -168,19 +171,40 @@ export default function OutstandingCasesList({
               </Box>
             </Form.CardContent>
 
-            <Form.CardActions sx={{ p: 0, justifyContent: "flex-end" }}>
-              <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
+            <Form.CardActions sx={{ p: 0, justifyContent: "flex-end", minWidth: 0 }}>
+              <Box
+                sx={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 1.5,
+                  minWidth: 0,
+                  maxWidth: "100%",
+                }}
+              >
                 {(() => {
                   const label = getAssignedEngineerLabel(c.assignedEngineer);
                   return label ? (
                     <Tooltip title={`Assigned to ${label}`}>
-                      <Typography variant="caption" color="text.secondary">
+                      <Typography
+                        variant="caption"
+                        color="text.secondary"
+                        sx={{
+                          minWidth: 0,
+                          overflow: "hidden",
+                          textOverflow: "ellipsis",
+                          whiteSpace: "nowrap",
+                        }}
+                      >
                         Assigned to {label}
                       </Typography>
                     </Tooltip>
                   ) : null;
                 })()}
-                <Typography variant="caption" color="text.secondary">
+                <Typography
+                  variant="caption"
+                  color="text.secondary"
+                  sx={{ flexShrink: 0 }}
+                >
                   {formatRelativeTime(c.createdOn ?? undefined)}
                 </Typography>
               </Box>

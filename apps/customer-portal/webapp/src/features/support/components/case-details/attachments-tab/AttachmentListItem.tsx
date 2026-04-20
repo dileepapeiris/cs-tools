@@ -25,6 +25,8 @@ import {
   Typography,
 } from "@wso2/oxygen-ui";
 import {
+  ChevronDown,
+  ChevronUp,
   Download,
   File,
   FileArchive,
@@ -40,6 +42,8 @@ import {
   getAttachmentFileCategory,
 } from "@features/support/utils/support";
 import ImageFullscreenModal from "@case-details-activity/ImageFullscreenModal";
+import AuthenticatedImage from "@/components/AuthenticatedImage";
+import { useAttachmentPreview } from "@api/useAttachmentPreview";
 
 // TODO: Use attachment category enum when introduced (see support.ts AttachmentFileCategory).
 function getAttachmentIcon(att: CaseAttachment): JSX.Element {
@@ -75,14 +79,16 @@ export default function AttachmentListItem({
   hideDescription = false,
   isDownloadLoading = false,
 }: AttachmentListItemProps): JSX.Element {
-  const [fullscreenSrc, setFullscreenSrc] = useState<string | null>(null);
+  const [fullscreenOpen, setFullscreenOpen] = useState(false);
+  const [imageExpanded, setImageExpanded] = useState(false);
   const attachmentCategory = getAttachmentFileCategory(
     attachment.name ?? "",
     attachment.type ?? "",
   );
-  const previewUrl = attachment.previewUrl?.trim() ?? "";
-  const hasPreviewImage =
-    attachmentCategory === "image" && previewUrl.length > 0;
+  const hasPreviewImage = attachmentCategory === "image" && !!attachment.id;
+  const { data: fullscreenDataUrl } = useAttachmentPreview(
+    hasPreviewImage ? attachment.id : null,
+  );
 
   const deleteIconButton = onDelete ? (
     <IconButton
@@ -123,7 +129,7 @@ export default function AttachmentListItem({
         <Box
           sx={{
             display: "flex",
-            alignItems: "flex-start",
+            alignItems: "center",
             gap: 2,
             minWidth: 0,
           }}
@@ -156,7 +162,21 @@ export default function AttachmentListItem({
           >
             {attachment.name}
           </Typography>
-          <Stack direction="row" spacing={0.25} sx={{ flexShrink: 0 }}>
+          <Stack direction="row" spacing={0.25} alignItems="center" sx={{ flexShrink: 0 }}>
+            {hasPreviewImage && (
+              <IconButton
+                size="small"
+                aria-label={imageExpanded ? "Collapse image" : "Expand image"}
+                sx={{ color: "text.secondary" }}
+                onClick={() => setImageExpanded((prev) => !prev)}
+              >
+                {imageExpanded ? (
+                  <ChevronUp size={16} aria-hidden />
+                ) : (
+                  <ChevronDown size={16} aria-hidden />
+                )}
+              </IconButton>
+            )}
             {onEdit && (
               <IconButton
                 size="small"
@@ -185,36 +205,31 @@ export default function AttachmentListItem({
           </Stack>
         </Box>
 
-        {hasPreviewImage && (
+        {hasPreviewImage && imageExpanded && (
           <Box
             component="button"
             type="button"
-            onClick={() => setFullscreenSrc(previewUrl)}
+            onClick={() => setFullscreenOpen(true)}
+            aria-label={`View ${attachment.name} full size`}
             sx={{
               m: 0,
               p: 0,
               border: "none",
               background: "none",
               cursor: "pointer",
-              alignSelf: "flex-start",
-              maxWidth: "100%",
-              maxHeight: 200,
-              overflow: "hidden",
+              alignSelf: "stretch",
+              width: "100%",
               display: "block",
             }}
           >
-            <Box
-              component="img"
-              src={previewUrl}
+            <AuthenticatedImage
+              attachmentId={attachment.id}
               alt={attachment.name}
-              loading="lazy"
               sx={{
+                maxHeight: 400,
                 maxWidth: "100%",
-                maxHeight: 200,
-                width: "auto",
-                height: "auto",
+                width: "100%",
                 objectFit: "contain",
-                display: "block",
               }}
             />
           </Box>
@@ -255,9 +270,9 @@ export default function AttachmentListItem({
       </Paper>
 
       <ImageFullscreenModal
-        open={!!fullscreenSrc}
-        imageSrc={fullscreenSrc}
-        onClose={() => setFullscreenSrc(null)}
+        open={fullscreenOpen}
+        imageSrc={fullscreenDataUrl ?? null}
+        onClose={() => setFullscreenOpen(false)}
       />
     </>
   );

@@ -86,8 +86,11 @@ export function useResolvedInlineImageHtml(
           [...dataUrls.entries()].find(
             ([id]) => src.includes(id) || id.includes(refId),
           )?.[1];
-        if (!dataUrl) return _match;
         const quote = doubleSrc !== undefined ? '"' : singleSrc !== undefined ? "'" : '"';
+        if (!dataUrl) {
+          // Strip the unresolved .iix src so the browser does not attempt an unauthenticated request.
+          return `<img${before} src=${quote}${quote} data-unresolved="true"${after}>`;
+        }
         return `<img${before} src=${quote}${dataUrl}${quote}${after}>`;
       },
     );

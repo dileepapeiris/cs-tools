@@ -36,6 +36,7 @@ export default function ImageFullscreenModal({
       onClose={onClose}
       maxWidth={false}
       fullWidth
+      aria-label="Image preview full screen"
       sx={{
         "& .MuiDialog-paper": {
           maxWidth: "100vw",

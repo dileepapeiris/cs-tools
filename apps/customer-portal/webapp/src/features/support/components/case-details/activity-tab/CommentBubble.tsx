@@ -163,16 +163,17 @@ export default function CommentBubble({
             {formatCommentDate(comment.createdOn)}
           </Typography>
         </Stack>
-        <ChatMessageCard
-          htmlContent={htmlContent}
-          isCurrentUser={isCurrentUser}
-          primaryBg={primaryBg}
-          onImageClick={onImageClick}
-        />
-        {isImagesLoading && (
+        {isImagesLoading ? (
           <Box sx={{ width: "100%", display: "flex", flexDirection: "column", gap: 0.75 }}>
             <Skeleton variant="rectangular" width="100%" height={160} sx={{ borderRadius: 1 }} />
           </Box>
+        ) : (
+          <ChatMessageCard
+            htmlContent={htmlContent}
+            isCurrentUser={isCurrentUser}
+            primaryBg={primaryBg}
+            onImageClick={onImageClick}
+          />
         )}
       </Stack>
     </Stack>

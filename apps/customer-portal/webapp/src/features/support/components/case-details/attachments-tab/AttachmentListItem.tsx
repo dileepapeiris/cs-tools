@@ -86,8 +86,9 @@ export default function AttachmentListItem({
     attachment.type ?? "",
   );
   const hasPreviewImage = attachmentCategory === "image" && !!attachment.id;
+  const shouldFetchPreview = hasPreviewImage && (imageExpanded || fullscreenOpen);
   const { data: fullscreenDataUrl } = useAttachmentPreview(
-    hasPreviewImage ? attachment.id : null,
+    shouldFetchPreview ? attachment.id : null,
   );
 
   const deleteIconButton = onDelete ? (

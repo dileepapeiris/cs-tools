@@ -45,7 +45,8 @@ export default function ChatInput({
   isCreateCaseLoading = false,
   resetTrigger = 0,
   forceRichText = false,
-}: ChatInputProps): JSX.Element {
+  disabled = false,
+}: ChatInputProps): JSX.Element | null {
   const plainText = htmlToPlainText(inputValue).trim();
   const isSendDisabled = !plainText || isSending;
   const [showToolbar, setShowToolbar] = useState(forceRichText);
@@ -59,6 +60,10 @@ export default function ChatInput({
   const maxLinesHeight = 120;
   const BUTTON_TOP_WITHOUT_TOOLBAR = 8;
   const BUTTON_TOP_WITH_TOOLBAR = 56;
+
+  if (disabled) {
+    return null;
+  }
 
   return (
     <Box sx={{ flexShrink: 0 }}>

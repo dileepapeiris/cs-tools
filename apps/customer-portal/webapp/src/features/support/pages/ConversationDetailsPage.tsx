@@ -337,7 +337,7 @@ export default function ConversationDetailsPage(): JSX.Element {
             <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
               <Flag size={16} />
               <Box>
-                <Typography variant="caption" color="text.secondary">
+                <Typography variant="body2" color="text.secondary">
                   Status
                 </Typography>
                 <Typography variant="body2" color="text.primary">
@@ -349,7 +349,7 @@ export default function ConversationDetailsPage(): JSX.Element {
             <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
               <Clock size={16} />
               <Box>
-                <Typography variant="caption" color="text.secondary">
+                <Typography variant="body2" color="text.secondary">
                   Started
                 </Typography>
                 <Typography variant="body2" color="text.primary">
@@ -361,7 +361,7 @@ export default function ConversationDetailsPage(): JSX.Element {
             <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
               <MessageSquare size={16} />
               <Box>
-                <Typography variant="caption" color="text.secondary">
+                <Typography variant="body2" color="text.secondary">
                   Messages
                 </Typography>
                 <Typography variant="body2" color="text.primary">
@@ -373,7 +373,7 @@ export default function ConversationDetailsPage(): JSX.Element {
             <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
               <FileText size={16} />
               <Box>
-                <Typography variant="caption" color="text.secondary">
+                <Typography variant="body2" color="text.secondary">
                   KB Articles
                 </Typography>
                 <Typography variant="body2" color="text.primary">
@@ -385,7 +385,7 @@ export default function ConversationDetailsPage(): JSX.Element {
             <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
               <Hash size={16} />
               <Box>
-                <Typography variant="caption" color="text.secondary">
+                <Typography variant="body2" color="text.secondary">
                   Chat Number
                 </Typography>
                 <Typography variant="body2" color="text.primary">

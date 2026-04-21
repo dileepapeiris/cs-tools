@@ -210,6 +210,7 @@ export default function DescribeIssuePage(): JSX.Element {
                   sx={{ flex: 1, "& textarea": { overflowY: "auto", resize: "none" } }}
                   onKeyDown={(e) => {
                     if (e.key === "Enter" && !e.shiftKey && !isSubmitDisabled) {
+                      if (e.nativeEvent.isComposing) return;
                       e.preventDefault();
                       void handleSubmit();
                     }

@@ -182,6 +182,7 @@ export default function CreateServiceRequestPage(): JSX.Element {
   const [attachments, setAttachments] = useState<AttachmentItem[]>([]);
   const attachmentNamesRef = useRef<Map<string, string>>(new Map());
   const attachmentIdCounterRef = useRef(0);
+  const requestDetailsSectionRef = useRef<HTMLDivElement>(null);
   const [isAttachmentModalOpen, setIsAttachmentModalOpen] = useState(false);
 
   const { data: projectDetails, isLoading: isProjectLoading } =
@@ -360,6 +361,15 @@ export default function CreateServiceRequestPage(): JSX.Element {
     },
     [],
   );
+
+  useEffect(() => {
+    if (selectedCatalogItemId) {
+      requestDetailsSectionRef.current?.scrollIntoView({
+        behavior: "smooth",
+        block: "start",
+      });
+    }
+  }, [selectedCatalogItemId]);
 
   const handleVariableChange = useCallback(
     (variableId: string, value: string) => {
@@ -618,22 +628,24 @@ export default function CreateServiceRequestPage(): JSX.Element {
         )}
 
         {!!selectedCatalogId && !!selectedCatalogItemId && (
-          <VariableFormFields
-            variables={variablesData?.variables}
-            isLoading={isVariablesLoading}
-            values={variableValues}
-            onChange={handleVariableChange}
-            selectedRequestTypeLabel={selectedCatalogItemLabel}
-            contextValues={{
-              projectDisplay: projectDisplay,
-              deploymentDisplay: deployment,
-              productDisplay:
-                sortedProductOptions.find((p) => p.id === product)?.label ?? "",
-            }}
-            attachments={attachments}
-            onAttachmentClick={handleAttachmentClick}
-            onAttachmentRemove={handleAttachmentRemove}
-          />
+          <div ref={requestDetailsSectionRef}>
+            <VariableFormFields
+              variables={variablesData?.variables}
+              isLoading={isVariablesLoading}
+              values={variableValues}
+              onChange={handleVariableChange}
+              selectedRequestTypeLabel={selectedCatalogItemLabel}
+              contextValues={{
+                projectDisplay: projectDisplay,
+                deploymentDisplay: deployment,
+                productDisplay:
+                  sortedProductOptions.find((p) => p.id === product)?.label ?? "",
+              }}
+              attachments={attachments}
+              onAttachmentClick={handleAttachmentClick}
+              onAttachmentRemove={handleAttachmentRemove}
+            />
+          </div>
         )}
 
         <UploadAttachmentModal

@@ -22,6 +22,7 @@ import {
   type JSX,
   type ChangeEvent,
 } from "react";
+import { useSessionState } from "@hooks/useSessionState";
 import { Box, Button, CircularProgress, Stack } from "@wso2/oxygen-ui";
 import { Download } from "@wso2/oxygen-ui-icons-react";
 import type { ChangeRequestFilterValues, ChangeRequestItem } from "@features/operations/types/changeRequests";
@@ -79,10 +80,11 @@ export default function ChangeRequestsPage(): JSX.Element {
   const [viewMode, setViewMode] = useState<ChangeRequestsViewMode>(
     ChangeRequestsViewMode.List,
   );
-  const [searchTerm, setSearchTerm] = useState("");
+  const sessionPrefix = `${projectId ?? "unknown"}-change-requests`;
+  const [searchTerm, setSearchTerm] = useSessionState(`${sessionPrefix}-search`, "");
   const [isFiltersOpen, setIsFiltersOpen] = useState(false);
-  const [filters, setFilters] = useState<ChangeRequestFilterValues>({});
-  const [page, setPage] = useState(1);
+  const [filters, setFilters] = useSessionState<ChangeRequestFilterValues>(`${sessionPrefix}-filters`, {});
+  const [page, setPage] = useSessionState<number>(`${sessionPrefix}-page`, 1);
   const [isExporting, setIsExporting] = useState(false);
   const pageSize = OPERATIONS_LIST_PAGE_SIZE;
 

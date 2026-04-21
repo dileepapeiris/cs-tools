@@ -16,6 +16,7 @@
 
 import { useParams, useNavigate } from "react-router";
 import { useState, useMemo, type JSX, type ChangeEvent } from "react";
+import { useSessionState } from "@hooks/useSessionState";
 import { Stack } from "@wso2/oxygen-ui";
 import useGetProjectFilters from "@api/useGetProjectFilters";
 import { useGetProjectCasesPage } from "@api/useGetProjectCasesPage";
@@ -57,19 +58,28 @@ export default function AnnouncementsPage(): JSX.Element {
   const navigate = useNavigate();
   const { projectId } = useParams<{ projectId: string }>();
 
-  const [searchTerm, setSearchTerm] = useState("");
+  const sessionPrefix = `${projectId ?? "unknown"}-announcements`;
+  const validSortFields = Object.values(AnnouncementSortField) as string[];
+  const isValidAnnouncementSortField = (v: unknown): v is AnnouncementSortField =>
+    typeof v === "string" && validSortFields.includes(v);
+  const [searchTerm, setSearchTerm] = useSessionState(`${sessionPrefix}-search`, "");
   const [isFiltersOpen, setIsFiltersOpen] = useState(false);
-  const [filters, setFilters] = useState<AnnouncementFilterValues>({});
-  const [sortOrder, setSortOrder] = useState<SortOrder>(SortOrder.DESC);
-  const [page, setPage] = useState(1);
+  const [filters, setFilters] = useSessionState<AnnouncementFilterValues>(`${sessionPrefix}-filters`, {});
+  const [sortField, setSortField] = useSessionState<AnnouncementSortField>(
+    `${sessionPrefix}-sortField`,
+    AnnouncementSortField.CreatedOn,
+    isValidAnnouncementSortField,
+  );
+  const [sortOrder, setSortOrder] = useSessionState<SortOrder>(`${sessionPrefix}-sortOrder`, SortOrder.DESC);
+  const [page, setPage] = useSessionState<number>(`${sessionPrefix}-page`, 1);
   const pageSize = ANNOUNCEMENTS_PAGE_SIZE;
 
   const { data: filterMetadata } = useGetProjectFilters(projectId || "");
 
   const caseSearchRequest = useMemo(
     () =>
-      buildAnnouncementCaseSearchRequest(filters, searchTerm, sortOrder),
-    [filters, searchTerm, sortOrder],
+      buildAnnouncementCaseSearchRequest(filters, searchTerm, sortOrder, sortField),
+    [filters, searchTerm, sortOrder, sortField],
   );
 
   const offset = (page - 1) * pageSize;
@@ -88,6 +98,13 @@ export default function AnnouncementsPage(): JSX.Element {
 
   const handlePageChange = (_event: ChangeEvent<unknown>, value: number) => {
     setPage(value);
+  };
+
+  const handleSortFieldChange = (value: string) => {
+    if (isValidAnnouncementSortField(value)) {
+      setSortField(value);
+    }
+    setPage(1);
   };
 
   const handleSortChange = (value: SortOrder) => {
@@ -147,8 +164,8 @@ export default function AnnouncementsPage(): JSX.Element {
         totalCount={totalRecords}
         entityLabel={ANNOUNCEMENTS_LIST_ENTITY_LABEL}
         sortFieldOptions={ANNOUNCEMENTS_SORT_FIELD_OPTIONS}
-        sortField={AnnouncementSortField.CreatedOn}
-        onSortFieldChange={() => undefined}
+        sortField={sortField}
+        onSortFieldChange={handleSortFieldChange}
         sortOrder={sortOrder}
         onSortOrderChange={handleSortChange}
       />

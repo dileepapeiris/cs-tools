@@ -25,7 +25,6 @@ import {
   MessageCircle,
   PlayCircle,
   RotateCcw,
-  TriangleAlert,
   XCircle,
 } from "@wso2/oxygen-ui-icons-react";
 import {
@@ -35,7 +34,6 @@ import {
   CaseStatus,
   CallRequestStatus,
   CaseType,
-  CaseSeverityLevel,
   type CaseTypeInput,
 } from "@features/support/constants/supportConstants";
 import { CaseReportType } from "@features/security/types/security";
@@ -943,34 +941,6 @@ export function isS0Case(caseItem: {
 }
 
 /**
- * Returns the icon component for a severity label (announcement cards).
- * S0/S1: TriangleAlert, S2: CircleAlert, S3: Clock, S4: CircleCheck.
- *
- * @param label - API severity label (e.g. "1 - Critical", "Critical (P1)").
- * @returns {ComponentType} Icon component.
- */
-export function getSeverityIcon(label?: string): ComponentType<{
-  size?: number;
-  color?: string;
-}> {
-  const display = mapSeverityToDisplay(label);
-  const upper = display.toUpperCase();
-  switch (upper) {
-    case CaseSeverityLevel.S0:
-    case CaseSeverityLevel.S1:
-      return TriangleAlert;
-    case CaseSeverityLevel.S2:
-      return CircleAlert;
-    case CaseSeverityLevel.S3:
-      return Clock;
-    case CaseSeverityLevel.S4:
-      return CircleCheck;
-    default:
-      return CircleAlert;
-  }
-}
-
-/**
  * Returns the Oxygen UI color path for a given severity label.
  *
  * @param {string} label - The severity label.
@@ -978,17 +948,18 @@ export function getSeverityIcon(label?: string): ComponentType<{
  */
 export function getSeverityColor(label?: string): string {
   const normalized = mapSeverityToDisplay(label);
-  const upper = normalized.toUpperCase();
-  switch (upper) {
+  // Strip any parenthetical suffix (e.g. "S4(Query)" → "S4") before comparing.
+  const token = normalized.replace(/\s*\(.*$/, "").toUpperCase();
+  switch (token) {
     case "S0":
       return "error.main";
-    case CaseSeverityLevel.S1:
+    case "S1":
       return "warning.main";
-    case CaseSeverityLevel.S2:
+    case "S2":
       return "info.main";
-    case CaseSeverityLevel.S3:
+    case "S3":
       return "secondary.main";
-    case CaseSeverityLevel.S4:
+    case "S4":
       return "success.main";
     default:
       return "text.primary";
@@ -1051,10 +1022,7 @@ export function convertCodeTagsToHtml(content: string): string {
     .replace(/\[\\\/CODE\]/g, "[/code]")
     .replace(/\[\\code\]/gi, "[code]")
     .replace(/\[\\CODE\]/g, "[code]")
-    .replace(
-    /\[\/code\]\s*\[code\]/gi,
-    "[/code]\n[code]",
-  );
+    .replace(/\[\/code\]\s*\[code\]/gi, "[/code]\n[code]");
   return normalized
     .replace(/\[code\]([\s\S]*?)\[\/code\]/gi, "<code>$1</code>")
     .replace(/\[\/?code\]/gi, "\n");
@@ -1196,7 +1164,12 @@ function resolveInlineImageDisplaySrc(
   if (originMatch && id) {
     return `${originMatch[1]}/${id}.iix`;
   }
-  return attachment.previewUrl ?? attachment.downloadUrl ?? attachment.url ?? originalSrc;
+  return (
+    attachment.previewUrl ??
+    attachment.downloadUrl ??
+    attachment.url ??
+    originalSrc
+  );
 }
 
 /**
@@ -1898,5 +1871,5 @@ export { hasListSearchOrFilters, countListSearchAndFilters } from "./listView";
 /** Hide terminal states from the Outstanding Cases overview list only. */
 export function isClosedLikeCaseStatus(statusLabel?: string | null): boolean {
   const normalized = statusLabel?.trim().toLowerCase() ?? "";
-  return normalized === CASE_STATUS.CLOSED;
+  return normalized === CASE_STATUS.CLOSED.toLowerCase();
 }

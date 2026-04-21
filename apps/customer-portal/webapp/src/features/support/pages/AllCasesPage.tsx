@@ -27,6 +27,7 @@ import {
   type JSX,
   type ChangeEvent,
 } from "react";
+import { useSessionState } from "@hooks/useSessionState";
 import { useLoader } from "@context/linear-loader/LoaderContext";
 import { Box, Stack } from "@wso2/oxygen-ui";
 import { useGetProjectCasesStats } from "@features/dashboard/api/useGetProjectCasesStats";
@@ -69,14 +70,13 @@ export default function AllCasesPage(): JSX.Element {
   const [searchParams] = useSearchParams();
   const createdByMe = searchParams.get("createdByMe") === "true";
 
-  const [searchTerm, setSearchTerm] = useState("");
+  const sessionPrefix = `${projectId ?? "unknown"}-cases`;
+  const [searchTerm, setSearchTerm] = useSessionState(`${sessionPrefix}-search`, "");
   const [isFiltersOpen, setIsFiltersOpen] = useState(false);
-  const [filters, setFilters] = useState<AllCasesFilterValues>({});
-  const [sortField, setSortField] = useState<
-    "createdOn" | "updatedOn" | "severity" | "state"
-  >("createdOn");
-  const [sortOrder, setSortOrder] = useState<SortOrder>(SortOrder.DESC);
-  const [page, setPage] = useState(1);
+  const [filters, setFilters] = useSessionState<AllCasesFilterValues>(`${sessionPrefix}-filters`, {});
+  const [sortField, setSortField] = useSessionState<"createdOn" | "updatedOn" | "severity" | "state">(`${sessionPrefix}-sortField`, "createdOn");
+  const [sortOrder, setSortOrder] = useSessionState<SortOrder>(`${sessionPrefix}-sortOrder`, SortOrder.DESC);
+  const [page, setPage] = useSessionState<number>(`${sessionPrefix}-page`, 1);
   const pageSize = 10;
 
   const { data: project, isLoading: isProjectLoading } = useGetProjectDetails(
@@ -324,8 +324,8 @@ export default function AllCasesPage(): JSX.Element {
         sortFieldOptions={[
           { value: "createdOn", label: "Created on" },
           { value: "updatedOn", label: "Updated on" },
-          { value: "severity", label: "Severity" },
-          { value: "state", label: "State" },
+          { value: "severity", label: "Severity", kind: "ordinal" as const },
+          { value: "state", label: "State", kind: "ordinal" as const },
         ]}
         sortField={sortField}
         onSortFieldChange={(v) =>

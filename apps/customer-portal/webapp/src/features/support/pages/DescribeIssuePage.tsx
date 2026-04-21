@@ -19,6 +19,7 @@ import {
   Button,
   Card,
   CardContent,
+  Paper,
   Stack,
   Typography,
 } from "@wso2/oxygen-ui";
@@ -226,9 +227,16 @@ export default function DescribeIssuePage(): JSX.Element {
 
               <Box
                 sx={{
+                  position: "sticky",
+                  bottom: 0,
                   display: "flex",
                   justifyContent: "flex-end",
                   gap: 2,
+                  pt: 1,
+                  pb: 1,
+                  pr: 2,
+                  mt: 1,
+                  zIndex: 1,
                 }}
               >
                 <Button

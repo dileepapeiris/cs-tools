@@ -20,9 +20,10 @@ import { ANNOUNCEMENT_FILTER_DEFINITIONS } from "@features/support/constants/sup
 
 export type { AnnouncementFilterValues };
 
-/** API `sortBy.field` for announcements list (fixed column). */
+/** API `sortBy.field` for announcements list. */
 export enum AnnouncementSortField {
   CreatedOn = "createdOn",
+  State = "state",
 }
 
 /**

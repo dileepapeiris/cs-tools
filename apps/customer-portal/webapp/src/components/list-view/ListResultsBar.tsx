@@ -28,6 +28,7 @@ import { SortOrder } from "@/types/common";
 export interface SortFieldOption {
   value: string;
   label: string;
+  kind?: "chronological" | "ordinal";
 }
 
 export interface ListResultsBarProps {
@@ -70,7 +71,8 @@ export default function ListResultsBar({
     sortOrder !== undefined &&
     onSortOrderChange !== undefined;
 
-  const isOrdinalSort = sortField === "severity" || sortField === "state";
+  const isOrdinalSort =
+    sortFieldOptions?.find((o) => o.value === sortField)?.kind === "ordinal";
 
   return (
     <Box

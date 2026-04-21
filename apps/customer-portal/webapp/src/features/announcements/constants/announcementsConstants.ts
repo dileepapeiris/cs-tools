@@ -49,10 +49,12 @@ export const ANNOUNCEMENTS_SORT_FIELD_OPTIONS: AnnouncementSortOption[] = [
   {
     value: AnnouncementSortField.CreatedOn,
     label: ANNOUNCEMENTS_SORT_CREATED_LABEL,
+    kind: "chronological",
   },
   {
     value: AnnouncementSortField.State,
     label: ANNOUNCEMENTS_SORT_STATE_LABEL,
+    kind: "ordinal",
   },
 ];
 

@@ -69,13 +69,13 @@ export default function AllConversationsPage(): JSX.Element {
   const [searchParams] = useSearchParams();
   const createdByMe = searchParams.get("createdByMe") === "true";
 
-  const sessionPrefix = `${projectId ?? ""}-conversations`;
+  const sessionPrefix = `${projectId ?? "unknown"}-conversations`;
   const [searchTerm, setSearchTerm] = useSessionState(`${sessionPrefix}-search`, "");
   const [isFiltersOpen, setIsFiltersOpen] = useState(false);
   const [filters, setFilters] = useSessionState<AllConversationsFilterValues>(`${sessionPrefix}-filters`, {});
   const [sortField, setSortField] = useSessionState<"createdOn" | "updatedOn">(`${sessionPrefix}-sortField`, "updatedOn");
   const [sortOrder, setSortOrder] = useSessionState<SortOrder>(`${sessionPrefix}-sortOrder`, SortOrder.DESC);
-  const [page, setPage] = useState(1);
+  const [page, setPage] = useSessionState<number>(`${sessionPrefix}-page`, 1);
   const pageSize = 10;
 
   const { data: filterMetadata } = useGetProjectFilters(projectId || "");

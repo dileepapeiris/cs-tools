@@ -76,7 +76,7 @@ export default function AllConversationsPage(): JSX.Element {
   const [sortField, setSortField] = useSessionState<"createdOn" | "updatedOn">(`${sessionPrefix}-sortField`, "updatedOn");
   const [sortOrder, setSortOrder] = useSessionState<SortOrder>(`${sessionPrefix}-sortOrder`, SortOrder.DESC);
   const [page, setPage] = useSessionState<number>(`${sessionPrefix}-page`, 1);
-  const pageSize = 10;
+  const [rowsPerPage, setRowsPerPage] = useSessionState<number>(`${sessionPrefix}-rowsPerPage`, 10);
 
   const { data: filterMetadata } = useGetProjectFilters(projectId || "");
 
@@ -88,8 +88,8 @@ export default function AllConversationsPage(): JSX.Element {
         createdByMe: createdByMe || undefined,
       },
       pagination: {
-        offset: (page - 1) * pageSize,
-        limit: pageSize,
+        offset: (page - 1) * rowsPerPage,
+        limit: rowsPerPage,
       },
       sortBy: {
         field: sortField,
@@ -100,7 +100,7 @@ export default function AllConversationsPage(): JSX.Element {
       searchTerm,
       filters.stateId,
       page,
-      pageSize,
+      rowsPerPage,
       sortField,
       sortOrder,
       createdByMe,
@@ -150,7 +150,6 @@ export default function AllConversationsPage(): JSX.Element {
 
   const conversations = data?.conversations ?? [];
   const totalRecords = data?.totalRecords ?? 0;
-  const totalPages = Math.max(1, Math.ceil(totalRecords / pageSize));
 
   const handleConversationClick = (conv: Conversation) => {
     if (!projectId) return;
@@ -172,6 +171,11 @@ export default function AllConversationsPage(): JSX.Element {
 
   const handlePageChange = (_event: ChangeEvent<unknown>, value: number) => {
     setPage(value);
+  };
+
+  const handleRowsPerPageChange = (newSize: number) => {
+    setRowsPerPage(newSize);
+    setPage(1);
   };
 
   const handleFilterChange = (field: string, value: string) => {
@@ -281,9 +285,11 @@ export default function AllConversationsPage(): JSX.Element {
       />
 
       <ListPagination
-        totalPages={totalPages}
+        totalRecords={totalRecords}
         page={page}
-        onChange={handlePageChange}
+        rowsPerPage={rowsPerPage}
+        onPageChange={handlePageChange}
+        onRowsPerPageChange={handleRowsPerPageChange}
       />
     </Stack>
   );

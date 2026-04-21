@@ -77,7 +77,7 @@ export default function AllCasesPage(): JSX.Element {
   const [sortField, setSortField] = useSessionState<"createdOn" | "updatedOn" | "severity" | "state">(`${sessionPrefix}-sortField`, "createdOn");
   const [sortOrder, setSortOrder] = useSessionState<SortOrder>(`${sessionPrefix}-sortOrder`, SortOrder.DESC);
   const [page, setPage] = useSessionState<number>(`${sessionPrefix}-page`, 1);
-  const pageSize = 10;
+  const [rowsPerPage, setRowsPerPage] = useSessionState<number>(`${sessionPrefix}-rowsPerPage`, 10);
 
   const { data: project, isLoading: isProjectLoading } = useGetProjectDetails(
     projectId || "",
@@ -162,6 +162,7 @@ export default function AllCasesPage(): JSX.Element {
     isFetchingNextPage,
   } = useGetProjectCases(projectId || "", caseSearchRequest, {
     enabled: !!projectId,
+    pageSize: rowsPerPage,
   });
 
   const { showLoader, hideLoader } = useLoader();
@@ -223,10 +224,13 @@ export default function AllCasesPage(): JSX.Element {
 
   const paginatedCases = filteredAndSearchedCases;
 
-  const totalPages = Math.ceil(totalItems / pageSize);
-
   const handlePageChange = (_event: ChangeEvent<unknown>, value: number) => {
     setPage(value);
+  };
+
+  const handleRowsPerPageChange = (newSize: number) => {
+    setRowsPerPage(newSize);
+    setPage(1);
   };
 
   const handleFilterChange = (field: string, value: string) => {
@@ -350,9 +354,11 @@ export default function AllCasesPage(): JSX.Element {
       />
 
       <ListPagination
-        totalPages={totalPages}
+        totalRecords={totalItems}
         page={page}
-        onChange={handlePageChange}
+        rowsPerPage={rowsPerPage}
+        onPageChange={handlePageChange}
+        onRowsPerPageChange={handleRowsPerPageChange}
       />
     </Stack>
   );

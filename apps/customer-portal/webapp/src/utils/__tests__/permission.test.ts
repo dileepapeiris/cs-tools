@@ -21,6 +21,7 @@ import {
   calculateProjectStats,
   getProjectPermissions,
   getProjectSeverityPolicy,
+  shouldHideOnboardingData,
   shouldForceSeverityS4,
 } from "@utils/permission";
 
@@ -182,5 +183,15 @@ describe("calculateProjectStats", () => {
     const result = calculateProjectStats(perms, 5, 0);
     expect(result.serviceRequests).toBe(5);
     expect(result.total).toBe(5);
+  });
+});
+
+describe("shouldHideOnboardingData", () => {
+  it("returns true when onboarding status is Not-Applicable", () => {
+    expect(shouldHideOnboardingData("Not-Applicable")).toBe(true);
+  });
+
+  it("returns false for active onboarding values", () => {
+    expect(shouldHideOnboardingData("In Progress")).toBe(false);
   });
 });

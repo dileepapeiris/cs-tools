@@ -16,7 +16,7 @@
 
 import { useQuery, type UseQueryResult } from "@tanstack/react-query";
 import { useAsgardeo } from "@asgardeo/react";
-import { useAuthApiClient } from "@utils/useAuthApiClient";
+import { useAuthApiClient } from "@/hooks/useAuthApiClient";
 import { useLogger } from "@hooks/useLogger";
 import { ApiQueryKeys } from "@constants/apiConstants";
 import type { ConversationSummaryResponse } from "@features/support/types/supportApi";
@@ -73,7 +73,6 @@ export default function useGetConversationSummary(
       }
     },
     enabled: !!projectId && !!conversationId && isSignedIn && !isAuthLoading,
-    staleTime: 5 * 60 * 1000, // 5 minutes
-    gcTime: 10 * 60 * 1000, // 10 minutes
+    staleTime: 0,
   });
 }

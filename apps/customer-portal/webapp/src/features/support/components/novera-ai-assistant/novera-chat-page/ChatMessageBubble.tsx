@@ -15,11 +15,13 @@
 // under the License.
 
 import type { ChatMessageBubbleProps } from "@features/support/types/supportComponents";
-import { Box, Paper, Typography, IconButton, alpha } from "@wso2/oxygen-ui";
-import { Bot, User, ThumbsUp, ThumbsDown } from "@wso2/oxygen-ui-icons-react";
+import { Box, Paper, Typography, IconButton, Button, alpha } from "@wso2/oxygen-ui";
+import { Bot, User, ThumbsUp, ThumbsDown, CheckCircle } from "@wso2/oxygen-ui-icons-react";
 import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 import { type JSX, useEffect, useRef, useState } from "react";
-import { ChatSender } from "@features/support/types/conversations";
+import { useDarkMode } from "@utils/useDarkMode";
+import { ChatSender, NoveraActionType } from "@features/support/types/conversations";
 import {
   NOVERA_ANALYZING_PLACEHOLDER_TEXT,
   NOVERA_DISPLAY_NAME,
@@ -148,6 +150,53 @@ const markdownComponents: React.ComponentProps<
         {children}
       </Typography>
     ),
+  table: ({ children }) => (
+    <Box sx={{ width: "100%", overflowX: "auto", mb: 1 }}>
+      <Box
+        component="table"
+        sx={{
+          width: "100%",
+          borderCollapse: "collapse",
+          minWidth: 420,
+        }}
+      >
+        {children}
+      </Box>
+    </Box>
+  ),
+  thead: ({ children }) => <Box component="thead">{children}</Box>,
+  tbody: ({ children }) => <Box component="tbody">{children}</Box>,
+  tr: ({ children }) => (
+    <Box component="tr" sx={{ borderBottom: "1px solid", borderColor: "divider" }}>
+      {children}
+    </Box>
+  ),
+  th: ({ children }) => (
+    <Box
+      component="th"
+      sx={{
+        textAlign: "left",
+        p: 1,
+        fontSize: "0.75rem",
+        fontWeight: 600,
+        color: "text.secondary",
+      }}
+    >
+      {children}
+    </Box>
+  ),
+  td: ({ children }) => (
+    <Box
+      component="td"
+      sx={{
+        p: 1,
+        fontSize: "0.8125rem",
+        verticalAlign: "top",
+      }}
+    >
+      {children}
+    </Box>
+  ),
 };
 
 /**
@@ -163,10 +212,16 @@ export default function ChatMessageBubble({
   message,
   onThumbsUp,
   onThumbsDown,
+  onSolutionWorked,
 }: ChatMessageBubbleProps): JSX.Element {
+  const isDark = useDarkMode();
+  const hasSolutionProposed = message.actions?.some(
+    (a) => a.type === NoveraActionType.SolutionProposed,
+  );
   const isUser = message.sender === ChatSender.USER;
   const [thumbsState, setThumbsState] = useState<"up" | "down" | null>(null);
   const hasFeedbackSelection = thumbsState !== null;
+  const [solutionWorkedSent, setSolutionWorkedSent] = useState(false);
 
   const displayText = message.isError ? "Something went wrong" : message.text;
 
@@ -216,17 +271,13 @@ export default function ChatMessageBubble({
   }
 
   if (isUser) {
-    const createdByLabel = message.createdBy?.trim() || "Unknown";
-    const createdOnLabel = message.createdOnRaw?.trim() || "--";
-
-    // User message with avatar
     return (
       <Box
         sx={{
           display: "flex",
           flexDirection: "column",
           alignItems: "flex-end",
-          gap: 1,
+          gap: 0.5,
         }}
       >
         <Box
@@ -272,15 +323,22 @@ export default function ChatMessageBubble({
             <User size={16} />
           </Paper>
         </Box>
-        <Typography variant="caption" color="text.secondary">
-          {createdByLabel} - {createdOnLabel}
-        </Typography>
+        {/* Timestamp sits under the bubble, aligned to its right edge (not under the icon) */}
+        <Box
+          sx={{
+            display: "flex",
+            justifyContent: "flex-end",
+            pr: (theme) => `calc(${theme.spacing(4)} + ${theme.spacing(1.5)})`,
+          }}
+        >
+          <Typography variant="caption" color="text.secondary">
+            {formattedTime}
+          </Typography>
+        </Box>
       </Box>
     );
   }
 
-  const createdByLabel = message.createdBy?.trim() || NOVERA_DISPLAY_NAME;
-  const createdOnLabel = message.createdOnRaw?.trim() || "--";
   const hideBotIdentityLabel = message.showFeedbackActions === false;
 
   // Bot message - new custom layout
@@ -392,7 +450,10 @@ export default function ChatMessageBubble({
             }}
             className="prose prose-sm max-w-none text-gray-800"
           >
-            <ReactMarkdown components={markdownComponents}>
+            <ReactMarkdown
+              components={markdownComponents}
+              remarkPlugins={[remarkGfm]}
+            >
               {displayText}
             </ReactMarkdown>
             {message.thinkingSteps && message.thinkingSteps.length > 0 && (
@@ -412,12 +473,12 @@ export default function ChatMessageBubble({
           </Box>
         )}
 
-        {/* Thumbs up/down and time — hide until final response */}
+        {/* Thumbs up/down, solution-worked button, and time — hide until final response */}
         {!hideFeedbackRow &&
           message.showFeedbackActions !== false &&
           (!message.recommendations ||
             message.recommendations.length === 0) && (
-            <Box sx={{ display: "flex", alignItems: "center", gap: 3, mt: 3 }}>
+            <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, mt: 3, flexWrap: "wrap" }}>
               <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
                 <IconButton
                   size="small"
@@ -462,14 +523,38 @@ export default function ChatMessageBubble({
                   <ThumbsDown size={14} />
                 </IconButton>
               </Box>
+
+              {hasSolutionProposed && !solutionWorkedSent && (
+                <Button
+                  size="small"
+                  variant="outlined"
+                  startIcon={<CheckCircle size={14} />}
+                  disabled={solutionWorkedSent}
+                  onClick={() => {
+                    setSolutionWorkedSent(true);
+                    onSolutionWorked?.();
+                  }}
+                  sx={(theme) => ({
+                    textTransform: "none",
+                    fontWeight: 500,
+                    fontSize: "0.75rem",
+                    height: 28,
+                    px: 1.5,
+                    color: isDark ? theme.palette.success.light : theme.palette.success.dark,
+                    borderColor: alpha(theme.palette.success.main, isDark ? 0.7 : 0.4),
+                    bgcolor: alpha(theme.palette.success.main, isDark ? 0.15 : 0.08),
+                  })}
+                >
+                  Solution Worked
+                </Button>
+              )}
+
               <Typography variant="caption" color="text.secondary">
                 {formattedTime}
               </Typography>
             </Box>
           )}
-        <Typography variant="caption" color="text.secondary" sx={{ mt: 1 }}>
-          {hideBotIdentityLabel ? createdOnLabel : `${createdByLabel} - ${createdOnLabel}`}
-        </Typography>
+
       </Box>
 
       {/* Recommendations - shown after message content */}

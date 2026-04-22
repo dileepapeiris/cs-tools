@@ -16,7 +16,7 @@
 
 import { useQuery, type UseQueryResult } from "@tanstack/react-query";
 import { useAsgardeo } from "@asgardeo/react";
-import { useAuthApiClient } from "@utils/useAuthApiClient";
+import { useAuthApiClient } from "@/hooks/useAuthApiClient";
 import { useLogger } from "@hooks/useLogger";
 import { ApiQueryKeys } from "@constants/apiConstants";
 import type { CaseCommentsResponse } from "@features/support/types/cases";
@@ -79,6 +79,6 @@ export default function useGetCaseComments(
       }
     },
     enabled: !!projectId && !!caseId && isSignedIn && !isAuthLoading,
-    staleTime: 5 * 60 * 1000, // 5 minutes
+    staleTime: 0,
   });
 }

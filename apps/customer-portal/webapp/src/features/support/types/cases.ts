@@ -216,7 +216,7 @@ export type CaseDetails = AuditMetadata & {
   type: IdLabelRef | null;
   deployedProduct: CaseDetailsDeployedProduct | null;
   relatedCase: IdLabelRef | null;
-  conversation: unknown;
+  conversation: IdLabelRef | null;
   issueType: IdLabelRef | null;
   catalog?: IdLabelRef | null;
   catalogItem?: IdLabelRef | null;
@@ -345,6 +345,7 @@ export type CaseSearchRequest = SearchRequestBase & {
 // Request type for case classification.
 export type CaseClassificationRequest = SharedEnvContext & {
   chatHistory: string;
+  projectTypeId: string;
 };
 
 // Request type for patching a case.

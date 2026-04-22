@@ -20,7 +20,7 @@ import {
   type InfiniteData,
 } from "@tanstack/react-query";
 import { useAsgardeo } from "@asgardeo/react";
-import { useAuthApiClient } from "@utils/useAuthApiClient";
+import { useAuthApiClient } from "@/hooks/useAuthApiClient";
 import { useLogger } from "@hooks/useLogger";
 import { ApiQueryKeys } from "@constants/apiConstants";
 import type { TimeCardSearchResponse } from "@features/usage-metrics/types/timeTracking";
@@ -111,6 +111,6 @@ export default function useSearchProjectTimeCards({
       return nextOffset < lastPage.totalRecords ? nextOffset : undefined;
     },
     enabled: enabled !== false && !!projectId && isSignedIn && !isAuthLoading,
-    staleTime: 5 * 60 * 1000,
+    staleTime: 0,
   });
 }

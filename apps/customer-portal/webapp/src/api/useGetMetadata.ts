@@ -16,7 +16,7 @@
 
 import { useQuery, type UseQueryResult } from "@tanstack/react-query";
 import { useAsgardeo } from "@asgardeo/react";
-import { useAuthApiClient } from "@utils/useAuthApiClient";
+import { useAuthApiClient } from "@/hooks/useAuthApiClient";
 import { useLogger } from "@hooks/useLogger";
 import { ApiQueryKeys } from "@constants/apiConstants";
 import type { PortalMetadataResponse } from "@features/project-hub/types/projects";
@@ -57,6 +57,5 @@ export default function useGetMetadata(): UseQueryResult<
     },
     enabled: isSignedIn && !isAuthLoading,
     staleTime: 10 * 60 * 1000,
-    gcTime: 10 * 60 * 1000,
   });
 }

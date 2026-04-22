@@ -168,8 +168,7 @@ export default function DeploymentProductList({
     return products.find((p) => p.id === editingProduct.id) ?? editingProduct;
   }, [products, editingProduct]);
   const isLoading = productsQuery.isLoading;
-  const isFetching = productsQuery.isFetching;
-  const isError = productsQuery.isError;
+    const isError = productsQuery.isError;
   const patchProduct = usePatchDeploymentProduct();
 
   const handleDeleteClick = (item: DeploymentProductItem) => {
@@ -213,7 +212,7 @@ export default function DeploymentProductList({
             <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
               WSO2 Products
             </Typography>
-            {isLoading || isFetching ? (
+            {isLoading ? (
               <Skeleton
                 variant="rounded"
                 width={32}
@@ -239,7 +238,7 @@ export default function DeploymentProductList({
             Add Product
           </Button>
         </Box>
-        {isLoading || isFetching ? (
+        {isLoading ? (
           <ProductsSkeleton />
         ) : isError ? (
           <Box sx={{ display: "flex", alignItems: "center", gap: 1, py: 2 }}>

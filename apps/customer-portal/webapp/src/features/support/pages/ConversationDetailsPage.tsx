@@ -40,9 +40,10 @@ import type {
   ChatHistoryItem,
 } from "@features/support/types/conversations";
 import { ChatSender } from "@features/support/types/conversations";
-import Error500Page from "@components/error/Error500Page";
+import ApiErrorState from "@components/error/ApiErrorState";
 import type { Message } from "@features/support/types/conversations";
 import ChatMessageBubble from "@features/support/components/novera-ai-assistant/novera-chat-page/ChatMessageBubble";
+import ConversationKnowledgeRecommendations from "@features/support/components/knowledge-base/ConversationKnowledgeRecommendations";
 import { alpha, useTheme } from "@wso2/oxygen-ui";
 import {
   compareByCreatedOnThenId,
@@ -73,6 +74,7 @@ export default function ConversationDetailsPage(): JSX.Element {
     data,
     isLoading,
     isError,
+    error,
     fetchNextPage,
     hasNextPage,
     isFetchingNextPage,
@@ -276,12 +278,10 @@ export default function ConversationDetailsPage(): JSX.Element {
             ))}
           </Box>
         ) : isError ? (
-          <Box sx={{ textAlign: "center", py: 6 }}>
-            <Error500Page width={180} height={120} />
-            <Typography variant="body2" color="text.secondary" sx={{ mt: 2 }}>
-              Could not load conversation messages.
-            </Typography>
-          </Box>
+          <ApiErrorState
+            error={error}
+            fallbackMessage="Could not load conversation messages."
+          />
         ) : messages.length === 0 ? (
           <Typography variant="body2" color="text.secondary">
             No messages found for this conversation.
@@ -309,23 +309,7 @@ export default function ConversationDetailsPage(): JSX.Element {
         )}
       </Paper>
 
-      <Paper
-        variant="outlined"
-        sx={{ p: 3, display: "flex", flexDirection: "column", gap: 2 }}
-      >
-        <Stack direction="row" spacing={1.5} alignItems="center" sx={{ mb: 1 }}>
-          <FileText size={18} />
-          <Typography variant="h6" color="text.primary">
-            Knowledge Base Articles Suggested
-          </Typography>
-        </Stack>
-        <Box sx={{ textAlign: "center", py: 4 }}>
-          <Error500Page width={160} height={110} />
-          <Typography variant="body2" color="text.secondary" sx={{ mt: 2 }}>
-            KB article suggestions are not available yet.
-          </Typography>
-        </Box>
-      </Paper>
+      <ConversationKnowledgeRecommendations messages={messages} />
     </Stack>
   );
 }

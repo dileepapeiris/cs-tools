@@ -16,7 +16,7 @@
 
 import { useQuery, type UseQueryResult } from "@tanstack/react-query";
 import { useAsgardeo } from "@asgardeo/react";
-import { useAuthApiClient } from "@utils/useAuthApiClient";
+import { useAuthApiClient } from "@/hooks/useAuthApiClient";
 import { useLogger } from "@hooks/useLogger";
 import { ApiQueryKeys } from "@constants/apiConstants";
 import type { RegistryToken } from "@features/settings/types/registryTokens";
@@ -73,6 +73,6 @@ export function useSearchRegistryTokens(
       }
     },
     enabled: !!projectId && !!isSignedIn && !isAuthLoading,
-    staleTime: 2 * 60 * 1000,
+    staleTime: 0,
   });
 }

@@ -25,6 +25,9 @@ import { useFloatingNoveraVisibility } from "@context/floating-novera-visibility
 import { useGetCaseAttachments } from "@features/support/api/useGetCaseAttachments";
 import { useGetCallRequests } from "@features/support/api/useGetCallRequests";
 import useGetProjectFilters from "@api/useGetProjectFilters";
+import useGetCaseComments from "@features/support/api/useGetCaseComments";
+import { useConversationRecommendationsSearch } from "@features/support/api/useConversationRecommendationsSearch";
+import { buildRecommendationRequestFromCase } from "@features/support/utils/recommendations";
 import {
   getStatusColor,
   resolveColorFromTheme,
@@ -38,6 +41,7 @@ import {
   type CaseStatus,
 } from "@features/support/constants/supportConstants";
 import ErrorIndicator from "@components/error-indicator/ErrorIndicator";
+import ApiErrorState from "@components/error/ApiErrorState";
 import CaseDetailsBackButton from "@case-details/CaseDetailsBackButton";
 import CaseDetailsHeader from "@case-details/CaseDetailsHeader";
 import CaseDetailsActionRow from "@case-details/CaseDetailsActionRow";
@@ -55,6 +59,7 @@ export default function CaseDetailsContent({
   data,
   isLoading,
   isError,
+  error,
   caseId,
   onBack,
   onOpenRelatedCase,
@@ -148,6 +153,24 @@ export default function CaseDetailsContent({
   const hideKnowledgeBaseTab =
     isSecurityReportAnalysis || isEngagementRoute || isServiceRequest;
 
+  // Eagerly fetch KB recommendations so the tab count is available on page load.
+  // React Query deduplicates the network call when the KB tab component mounts later.
+  const { data: kbCommentsData, isLoading: isKbCommentsLoading } = useGetCaseComments(
+    hideKnowledgeBaseTab ? "" : resolvedProjectId,
+    hideKnowledgeBaseTab ? "" : caseId,
+    { offset: 0 },
+  );
+  const kbPayload = useMemo(
+    () => (hideKnowledgeBaseTab ? null : buildRecommendationRequestFromCase(data, kbCommentsData?.comments ?? [])),
+    [hideKnowledgeBaseTab, data, kbCommentsData],
+  );
+  const { data: kbRecData, isLoading: isKbRecLoading } = useConversationRecommendationsSearch(
+    kbPayload,
+    !hideKnowledgeBaseTab && !isKbCommentsLoading && !!kbPayload,
+  );
+  const knowledgeBaseCount = kbRecData ? (kbRecData.recommendations?.length ?? 0) : undefined;
+  const knowledgeBaseCountLoading = !hideKnowledgeBaseTab && (isKbCommentsLoading || (!!kbPayload && isKbRecLoading && !kbRecData));
+
   const visibleTabs = useMemo(
     () => [
       0,
@@ -197,6 +220,19 @@ export default function CaseDetailsContent({
     resolvedPanelIndex,
     setHideForDetailsActivityTab,
   ]);
+
+  if (isError && error) {
+    return (
+      <ApiErrorState
+        error={error}
+        fallbackMessage={
+          isServiceRequest
+            ? "Failed to load service request details."
+            : "Failed to load case details."
+        }
+      />
+    );
+  }
 
   if (isLoading) {
     return (
@@ -314,6 +350,8 @@ export default function CaseDetailsContent({
           callCount={callCount}
           hideCallsTab={hideCallsTab}
           hideKnowledgeBaseTab={hideKnowledgeBaseTab}
+          knowledgeBaseCount={knowledgeBaseCount}
+          knowledgeBaseCountLoading={knowledgeBaseCountLoading}
         />
       </Paper>
 
@@ -336,6 +374,7 @@ export default function CaseDetailsContent({
           caseId={caseId}
           data={data}
           isError={isError}
+          error={error}
           projectId={projectId}
           focusMode={focusMode}
           isEngagement={isEngagementRoute}

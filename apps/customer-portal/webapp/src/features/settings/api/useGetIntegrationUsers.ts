@@ -16,7 +16,7 @@
 
 import { useQuery, type UseQueryResult } from "@tanstack/react-query";
 import { useAsgardeo } from "@asgardeo/react";
-import { useAuthApiClient } from "@utils/useAuthApiClient";
+import { useAuthApiClient } from "@/hooks/useAuthApiClient";
 import { useLogger } from "@hooks/useLogger";
 import { ApiQueryKeys } from "@constants/apiConstants";
 import type { IntegrationUser } from "@features/settings/types/users";
@@ -73,6 +73,6 @@ export function useGetIntegrationUsers(
       }
     },
     enabled: !!projectId && !!isSignedIn && !isAuthLoading && enabled,
-    staleTime: 5 * 60 * 1000,
+    staleTime: 0,
   });
 }

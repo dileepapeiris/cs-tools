@@ -29,6 +29,7 @@ export type ProjectListItem = {
   description: string;
   type?: IdLabelRef;
   hasAgent: boolean;
+  hasPdpSubscription?: boolean;
   hasKbReferences?: boolean;
   activeCasesCount: number;
   activeChatsCount: number;
@@ -60,6 +61,7 @@ export type ProjectDetails = {
   hasKbReferences?: boolean;
   type: IdLabelRef;
   sfId?: string;
+  hasPdpSubscription?: boolean;
   hasSr: boolean;
   startDate?: string;
   endDate?: string;

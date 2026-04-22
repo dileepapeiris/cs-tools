@@ -16,7 +16,7 @@
 
 import { useQuery, type UseQueryResult } from "@tanstack/react-query";
 import { useAsgardeo } from "@asgardeo/react";
-import { useAuthApiClient } from "@utils/useAuthApiClient";
+import { useAuthApiClient } from "@/hooks/useAuthApiClient";
 import { useLogger } from "@hooks/useLogger";
 import { ApiQueryKeys } from "@constants/apiConstants";
 import type { ChangeRequestStatsResponse } from "@features/operations/types/changeRequests";
@@ -87,10 +87,6 @@ export function useGetProjectChangeRequestsStats(
       }
     },
     enabled,
-    staleTime: enabled ? 5 * 60 * 1000 : 0,
-    gcTime: enabled ? 10 * 60 * 1000 : 0,
-    refetchOnMount: true,
-    refetchOnWindowFocus: false,
-    refetchOnReconnect: false,
+    staleTime: 0,
   });
 }

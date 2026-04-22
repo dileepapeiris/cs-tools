@@ -16,7 +16,7 @@
 
 import { useAsgardeo } from "@asgardeo/react";
 import { useQuery } from "@tanstack/react-query";
-import { useAuthApiClient } from "@utils/useAuthApiClient";
+import { useAuthApiClient } from "@/hooks/useAuthApiClient";
 import { ApiQueryKeys } from "@constants/apiConstants";
 import type { InstanceMetricsRequest } from "@features/project-details/types/usage";
 import type { InstanceMetricsResponse } from "@features/project-details/types/usage";
@@ -57,6 +57,6 @@ export default function usePostProjectInstancesMetricsSearch(
       return response.json() as Promise<InstanceMetricsResponse>;
     },
     enabled: !!projectId && isSignedIn && !isAuthLoading,
-    staleTime: 5 * 60 * 1000,
+    staleTime: 0,
   });
 }

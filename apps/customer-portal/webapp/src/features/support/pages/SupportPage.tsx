@@ -57,7 +57,7 @@ export default function SupportPage(): JSX.Element {
 
   const {
     data: stats,
-    isFetching,
+    isLoading,
     isError,
   } = useGetProjectSupportStats(projectId || "", {
     caseTypes: [CaseType.DEFAULT_CASE],
@@ -65,7 +65,7 @@ export default function SupportPage(): JSX.Element {
 
   const {
     data,
-    isFetching: isCasesLoading,
+    isLoading: isCasesLoading,
     isError: isCasesError,
   } = useGetProjectCases(
     projectId || "",
@@ -82,7 +82,7 @@ export default function SupportPage(): JSX.Element {
 
   const {
     data: conversationsData,
-    isFetching: isChatLoading,
+    isLoading: isChatLoading,
     isError: isChatError,
   } = useSearchConversations(projectId || "", {
     pagination: { limit: SUPPORT_OVERVIEW_CHAT_LIMIT, offset: 0 },
@@ -112,7 +112,7 @@ export default function SupportPage(): JSX.Element {
     status: c.state?.label ?? "Open",
   }));
 
-  const isActuallyLoading = isAuthLoading || isFetching || (!stats && !isError);
+  const isActuallyLoading = isAuthLoading || isLoading || (!stats && !isError);
 
   useEffect(() => {
     if (isError) {

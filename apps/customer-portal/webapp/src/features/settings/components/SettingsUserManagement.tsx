@@ -102,7 +102,6 @@ export default function SettingsUserManagement({
   const {
     data: contacts = [],
     isLoading,
-    isFetching,
     error,
   } = useGetProjectContacts(projectId);
   const postContact = usePostProjectContact(projectId);
@@ -181,7 +180,7 @@ export default function SettingsUserManagement({
     [editTarget, patchContact, showSuccess, showError],
   );
 
-  const isEffectiveLoading = isLoading || isFetching;
+  const isEffectiveLoading = isLoading;
 
   return (
     <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>

@@ -16,7 +16,7 @@
 
 import { useAsgardeo } from "@asgardeo/react";
 import { useQuery } from "@tanstack/react-query";
-import { useAuthApiClient } from "@utils/useAuthApiClient";
+import { useAuthApiClient } from "@/hooks/useAuthApiClient";
 import { ApiQueryKeys } from "@constants/apiConstants";
 import type { InstanceSearchRequest } from "@features/project-details/types/usage";
 import type { InstancesResponse } from "@features/project-details/types/usage";
@@ -56,6 +56,6 @@ export default function usePostProjectInstancesSearch(
       return response.json() as Promise<InstancesResponse>;
     },
     enabled: !!projectId && isSignedIn && !isAuthLoading,
-    staleTime: 5 * 60 * 1000,
+    staleTime: 0,
   });
 }

@@ -24,7 +24,7 @@ import {
   colors,
 } from "@wso2/oxygen-ui";
 import { Send, PanelTopClose, FileText } from "@wso2/oxygen-ui-icons-react";
-import { type JSX, useState } from "react";
+import { type JSX, useEffect, useState } from "react";
 import Editor from "@components/rich-text-editor/Editor";
 import { htmlToPlainText } from "@features/support/utils/richTextEditor";
 
@@ -44,16 +44,26 @@ export default function ChatInput({
   isSending = false,
   isCreateCaseLoading = false,
   resetTrigger = 0,
-}: ChatInputProps): JSX.Element {
+  forceRichText = false,
+  disabled = false,
+}: ChatInputProps): JSX.Element | null {
   const plainText = htmlToPlainText(inputValue).trim();
   const isSendDisabled = !plainText || isSending;
-  const [showToolbar, setShowToolbar] = useState(false);
+  const [showToolbar, setShowToolbar] = useState(forceRichText);
+
+  useEffect(() => {
+    if (forceRichText) setShowToolbar(true);
+  }, [forceRichText]);
 
   // Calculate max height for 5 lines (line-height is ~24px in body2)
   const singleLineHeight = 40;
   const maxLinesHeight = 120;
   const BUTTON_TOP_WITHOUT_TOOLBAR = 8;
   const BUTTON_TOP_WITH_TOOLBAR = 56;
+
+  if (disabled) {
+    return null;
+  }
 
   return (
     <Box sx={{ flexShrink: 0 }}>

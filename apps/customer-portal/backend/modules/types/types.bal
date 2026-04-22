@@ -187,6 +187,10 @@ public type ReferenceItem record {|
     string? number?;
     # Abbreviation
     string? abbreviation?;
+    # Release date (for product versions)
+    entity:Date? releasedOn?;
+    # End of life date (for product versions)
+    entity:Date? endOfLifeOn?;
 |};
 
 # Case metadata information.
@@ -250,6 +254,32 @@ public type UpdatedUser record {|
     string timeZone?;
 |};
 
+# Project feature access configuration.
+public type ProjectFeatures record {|
+    # Severities available for the feature
+    ReferenceItem[] acceptedSeverityValues;
+    # Indicates if service request write access is enabled
+    boolean hasServiceRequestWriteAccess;
+    # Indicates if service request read access is enabled
+    boolean hasServiceRequestReadAccess;
+    # Indicates if SRA write access is enabled
+    boolean hasSraWriteAccess;
+    # Indicates if SRA read access is enabled
+    boolean hasSraReadAccess;
+    # Indicates if change request read access is enabled
+    boolean hasChangeRequestReadAccess;
+    # Indicates if engagements read access is enabled
+    boolean hasEngagementsReadAccess;
+    # Indicates if updates read access is enabled
+    boolean hasUpdatesReadAccess;
+    # Indicates if time logs read access is enabled
+    boolean hasTimeLogsReadAccess;
+    # Indicates if deployment write access is enabled
+    boolean hasDeploymentWriteAccess;
+    # Indicates if deployment read access is enabled
+    boolean hasDeploymentReadAccess;
+|};
+
 # Project filter options.
 public type ProjectFilterOptions record {|
     # List of case states
@@ -278,6 +308,7 @@ public type ProjectFilterOptions record {|
     ReferenceItem[] engagementPaymentTypes;
     # Severity based allocation time mapping (severity ID to allocation time in minutes)
     map<int> severityBasedAllocationTime;
+
 |};
 
 # Project data.
@@ -294,6 +325,10 @@ public type Project record {|
     string? description;
     # Project type
     ReferenceItem 'type;
+    # Closure state
+    string? closureState;
+    # Indicates whether the project has a PDP subscription
+    boolean hasPdpSubscription;
     # Novera agent enabled status for the project
     boolean hasAgent;
     # Knowledge base references enabled status for the project
@@ -322,8 +357,10 @@ public type ProjectResponse record {|
     ReferenceItem 'type;
     # Salesforce ID
     string sfId;
-    # Indicates if the project has service requests
-    boolean hasSr;
+    # Closure state
+    string? closureState;
+    # Indicates whether the project has a PDP subscription
+    boolean hasPdpSubscription;
     # Project start date
     entity:Date? startDate;
     # Project end date 
@@ -583,6 +620,8 @@ public type DeploymentSearchPayload record {|
 public type Deployment record {|
     # ID
     string id;
+    # Number of the deployment
+    string? number;
     # Name
     string name;
     # Created date and time
@@ -610,6 +649,11 @@ public type DeploymentsResponse record {|
 
 # Deployed product search payload
 public type DeployedProductSearchPayload record {|
+    # Filter criteria
+    record {|
+        # List of product categories to filter
+        entity:ProductCategory[] productCategories?;
+    |} filters?;
     # Pagination details
     entity:Pagination pagination?;
 |};
@@ -638,10 +682,6 @@ public type DeployedProduct record {|
     int? cores;
     # TPS allocated for the product
     decimal? tps;
-    # Release date of the product
-    string? releasedOn;
-    # End of life date of the product
-    string? endOfLifeOn;
 |};
 
 # Instance search filters.
@@ -1052,7 +1092,6 @@ public type ProductVersion record {|
     string? earliestPossibleSupportEolDate;
     # Product information
     ReferenceItem? product;
-    json...;
 |};
 
 # Product versions response.
@@ -1088,7 +1127,41 @@ public type TimeCard record {|
         # Case number
         string number;
     |}? case;
-    json...;
+|};
+
+# Time card grouped by case.
+public type CaseTimeCard record {|
+    # Case information
+    record {|
+        # ID of the case
+        entity:IdString id;
+        # Case number
+        string number;
+        # Case name/summary
+        string name;
+        # Last updated date and time
+        string updatedOn;
+        # Associated project information
+        ReferenceItem? project;
+        json...;
+    |} 'case;
+    # Total time logged for this case
+    decimal totalTime;
+    # Total count of time cards
+    int totalCount;
+    # Billable time information
+    entity:CaseTimeCardBillingInfo billable;
+    # Non-billable time information
+    entity:CaseTimeCardBillingInfo nonBillable;
+|};
+
+# Cases time cards search response.
+public type CaseTimeCardsSearchResponse record {|
+    # List of case time card summaries
+    CaseTimeCard[] caseTimeCards;
+    # Total records count
+    int totalRecords;
+    *entity:Pagination;
 |};
 
 # Time cards response.
@@ -1405,9 +1478,9 @@ public type ChangeRequestResponse record {|
     string? rollbackPlan;
     # Test plan
     string? testPlan;
-    # Indicates if the customer has approved
+    # Indicates if the customer has permission to approve
     boolean hasCustomerApproved;
-    # Indicates if the customer has reviewed
+    # Indicates if the customer has permission to review
     boolean hasCustomerReviewed;
     # Internal approval details
     ReferenceItem? approvedBy;

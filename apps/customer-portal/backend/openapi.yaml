@@ -766,18 +766,52 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ProjectFilterOptions'
-        "400":
-          description: BadRequest
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorPayload'
         "401":
           description: Unauthorized
         "500":
           description: InternalServerError
         "403":
           description: Forbidden
+        "404":
+          description: NotFound
+        "400":
+          description: BadRequest
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorPayload'
+  /projects/{id}/features:
+    get:
+      summary: Get features for a project.
+      operationId: getProjectsIdFeatures
+      parameters:
+      - name: id
+        in: path
+        description: ID of the project
+        required: true
+        schema:
+          $ref: '#/components/schemas/IdString'
+      responses:
+        "200":
+          description: Ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProjectFeatures'
+        "401":
+          description: Unauthorized
+        "500":
+          description: InternalServerError
+        "403":
+          description: Forbidden
+        "404":
+          description: NotFound
+        "400":
+          description: BadRequest
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorPayload'
   /cases/classify:
     post:
       summary: Classify the case using AI chat agent.
@@ -796,6 +830,32 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/CaseClassificationResponse'
+        "500":
+          description: InternalServerError
+        "400":
+          description: BadRequest
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorPayload'
+  /conversations/recommendations/search:
+    post:
+      summary: Get recommendations for a given chat history and conversation context.
+      operationId: postConversationsRecommendationsSearch
+      requestBody:
+        description: Recommendation request payload
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RecommendationRequest'
+        required: true
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RecommendationResponse'
         "500":
           description: InternalServerError
         "400":
@@ -1998,6 +2058,39 @@ paths:
           description: InternalServerError
         "403":
           description: Forbidden
+  /projects/{id}/cases/time-cards/search:
+    post:
+      summary: Search time cards grouped by cases based on provided filters.
+      operationId: postProjectsIdCasesTimeCardsSearch
+      parameters:
+      - name: id
+        in: path
+        description: ID of the project
+        required: true
+        schema:
+          $ref: '#/components/schemas/IdString'
+      requestBody:
+        description: Time card search payload containing filters and pagination info
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TimeCardSearchPayload'
+        required: true
+      responses:
+        "200":
+          description: Ok
+        "400":
+          description: BadRequest
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorPayload'
+        "401":
+          description: Unauthorized
+        "500":
+          description: InternalServerError
+        "403":
+          description: Forbidden
   /projects/{id}/stats/time-cards:
     get:
       summary: Get time card statistics for a project based on provided date range.
@@ -2669,10 +2762,12 @@ components:
           type: string
           description: Allowed domain list of the account
           nullable: true
+          default: ""
         classification:
           type: string
           description: Account classification
           nullable: true
+          default: ""
         isPartner:
           type: boolean
           description: Whether the account is a partner or not
@@ -2947,6 +3042,7 @@ components:
       required:
       - chatHistory
       - envProducts
+      - projectTypeId
       - region
       - tier
       type: object
@@ -2967,6 +3063,9 @@ components:
         tier:
           type: string
           description: Tier
+        projectTypeId:
+          type: string
+          description: Project type ID
       description: Case classification payload.
     CaseClassificationResponse:
       required:
@@ -3455,10 +3554,10 @@ components:
             nullable: true
           hasCustomerApproved:
             type: boolean
-            description: Indicates if the customer has approved
+            description: Indicates if the customer has permission to approve
           hasCustomerReviewed:
             type: boolean
-            description: Indicates if the customer has reviewed
+            description: Indicates if the customer has permission to review
           approvedBy:
             description: Internal approval details
             nullable: true
@@ -3786,6 +3885,31 @@ components:
           allOf:
           - $ref: '#/components/schemas/ReferenceItem'
       description: Conversation data.
+    ConversationData:
+      required:
+      - chatHistory
+      - envProducts
+      - region
+      - tier
+      type: object
+      properties:
+        chatHistory:
+          type: string
+          description: Chat history as a string
+        envProducts:
+          type: object
+          additionalProperties:
+            type: array
+            items:
+              type: string
+          description: Environment products
+        region:
+          type: string
+          description: Region
+        tier:
+          type: string
+          description: Tier
+      description: Conversation data for recommendations.
     ConversationPayload:
       required:
       - message
@@ -4077,6 +4201,16 @@ components:
     DeployedProductSearchPayload:
       type: object
       properties:
+        filters:
+          type: object
+          properties:
+            productCategories:
+              type: array
+              description: List of product categories to filter
+              items:
+                $ref: '#/components/schemas/ProductCategory'
+          additionalProperties: false
+          description: Filter criteria
         pagination:
           $ref: '#/components/schemas/Pagination'
       additionalProperties: false
@@ -4312,6 +4446,22 @@ components:
           description: Whether the contact is a security contact or not
       additionalProperties: false
       description: Payload for updating membership security flag.
+    Message:
+      required:
+      - content
+      - role
+      - timestamp
+      type: object
+      properties:
+        role:
+          $ref: '#/components/schemas/Role'
+        content:
+          type: string
+          description: Message content
+        timestamp:
+          type: string
+          description: ISO timestamp
+      description: Single chat message for UI rendering.
     MetadataResponse:
       required:
       - featureFlags
@@ -4362,6 +4512,11 @@ components:
           type: string
           description: Product class (Product Model)
       description: Product data.
+    ProductCategory:
+      type: string
+      description: Valid product category values.
+      enum:
+      - cl
     ProductClass:
       type: string
       description: Valid product class values.
@@ -4662,6 +4817,58 @@ components:
             $ref: '#/components/schemas/ReferenceItem'
       additionalProperties: false
       description: Change request statistics.
+    ProjectFeatures:
+      required:
+      - acceptedSeverityValues
+      - hasChangeRequestReadAccess
+      - hasDeploymentReadAccess
+      - hasDeploymentWriteAccess
+      - hasEngagementsReadAccess
+      - hasServiceRequestReadAccess
+      - hasServiceRequestWriteAccess
+      - hasSraReadAccess
+      - hasSraWriteAccess
+      - hasTimeLogsReadAccess
+      - hasUpdatesReadAccess
+      type: object
+      properties:
+        acceptedSeverityValues:
+          type: array
+          description: Severities available for the feature
+          items:
+            $ref: '#/components/schemas/ReferenceItem'
+        hasServiceRequestWriteAccess:
+          type: boolean
+          description: Indicates if service request write access is enabled
+        hasServiceRequestReadAccess:
+          type: boolean
+          description: Indicates if service request read access is enabled
+        hasSraWriteAccess:
+          type: boolean
+          description: Indicates if SRA write access is enabled
+        hasSraReadAccess:
+          type: boolean
+          description: Indicates if SRA read access is enabled
+        hasChangeRequestReadAccess:
+          type: boolean
+          description: Indicates if change request read access is enabled
+        hasEngagementsReadAccess:
+          type: boolean
+          description: Indicates if engagements read access is enabled
+        hasUpdatesReadAccess:
+          type: boolean
+          description: Indicates if updates read access is enabled
+        hasTimeLogsReadAccess:
+          type: boolean
+          description: Indicates if time logs read access is enabled
+        hasDeploymentWriteAccess:
+          type: boolean
+          description: Indicates if deployment write access is enabled
+        hasDeploymentReadAccess:
+          type: boolean
+          description: Indicates if deployment read access is enabled
+      additionalProperties: false
+      description: Project feature access configuration.
     ProjectFilterOptions:
       required:
       - callRequestStates
@@ -4751,6 +4958,7 @@ components:
     ProjectResponse:
       required:
       - account
+      - closureState
       - consumedOnboardingHours
       - consumedQueryHours
       - createdOn
@@ -4758,7 +4966,7 @@ components:
       - endDate
       - goLiveDate
       - goLivePlanDate
-      - hasSr
+      - hasPdpSubscription
       - id
       - key
       - name
@@ -4793,9 +5001,13 @@ components:
         sfId:
           type: string
           description: Salesforce ID
-        hasSr:
+        closureState:
+          type: string
+          description: Closure state
+          nullable: true
+        hasPdpSubscription:
           type: boolean
-          description: Indicates if the project has service requests
+          description: Indicates whether the project has a PDP subscription
         startDate:
           description: Project start date
           nullable: true
@@ -5025,6 +5237,54 @@ components:
           nullable: true
       additionalProperties: false
       description: Recent activity details.
+    RecommendationItem:
+      required:
+      - articleId
+      - score
+      - title
+      type: object
+      properties:
+        title:
+          type: string
+          description: Article title
+        articleId:
+          type: string
+          description: Article ID
+        score:
+          type: number
+          description: Similarity score
+          format: float
+      description: Recommendation item.
+    RecommendationRequest:
+      required:
+      - chatHistory
+      - conversationData
+      type: object
+      properties:
+        chatHistory:
+          type: array
+          description: Chat history
+          items:
+            $ref: '#/components/schemas/Message'
+        conversationData:
+          $ref: '#/components/schemas/ConversationData'
+      additionalProperties: false
+      description: Recommendation request.
+    RecommendationResponse:
+      required:
+      - query
+      type: object
+      properties:
+        query:
+          type: string
+          description: Original query (shortDescription from classification)
+        recommendations:
+          type: array
+          description: Top matching articles
+          items:
+            $ref: '#/components/schemas/RecommendationItem'
+          default: []
+      description: Recommendation response.
     RecommendedUpdateLevel:
       required:
       - availableSecurityUpdatesCount
@@ -5107,6 +5367,16 @@ components:
           type: string
           description: Abbreviation
           nullable: true
+        releasedOn:
+          description: Release date (for product versions)
+          nullable: true
+          allOf:
+          - $ref: '#/components/schemas/Date'
+        endOfLifeOn:
+          description: End of life date (for product versions)
+          nullable: true
+          allOf:
+          - $ref: '#/components/schemas/Date'
       additionalProperties: false
       description: Reference item.
     ReferenceTableItem:
@@ -5133,6 +5403,16 @@ components:
           type: string
           description: Abbreviation
           nullable: true
+        releasedOn:
+          description: Release date (for product versions)
+          nullable: true
+          allOf:
+          - $ref: '#/components/schemas/Date'
+        endOfLifeOn:
+          description: End of life date (for product versions)
+          nullable: true
+          allOf:
+          - $ref: '#/components/schemas/Date'
       description: Basic table information.
     RegistryTokenCreatePayload:
       required:
@@ -5151,6 +5431,11 @@ components:
           description: Created for user email
       additionalProperties: false
       description: Registry token creation payload.
+    Role:
+      type: string
+      enum:
+      - assistant
+      - user
     ServiceRequestVariable:
       required:
       - name

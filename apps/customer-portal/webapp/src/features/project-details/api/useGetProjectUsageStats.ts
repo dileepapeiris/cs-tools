@@ -16,7 +16,7 @@
 
 import { useAsgardeo } from "@asgardeo/react";
 import { useQuery } from "@tanstack/react-query";
-import { useAuthApiClient } from "@utils/useAuthApiClient";
+import { useAuthApiClient } from "@/hooks/useAuthApiClient";
 import { ApiQueryKeys } from "@constants/apiConstants";
 import type { UsageStatsResponse } from "@features/project-details/types/usage";
 
@@ -46,6 +46,6 @@ export default function useGetProjectUsageStats(projectId: string | undefined) {
       return response.json() as Promise<UsageStatsResponse>;
     },
     enabled: !!projectId && isSignedIn && !isAuthLoading,
-    staleTime: 5 * 60 * 1000,
+    staleTime: 0,
   });
 }

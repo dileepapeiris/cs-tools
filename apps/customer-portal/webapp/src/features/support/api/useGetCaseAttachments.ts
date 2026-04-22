@@ -16,7 +16,7 @@
 
 import { useInfiniteQuery, type InfiniteData } from "@tanstack/react-query";
 import { useAsgardeo } from "@asgardeo/react";
-import { useAuthApiClient } from "@utils/useAuthApiClient";
+import { useAuthApiClient } from "@/hooks/useAuthApiClient";
 import { useLogger } from "@hooks/useLogger";
 import { ApiQueryKeys } from "@constants/apiConstants";
 import type {
@@ -97,7 +97,7 @@ export function useGetCaseAttachments(caseId: string) {
       return nextOffset < totalRecords ? nextOffset : undefined;
     },
     enabled: !!caseId && isSignedIn && !isAuthLoading,
-    staleTime: 5 * 60 * 1000,
+    staleTime: 0,
   });
 }
 

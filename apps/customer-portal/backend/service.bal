@@ -66,7 +66,7 @@ http:ListenerConfiguration listenerConf = {
 }
 service http:InterceptableService / on new http:Listener(9090, listenerConf) {
     public function createInterceptors() returns http:Interceptor[] =>
-        [new authorization:JwtInterceptor(), new ErrorInterceptor()];
+        [new authorization:JwtInterceptor(), new authorization:ResponseInterceptor(), new ErrorInterceptor()];
 
     # Service init function.
     #
@@ -1370,7 +1370,7 @@ service http:InterceptableService / on new http:Listener(9090, listenerConf) {
     # + id - ID of the project
     # + return - Case filters or error
     resource function get projects/[entity:IdString id]/filters(http:RequestContext ctx)
-        returns types:ProjectFilterOptions|http:BadRequest|http:Unauthorized|http:Forbidden|http:InternalServerError {
+        returns types:ProjectFilterOptions|http:Unauthorized|http:Forbidden|http:NotFound|http:InternalServerError {
 
         authorization:UserInfoPayload|error userInfo = ctx.getWithType(authorization:HEADER_USER_INFO);
         if userInfo is error {
@@ -1402,6 +1402,15 @@ service http:InterceptableService / on new http:Listener(9090, listenerConf) {
                 };
             }
 
+            if getStatusCode(projectMetadata) == http:STATUS_NOT_FOUND {
+                log:printWarn(string `Project with ID: ${id} not found for user: ${userInfo.userId}`);
+                return <http:NotFound>{
+                    body: {
+                        message: "The requested project does not exist or you don't have access to it."
+                    }
+                };
+            }
+
             string customError = "Failed to retrieve project filters.";
             log:printError(customError, projectMetadata);
             return <http:InternalServerError>{
@@ -1412,6 +1421,64 @@ service http:InterceptableService / on new http:Listener(9090, listenerConf) {
         }
 
         return getProjectFilters(projectMetadata);
+    }
+
+    # Get features for a project.
+    #
+    # + id - ID of the project
+    # + return - Project features or error
+    resource function get projects/[entity:IdString id]/features(http:RequestContext ctx)
+        returns types:ProjectFeatures|http:Unauthorized|http:Forbidden|http:NotFound|http:InternalServerError {
+
+        authorization:UserInfoPayload|error userInfo = ctx.getWithType(authorization:HEADER_USER_INFO);
+        if userInfo is error {
+            return <http:InternalServerError>{
+                body: {
+                    message: ERR_MSG_USER_INFO_HEADER_NOT_FOUND
+                }
+            };
+        }
+
+        entity:ProjectMetadataResponse|error projectMetadata = entity:getProjectMetadata(userInfo.idToken, id);
+        if projectMetadata is error {
+            if getStatusCode(projectMetadata) == http:STATUS_UNAUTHORIZED {
+                log:printWarn(string `User: ${userInfo.userId} is not authorized to access the customer portal!`);
+                return <http:Unauthorized>{
+                    body: {
+                        message: ERR_MSG_UNAUTHORIZED_ACCESS
+                    }
+                };
+            }
+
+            if getStatusCode(projectMetadata) == http:STATUS_FORBIDDEN {
+                log:printWarn(string `User: ${userInfo.userId} is forbidden to access project features for project: ${
+                        id}`);
+                return <http:Forbidden>{
+                    body: {
+                        message: "You're not authorized to access the features for the selected project."
+                    }
+                };
+            }
+
+            if getStatusCode(projectMetadata) == http:STATUS_NOT_FOUND {
+                log:printWarn(string `Project with ID: ${id} not found for user: ${userInfo.userId}`);
+                return <http:NotFound>{
+                    body: {
+                        message: "The requested project does not exist or you don't have access to it."
+                    }
+                };
+            }
+
+            string customError = "Failed to retrieve project features.";
+            log:printError(customError, projectMetadata);
+            return <http:InternalServerError>{
+                body: {
+                    message: customError
+                }
+            };
+        }
+
+        return getProjectFeatures(projectMetadata);
     }
 
     # Classify the case using AI chat agent.
@@ -1442,6 +1509,37 @@ service http:InterceptableService / on new http:Listener(9090, listenerConf) {
             };
         }
         return classificationResponse;
+    }
+
+    # Get recommendations for a given chat history and conversation context.
+    #
+    # + payload - Recommendation request payload
+    # + return - Recommendation response or an error
+    resource function post conversations/recommendations/search(http:RequestContext ctx,
+            ai_chat_agent:RecommendationRequest payload)
+        returns ai_chat_agent:RecommendationResponse|http:InternalServerError {
+
+        authorization:UserInfoPayload|error userInfo = ctx.getWithType(authorization:HEADER_USER_INFO);
+        if userInfo is error {
+            return <http:InternalServerError>{
+                body: {
+                    message: ERR_MSG_USER_INFO_HEADER_NOT_FOUND
+                }
+            };
+        }
+
+        ai_chat_agent:RecommendationResponse|error recommendationResponse =
+            ai_chat_agent:getRecommendation(payload);
+        if recommendationResponse is error {
+            string customError = "Failed to retrieve recommendations.";
+            log:printError(customError, recommendationResponse);
+            return <http:InternalServerError>{
+                body: {
+                    message: customError
+                }
+            };
+        }
+        return recommendationResponse;
     }
 
     # Search conversations for a specific project with filters and pagination.
@@ -2393,7 +2491,8 @@ service http:InterceptableService / on new http:Listener(9090, listenerConf) {
         entity:DeployedProductsResponse|error productsResponse = entity:searchDeployedProducts(userInfo.idToken,
                 {
                     filters: {
-                        deploymentIds: [id]
+                        deploymentIds: [id],
+                        productCategories: payload?.filters?.productCategories
                     },
                     pagination: payload.pagination
                 });
@@ -3720,6 +3819,72 @@ service http:InterceptableService / on new http:Listener(9090, listenerConf) {
         }
         return <http:Ok>{
             body: mapTimeCardSearchResponse(response)
+        };
+    }
+
+    # Search time cards grouped by cases based on provided filters.
+    #
+    # + id - ID of the project
+    # + payload - Time card search payload containing filters and pagination info
+    # + return - List of time cards grouped by cases matching the criteria or an error
+    resource function post projects/[entity:IdString id]/cases/time\-cards/search(http:RequestContext ctx,
+            types:TimeCardSearchPayload payload)
+        returns http:Ok|http:BadRequest|http:Unauthorized|http:Forbidden|http:InternalServerError {
+        
+        authorization:UserInfoPayload|error userInfo = ctx.getWithType(authorization:HEADER_USER_INFO);
+        if userInfo is error {
+            return <http:InternalServerError>{
+                body: {
+                    message: ERR_MSG_USER_INFO_HEADER_NOT_FOUND
+                }
+            };
+        }
+
+        entity:CaseTimeCardsSearchResponse|error response = entity:searchTimeCardsGroupedByCases(userInfo.idToken,
+                {
+                    filters: {
+                        projectIds: [id],
+                        startDate: payload.filters?.startDate,
+                        endDate: payload.filters?.endDate,
+                        states: payload.filters?.states
+                    },
+                    pagination: payload.pagination
+                });
+        if response is error {
+            if getStatusCode(response) == http:STATUS_BAD_REQUEST {
+                return <http:BadRequest>{
+                    body: {
+                        message: "Invalid request parameters for searching time cards grouped by cases."
+                    }
+                };
+            }
+            if getStatusCode(response) == http:STATUS_UNAUTHORIZED {
+                log:printWarn(string `User: ${userInfo.userId} is not authorized to access time card information!`);
+                return <http:Unauthorized>{
+                    body: {
+                        message: ERR_MSG_UNAUTHORIZED_ACCESS
+                    }
+                };
+            }
+            if getStatusCode(response) == http:STATUS_FORBIDDEN {
+                log:printWarn(string `Access to time card information is forbidden for user: ${userInfo.userId}`);
+                return <http:Forbidden>{
+                    body: {
+                        message: "Access to time card information is forbidden for the user!"
+                    }
+                };
+            }
+
+            string customError = "Failed to search time cards grouped by cases.";
+            log:printError(customError, response);
+            return <http:InternalServerError>{
+                body: {
+                    message: customError
+                }
+            };
+        }
+        return <http:Ok>{
+            body: mapTimeCardSearchResponseGroupedByCases(response)
         };
     }
 

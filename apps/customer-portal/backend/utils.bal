@@ -23,6 +23,7 @@ configurable int stateIdOpen = 1;
 configurable types:FeatureFlags featureFlags = {
     usageMetricsEnabled: true
 };
+configurable string[] restrictedChangeRequestStateIds = ["-3", "-4", "-5"];
 
 # Search cases for a given project.
 #
@@ -101,6 +102,31 @@ public isolated function searchCases(string idToken, string projectId, types:Cas
     };
 }
 
+# Get project features for a given project.
+#
+# + projectMetadata - Project metadata response
+# + return - Project features or error
+public isolated function getProjectFeatures(entity:ProjectMetadataResponse projectMetadata)
+    returns types:ProjectFeatures {
+
+    types:ReferenceItem[] acceptedSeverityValues =
+        from entity:ChoiceListItem item in projectMetadata.features.acceptedSeverityValues
+    select {id: item.id.toString(), label: item.label};
+    return {
+        acceptedSeverityValues,
+        hasServiceRequestWriteAccess: projectMetadata.features.hasServiceRequestWriteAccess,
+        hasServiceRequestReadAccess: projectMetadata.features.hasServiceRequestReadAccess,
+        hasSraWriteAccess: projectMetadata.features.hasSraWriteAccess,
+        hasSraReadAccess: projectMetadata.features.hasSraReadAccess,
+        hasChangeRequestReadAccess: projectMetadata.features.hasChangeRequestReadAccess,
+        hasEngagementsReadAccess: projectMetadata.features.hasEngagementsReadAccess,
+        hasUpdatesReadAccess: projectMetadata.features.hasUpdatesReadAccess,
+        hasTimeLogsReadAccess: projectMetadata.features.hasTimeLogsReadAccess,
+        hasDeploymentWriteAccess: projectMetadata.features.hasDeploymentWriteAccess,
+        hasDeploymentReadAccess: projectMetadata.features.hasDeploymentReadAccess
+    };
+}
+
 # Get project filters for a given project.
 #
 # + projectMetadata - Project metadata response
@@ -133,13 +159,18 @@ public isolated function getProjectFilters(entity:ProjectMetadataResponse projec
     types:ReferenceItem[] engagementPaymentTypes = from entity:ChoiceListItem item in projectMetadata.engagementPaymentTypes
         select {id: item.id.toString(), label: item.label};
 
+    types:ReferenceItem[] nonRestrictedChangeRequestStates =
+        from types:ReferenceItem changeRequestState in changeRequestStates
+    where restrictedChangeRequestStateIds.indexOf(changeRequestState.id) is ()
+    select changeRequestState;
+
     return {
         caseStates,
         severities,
         issueTypes,
         deploymentTypes,
         callRequestStates,
-        changeRequestStates,
+        changeRequestStates: nonRestrictedChangeRequestStates,
         changeRequestImpacts,
         caseTypes,
         conversationStates,
@@ -256,6 +287,7 @@ public isolated function mapDeployments(entity:DeploymentsResponse response) ret
         select {
             id: deployment.id,
             name: deployment.name,
+            number: deployment.number,
             createdOn: deployment.createdOn,
             updatedOn: deployment.updatedOn,
             description: deployment.description,
@@ -285,8 +317,6 @@ public isolated function mapDeployedProducts(entity:DeployedProductsResponse res
             description: product.description,
             cores: product.cores,
             tps: product.tps,
-            releasedOn: product.releasedOn,
-            endOfLifeOn: product.endOfLifeOn,
             updates: product.updates,
             product: associatedProduct != () ? {
                     id: associatedProduct.id,
@@ -294,7 +324,12 @@ public isolated function mapDeployedProducts(entity:DeployedProductsResponse res
                     abbreviation: associatedProduct?.abbreviation
                 } : (),
             deployment: deployment != () ? {id: deployment.id, label: deployment.name} : (),
-            version: version != () ? {id: version.id, label: version.name} : (),
+            version: version != () ? {
+                    id: version.id,
+                    label: version.name,
+                    releasedOn: associatedProduct?.releasedOn,
+                    endOfLifeOn: associatedProduct?.endOfLifeOn
+                } : (),
             category: category != () ? {id: category.id, label: category.name} : ()
         };
 
@@ -845,7 +880,9 @@ public isolated function mapProjectsResponse(entity:ProjectsResponse response) r
             name: project.name,
             description: project.description,
             createdOn: project.createdOn,
+            closureState: project.closureState,
             'type: {id: project.'type.id, label: project.'type.name},
+            hasPdpSubscription: project.hasPdpSubscription,
             hasAgent: project.hasAgent,
             hasKbReferences: project.hasKbReferences,
             activeCasesCount: project.activeCasesCount,
@@ -868,7 +905,8 @@ public isolated function mapProjectResponse(entity:ProjectResponse response) ret
     createdOn: response.createdOn,
     'type: {id: response.'type.id, label: response.'type.name},
     sfId: response.sfId,
-    hasSr: response.hasSr,
+    closureState: response.closureState,
+    hasPdpSubscription: response.hasPdpSubscription,
     startDate: response.startDate,
     endDate: response.endDate,
     account: {
@@ -1001,4 +1039,29 @@ public isolated function mapInstanceUsages(entity:InstanceUsageResponse response
         startDate: response.startDate,
         endDate: response.endDate
     };
+}
+
+# Map time cards search response grouped by cases to the desired structure.
+#
+# + response - Time cards search response grouped by cases from the entity service
+# + return - Mapped time cards search response grouped by cases
+public isolated function mapTimeCardSearchResponseGroupedByCases(entity:CaseTimeCardsSearchResponse response)
+    returns types:CaseTimeCardsSearchResponse {
+
+    types:CaseTimeCard[] caseTimeCards = from entity:CaseTimeCardSummary caseTimeCard in response.cases
+        let entity:ReferenceTableItem? project = caseTimeCard.case.project
+        select {
+            case: {
+                id: caseTimeCard.case.id,
+                number: caseTimeCard.case.number,
+                name: caseTimeCard.case.name,
+                updatedOn: caseTimeCard.case.updatedOn,
+                project: project != () ? {id: project.id, label: project.name} : ()
+            },
+            totalTime: caseTimeCard.totalTime,
+            totalCount: caseTimeCard.totalCount,
+            billable: caseTimeCard.billable,
+            nonBillable: caseTimeCard.nonBillable
+        };
+    return {caseTimeCards, totalRecords: response.totalRecords, 'limit: response.'limit, offset: response.offset};
 }

@@ -130,10 +130,12 @@ const EnterSubmitPlugin = ({
   onSubmit,
   disabled,
   enterToSubmit = false,
+  shiftEnterToSubmit = false,
 }: {
   onSubmit?: () => void;
   disabled?: boolean;
   enterToSubmit?: boolean;
+  shiftEnterToSubmit?: boolean;
 }) => {
   const [editor] = useLexicalComposerContext();
 
@@ -168,6 +170,13 @@ const EnterSubmitPlugin = ({
           return true;
         }
 
+        if (shiftEnterToSubmit && event.shiftKey && !event.ctrlKey && !event.metaKey) {
+          if (event.isComposing) return false;
+          event.preventDefault();
+          onSubmit();
+          return true;
+        }
+
         if (!event.ctrlKey && !event.metaKey) return false;
         event.preventDefault?.();
         onSubmit();
@@ -177,7 +186,7 @@ const EnterSubmitPlugin = ({
     );
 
     return unregEnter;
-  }, [editor, onSubmit, disabled, enterToSubmit]);
+  }, [editor, onSubmit, disabled, enterToSubmit, shiftEnterToSubmit]);
 
   return null;
 };
@@ -242,6 +251,7 @@ const Editor = ({
   toolbarVariant = "full",
   onSubmitKeyDown,
   enterToSubmit = false,
+  shiftEnterToSubmit = false,
   placeholder = "Enter description...",
   id,
   showKeyboardHint = false,
@@ -262,6 +272,7 @@ const Editor = ({
   toolbarVariant?: ToolbarVariant;
   onSubmitKeyDown?: () => void;
   enterToSubmit?: boolean;
+  shiftEnterToSubmit?: boolean;
   placeholder?: string;
   id?: string;
   showKeyboardHint?: boolean;
@@ -335,8 +346,6 @@ const Editor = ({
         sx={{
           p: 2,
           borderColor: disabled ? "action.disabled" : "divider",
-          backgroundColor: "background.acrylic",
-          backdropFilter: "blur(10px)",
           transition: "border-color 0.2s",
           "&:hover:not(:focus-within)": {
             borderColor: disabled ? "action.disabled" : "text.primary",
@@ -378,6 +387,9 @@ const Editor = ({
               "& p": {
                 margin: 0,
                 padding: 0,
+              },
+              "& > p:only-child > br:only-child": {
+                display: "none",
               },
             },
             "& .editor-text-bold": {
@@ -449,7 +461,7 @@ const Editor = ({
           <InitialValuePlugin initialHtml={value} />
           <OnChangeHTMLPlugin onChange={onChange} />
           <ResetPlugin resetTrigger={resetTrigger} />
-          <EnterSubmitPlugin onSubmit={onSubmitKeyDown} disabled={disabled} enterToSubmit={enterToSubmit} />
+          <EnterSubmitPlugin onSubmit={onSubmitKeyDown} disabled={disabled} enterToSubmit={enterToSubmit} shiftEnterToSubmit={shiftEnterToSubmit} />
           {overlayElement && (
             <Box
               sx={{

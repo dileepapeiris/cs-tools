@@ -58,9 +58,20 @@ import { ROUTE_PREVIOUS_PAGE } from "@features/project-hub/constants/navigationC
 import { ConversationListRowAction } from "@features/support/types/conversations";
 import { resolveConversationListRowAction } from "@features/support/utils/conversationsList";
 import { NOVERA_DISPLAY_NAME } from "@features/support/constants/chatConstants";
-import MarkdownIt from "markdown-it";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 
-const md = new MarkdownIt({ linkify: true, breaks: true });
+const SAFE_PROTOCOLS = ["http:", "https:"];
+
+function isSafeHref(href: string | undefined): href is string {
+  if (!href || typeof href !== "string") return false;
+  try {
+    const parsed = new URL(href, "https://invalid.invalid");
+    return SAFE_PROTOCOLS.includes(parsed.protocol);
+  } catch {
+    return false;
+  }
+}
 
 function ConversationMsgBubble({
   message,
@@ -85,7 +96,74 @@ function ConversationMsgBubble({
       ? message.timestamp.toISOString()
       : String(message.timestamp ?? "");
 
-  const html = useMemo(() => md.render(message.text ?? ""), [message.text]);
+  const markdownComponents: React.ComponentProps<
+    typeof ReactMarkdown
+  >["components"] = useMemo(
+    () => ({
+      a: ({ href, children }) =>
+        isSafeHref(href) ? (
+          <Box
+            component="a"
+            href={href}
+            target="_blank"
+            rel="noopener noreferrer"
+            sx={{ color: "primary.main", textDecoration: "underline" }}
+          >
+            {children}
+          </Box>
+        ) : (
+          <Box component="span">{children}</Box>
+        ),
+      table: ({ children }) => (
+        <Box sx={{ width: "100%", overflowX: "auto", mb: 1 }}>
+          <Box
+            component="table"
+            sx={{
+              width: "100%",
+              borderCollapse: "collapse",
+              minWidth: 420,
+            }}
+          >
+            {children}
+          </Box>
+        </Box>
+      ),
+      thead: ({ children }) => <Box component="thead">{children}</Box>,
+      tbody: ({ children }) => <Box component="tbody">{children}</Box>,
+      tr: ({ children }) => (
+        <Box component="tr" sx={{ borderBottom: "1px solid", borderColor: "divider" }}>
+          {children}
+        </Box>
+      ),
+      th: ({ children }) => (
+        <Box
+          component="th"
+          sx={{
+            textAlign: "left",
+            p: 1,
+            fontSize: "0.75rem",
+            fontWeight: 600,
+            color: "text.secondary",
+          }}
+        >
+          {children}
+        </Box>
+      ),
+      td: ({ children }) => (
+        <Box
+          component="td"
+          sx={{
+            p: 1,
+            fontSize: "0.8125rem",
+            verticalAlign: "top",
+          }}
+        >
+          {children}
+        </Box>
+      ),
+    }),
+    [],
+  );
 
   return (
     <Stack
@@ -165,21 +243,58 @@ function ConversationMsgBubble({
             "& ul, & ol": { mt: 0, mb: 1, pl: 2.5 },
             "& li": { mb: 0.5 },
             "& a": { color: "primary.main", textDecoration: "underline" },
+            "& table": {
+              width: "100%",
+              minWidth: 420,
+              borderCollapse: "collapse",
+              mb: 1,
+            },
+            "& tr": {
+              borderBottom: "1px solid",
+              borderColor: "divider",
+            },
+            "& th": {
+              textAlign: "left",
+              p: 1,
+              fontSize: "0.75rem",
+              fontWeight: 600,
+              color: "text.secondary",
+            },
+            "& td": {
+              p: 1,
+              fontSize: "0.8125rem",
+              verticalAlign: "top",
+            },
             "& code": {
               fontFamily: "monospace",
               backgroundColor: "action.hover",
-              px: 0.5,
+              px: 0.75,
+              py: 0.5,
+              whiteSpace: "pre-wrap",
+              wordBreak: "break-word",
+              display: "block",
+              boxSizing: "border-box",
             },
             "& pre": {
               overflowX: "auto",
+              maxWidth: "100%",
+              whiteSpace: "pre-wrap",
+              wordBreak: "break-word",
               backgroundColor: "action.disabledBackground",
               p: 1,
               m: 0,
+              boxSizing: "border-box",
+            },
+            "& pre code": {
+              backgroundColor: "transparent",
+              p: 0,
             },
           }}
         >
           {isBot ? (
-            <Box dangerouslySetInnerHTML={{ __html: html }} />
+            <ReactMarkdown components={markdownComponents} remarkPlugins={[remarkGfm]}>
+              {message.text ?? ""}
+            </ReactMarkdown>
           ) : (
             <Typography
               variant="body2"

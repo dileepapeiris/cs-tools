@@ -17,8 +17,9 @@
 import type { ChatMessageBubbleProps } from "@features/support/types/supportComponents";
 import { Avatar, Box, Paper, Stack, Typography, alpha, useTheme } from "@wso2/oxygen-ui";
 import { Bot, User } from "@wso2/oxygen-ui-icons-react";
-import MarkdownIt from "markdown-it";
 import { type JSX, useEffect, useMemo, useRef } from "react";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 import { ChatSender } from "@features/support/types/conversations";
 import {
   NOVERA_ANALYZING_PLACEHOLDER_TEXT,
@@ -72,32 +73,117 @@ function isSafeHref(href: string | undefined): href is string {
   }
 }
 
-const md = new MarkdownIt({ linkify: true, breaks: false });
-
-/** Block unsafe href attributes before the HTML reaches the DOM. */
-const defaultLinkOpenRenderer =
-  md.renderer.rules.link_open ??
-  ((tokens, idx, options, _env, self) => self.renderToken(tokens, idx, options));
-
-md.renderer.rules.link_open = (tokens, idx, options, env, self) => {
-  const token = tokens[idx];
-  const hrefIndex = token.attrIndex("href");
-  if (hrefIndex >= 0) {
-    const href = token.attrs?.[hrefIndex]?.[1];
-    if (!isSafeHref(href)) {
-      // Strip the href so the anchor renders as plain text wrapper
-      token.attrs?.splice(hrefIndex, 1);
-    } else {
-      token.attrSet("target", "_blank");
-      token.attrSet("rel", "noopener noreferrer");
-    }
-  }
-  return defaultLinkOpenRenderer(tokens, idx, options, env, self);
-};
-
 function MarkdownContent({ text }: { text: string }) {
-  const html = useMemo(() => md.render(text), [text]);
-  return <Box dangerouslySetInnerHTML={{ __html: html }} />;
+  const markdownComponents: React.ComponentProps<
+    typeof ReactMarkdown
+  >["components"] = useMemo(
+    () => ({
+      a: ({ href, children }) =>
+        isSafeHref(href) ? (
+          <Box
+            component="a"
+            href={href}
+            target="_blank"
+            rel="noopener noreferrer"
+            sx={{ color: "primary.main", textDecoration: "underline" }}
+          >
+            {children}
+          </Box>
+        ) : (
+          <Box component="span">{children}</Box>
+        ),
+      table: ({ children }) => (
+        <Box sx={{ width: "100%", overflowX: "auto", mb: 1 }}>
+          <Box
+            component="table"
+            sx={{
+              width: "100%",
+              borderCollapse: "collapse",
+              minWidth: 420,
+            }}
+          >
+            {children}
+          </Box>
+        </Box>
+      ),
+      thead: ({ children }) => <Box component="thead">{children}</Box>,
+      tbody: ({ children }) => <Box component="tbody">{children}</Box>,
+      tr: ({ children }) => (
+        <Box component="tr" sx={{ borderBottom: "1px solid", borderColor: "divider" }}>
+          {children}
+        </Box>
+      ),
+      th: ({ children }) => (
+        <Box
+          component="th"
+          sx={{
+            textAlign: "left",
+            p: 1,
+            fontSize: "0.75rem",
+            fontWeight: 600,
+            color: "text.secondary",
+          }}
+        >
+          {children}
+        </Box>
+      ),
+      td: ({ children }) => (
+        <Box
+          component="td"
+          sx={{
+            p: 1,
+            fontSize: "0.8125rem",
+            verticalAlign: "top",
+          }}
+        >
+          {children}
+        </Box>
+      ),
+    }),
+    [],
+  );
+
+  return (
+    <Box
+      sx={{
+        "& h1:first-of-type, & h2:first-of-type, & h3:first-of-type, & p:first-of-type":
+          { mt: 0 },
+        "& ul, & ol": { mt: 0, mb: 1, pl: 2.5 },
+        "& li": { mb: 0.5 },
+        "& p": { margin: "0 0 0.25em 0", whiteSpace: "pre-wrap", wordBreak: "break-word" },
+        "& p:last-child": { marginBottom: 0 },
+        "& pre": {
+          overflowX: "auto",
+          maxWidth: "100%",
+          whiteSpace: "pre-wrap",
+          wordBreak: "break-word",
+          backgroundColor: "action.disabledBackground",
+          p: 1,
+          m: 0,
+          boxSizing: "border-box",
+        },
+        "& code": {
+          fontFamily: "monospace",
+          fontSize: "inherit",
+          backgroundColor: "action.hover",
+          px: 0.75,
+          py: 0.5,
+          whiteSpace: "pre-wrap",
+          wordBreak: "break-word",
+          display: "block",
+          boxSizing: "border-box",
+        },
+        "& pre code": {
+          backgroundColor: "transparent",
+          p: 0,
+        },
+      }}
+    >
+      <ReactMarkdown components={markdownComponents} remarkPlugins={[remarkGfm]}>
+        {text}
+      </ReactMarkdown>
+    </Box>
+  );
 }
 
 /**
@@ -320,12 +406,7 @@ export default function ChatMessageBubble({
                 </Box>
               </Paper>
             ) : (
-              <Box
-                sx={{
-                  "& h1:first-of-type, & h2:first-of-type, & h3:first-of-type, & p:first-of-type":
-                    { mt: 0 },
-                }}
-              >
+              <Box>
                 <MarkdownContent text={displayText} />
                 {message.thinkingSteps && message.thinkingSteps.length > 0 && (
                   <Box sx={{ mt: 1 }}>

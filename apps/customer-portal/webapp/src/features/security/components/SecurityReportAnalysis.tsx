@@ -63,7 +63,7 @@ import {
   parseSecurityReportCaseSortField,
   parseSecurityReportViewMode,
 } from "@features/security/utils/securityPage";
-import { getProjectPermissions } from "@utils/permission";
+import { getProjectPermissions, isProjectRestricted } from "@utils/permission";
 
 /**
  * SecurityReportAnalysis displays security vulnerability reports uploaded for analysis.
@@ -79,10 +79,12 @@ const SecurityReportAnalysis = (): JSX.Element => {
     useGetProjectFeatures(projectId || "");
   const areFeaturePermissionsReady =
     !isProjectLoading && !isProjectFeaturesLoading && !!projectFeatures;
-  const canCreateSecurityReport = areFeaturePermissionsReady
-    ? getProjectPermissions(projectDetails?.type?.label, { projectFeatures })
-        .hasSecurityReportAnalysis
-    : false;
+  const canCreateSecurityReport =
+    areFeaturePermissionsReady &&
+    !isProjectRestricted(projectDetails?.closureState)
+      ? getProjectPermissions(projectDetails?.type?.label, { projectFeatures })
+          .hasSecurityReportAnalysis
+      : false;
 
   const [viewMode, setViewMode] = useState<SecurityReportViewMode>(
     SecurityReportViewMode.ALL,

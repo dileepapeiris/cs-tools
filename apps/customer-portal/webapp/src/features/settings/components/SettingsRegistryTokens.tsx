@@ -106,6 +106,7 @@ import { resolveRegistryTokenSubTabId } from "@features/settings/utils/settingsP
 export default function SettingsRegistryTokens({
   projectId,
   isAdmin,
+  isRestricted = false,
 }: SettingsRegistryTokensProps): JSX.Element {
   const theme = useTheme();
   const [searchQuery, setSearchQuery] = useState("");
@@ -331,23 +332,25 @@ export default function SettingsRegistryTokens({
           }}
         />
         {/* Generate button: user token for all, service token for admins only */}
-        <Button
-          variant="contained"
-          color="warning"
-          startIcon={
-            displayTokenTab === RegistryTokenSubTabId.USER ? (
-              <KeyRound size={18} />
-            ) : (
-              <Monitor size={18} />
-            )
-          }
-          sx={{ whiteSpace: "nowrap", pl: 3, pr: 3 }}
-          onClick={() => setGenerateModalOpen(true)}
-        >
-          {displayTokenTab === RegistryTokenSubTabId.USER
-            ? REGISTRY_GENERATE_USER_TOKEN
-            : REGISTRY_GENERATE_SERVICE_TOKEN}
-        </Button>
+        {!isRestricted && (
+          <Button
+            variant="contained"
+            color="warning"
+            startIcon={
+              displayTokenTab === RegistryTokenSubTabId.USER ? (
+                <KeyRound size={18} />
+              ) : (
+                <Monitor size={18} />
+              )
+            }
+            sx={{ whiteSpace: "nowrap", pl: 3, pr: 3 }}
+            onClick={() => setGenerateModalOpen(true)}
+          >
+            {displayTokenTab === RegistryTokenSubTabId.USER
+              ? REGISTRY_GENERATE_USER_TOKEN
+              : REGISTRY_GENERATE_SERVICE_TOKEN}
+          </Button>
+        )}
       </Box>
 
       {/* User Tokens Table */}

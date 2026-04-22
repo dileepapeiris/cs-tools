@@ -899,6 +899,8 @@ public type DeployedProductSearchPayload record {|
         IdString[] projectIds?;
         # List of deployment IDs to filter
         IdString[] deploymentIds?;
+        # List of product categories to filter
+        ProductCategory[] productCategories?;
     |} filters?;
     # Pagination details
     Pagination pagination?;

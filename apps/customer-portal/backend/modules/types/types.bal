@@ -649,6 +649,11 @@ public type DeploymentsResponse record {|
 
 # Deployed product search payload
 public type DeployedProductSearchPayload record {|
+    # Filter criteria
+    record {|
+        # List of product categories to filter
+        entity:ProductCategory[] productCategories?;
+    |} filters?;
     # Pagination details
     entity:Pagination pagination?;
 |};

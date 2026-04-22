@@ -2491,7 +2491,8 @@ service http:InterceptableService / on new http:Listener(9090, listenerConf) {
         entity:DeployedProductsResponse|error productsResponse = entity:searchDeployedProducts(userInfo.idToken,
                 {
                     filters: {
-                        deploymentIds: [id]
+                        deploymentIds: [id],
+                        productCategories: payload?.filters?.productCategories
                     },
                     pagination: payload.pagination
                 });

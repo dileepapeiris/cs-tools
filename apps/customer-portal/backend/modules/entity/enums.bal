@@ -70,3 +70,8 @@ public enum StatsFilter {
 public enum ProductClass {
     PRODUCT_MODEL = "product_model"
 }
+
+# Valid product category values.
+public enum ProductCategory {
+    CLOUD = "cl"
+}

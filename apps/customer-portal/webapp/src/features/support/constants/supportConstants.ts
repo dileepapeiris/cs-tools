@@ -557,9 +557,9 @@ export const SERVICE_REQUEST_STAT_CONFIGS: SupportStatConfig<ServiceRequestStatK
  * Valid keys for operations statistics.
  */
 export type OperationsStatKey =
-  | "activeServiceRequests"
-  | "activeChangeRequests"
-  | "completedThisMonth"
+  | "actionRequiredServiceRequests"
+  | "outstandingServiceRequests"
+  | "actionRequiredChangeRequests"
   | "upcomingChanges";
 
 /**
@@ -569,19 +569,19 @@ export const OPERATIONS_STAT_CONFIGS: SupportStatConfig<OperationsStatKey>[] = [
   {
     icon: Server,
     iconColor: "info",
-    key: "activeServiceRequests",
+    key: "actionRequiredServiceRequests",
     label: "Action Required Service Requests",
   },
   {
     icon: CalendarDays,
     iconColor: "primary",
-    key: "activeChangeRequests",
+    key: "outstandingServiceRequests",
     label: "Outstanding Service Requests",
   },
   {
     icon: CircleCheck,
     iconColor: "success",
-    key: "completedThisMonth",
+    key: "actionRequiredChangeRequests",
     label: "Action Required Change Requests",
   },
   {

@@ -268,7 +268,7 @@ export type UpdateCardBreakdownProps = {
 };
 
 export type UpdateCardLevelsProps = {
-  startingUpdateLevel: number;
+  currentUpdateLevel: number;
   recommendedUpdateLevel: number;
   pendingLevels: number;
 };

@@ -45,7 +45,6 @@ export interface ListSearchPanelProps {
   onLoadMoreDeployments?: () => void;
   hasMoreDeployments?: boolean;
   isFetchingMoreDeployments?: boolean;
-  /** Filter keys to exclude from the active-filter count (e.g. URL-seeded filters). */
   excludeFromCount?: string[];
 }
 

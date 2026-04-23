@@ -248,6 +248,7 @@ export function buildActiveCasesLegendRows(
       item.key as "serviceRequests" | "changeRequests",
     ),
     color: item.color,
+    id: item.key,
   }));
 }
 

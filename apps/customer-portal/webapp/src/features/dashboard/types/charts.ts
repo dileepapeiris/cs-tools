@@ -71,6 +71,7 @@ export type CasesTrendChartProps = {
   isLoading?: boolean;
   isError?: boolean;
   centerContent?: boolean;
+  onSliceClick?: () => void;
 };
 
 // Active cases chart props.
@@ -80,6 +81,7 @@ export type ActiveCasesChartProps = {
   isError?: boolean;
   variant?: OperationsChartMode;
   centerContent?: boolean;
+  onSliceClick?: (key: string) => void;
 };
 
 // Chart legend props.
@@ -105,4 +107,6 @@ export type ChartLayoutProps = {
   operationsChartMode?: OperationsChartMode;
   showEngagementsChart?: boolean;
   onSeverityClick?: (severityId: string) => void;
+  onOperationsClick?: (key: string) => void;
+  onEngagementsClick?: () => void;
 };

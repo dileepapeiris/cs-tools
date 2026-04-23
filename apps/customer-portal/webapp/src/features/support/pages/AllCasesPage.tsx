@@ -308,16 +308,18 @@ export default function AllCasesPage(): JSX.Element {
         }}
       />
 
-      {/* Stat cards */}
-      <Box sx={{ mb: 3 }}>
-        <ListStatGrid
-          isLoading={isStatsLoading}
-          isError={isStatsError}
-          entityName="case"
-          configs={ALL_CASES_STAT_CONFIGS}
-          stats={getAllCasesFlattenedStats(stats)}
-        />
-      </Box>
+      {/* Stat cards — hidden when arriving from severity chart click */}
+      {!initialSeverityId && (
+        <Box sx={{ mb: 3 }}>
+          <ListStatGrid
+            isLoading={isStatsLoading}
+            isError={isStatsError}
+            entityName="case"
+            configs={ALL_CASES_STAT_CONFIGS}
+            stats={getAllCasesFlattenedStats(stats)}
+          />
+        </Box>
+      )}
 
       <ListSearchPanel
         searchTerm={searchTerm}
@@ -347,6 +349,11 @@ export default function AllCasesPage(): JSX.Element {
         restrictSeverityToLow={restrictSeverityToLow}
         hideDeploymentFilter={!permissions.hasDeployments}
         isProjectContextLoading={isProjectContextLoading}
+        excludeFromCount={
+          initialSeverityId && filters.severityId === initialSeverityId
+            ? ["severityId"]
+            : []
+        }
       />
 
       <ListResultsBar

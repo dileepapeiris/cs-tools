@@ -74,6 +74,27 @@ export default function DashboardPage(): JSX.Element {
     [navigate, projectId, location.pathname],
   );
 
+  const handleOperationsClick = useCallback(
+    (key: string) => {
+      const segment = key === "serviceRequests" ? "service-requests" : "change-requests";
+      navigate(
+        `/projects/${projectId}/operations/${segment}`,
+        { state: { returnTo: location.pathname } },
+      );
+    },
+    [navigate, projectId, location.pathname],
+  );
+
+  const handleEngagementsClick = useCallback(
+    () => {
+      navigate(
+        `/projects/${projectId}/engagements`,
+        { state: { returnTo: location.pathname } },
+      );
+    },
+    [navigate, projectId, location.pathname],
+  );
+
   // loader
   const { showLoader, hideLoader } = useLoader();
 
@@ -549,6 +570,8 @@ export default function DashboardPage(): JSX.Element {
         operationsChartMode={operationsChartMode}
         showEngagementsChart={permissions.hasEngagements}
         onSeverityClick={handleSeverityClick}
+        onOperationsClick={handleOperationsClick}
+        onEngagementsClick={handleEngagementsClick}
       />
       {/* Cases Table */}
       {projectId && (

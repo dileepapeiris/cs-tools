@@ -30,6 +30,8 @@ export function UpdateCardBreakdown({
   pendingRegular,
   pendingSecurity,
   totalPending,
+  onInstalledClick,
+  onPendingClick,
 }: UpdateCardBreakdownProps): JSX.Element {
   const theme = useTheme();
 
@@ -37,14 +39,31 @@ export function UpdateCardBreakdown({
     <Grid container spacing={1} sx={{ mb: 2 }}>
       <Grid size={{ xs: 6 }}>
         <Paper
+          onClick={onInstalledClick}
+          variant="outlined"
           sx={{
-            p: 1,
+            p: 1.5,
             textAlign: "center",
-            borderColor: "success.light",
-            bgcolor: alpha(theme.palette["success"].light, 0.1),
+            border: "1px solid",
+            borderColor: alpha(theme.palette.success.main, 0.35),
+            bgcolor: alpha(theme.palette.success.light, 0.08),
+            cursor: onInstalledClick ? "pointer" : "default",
+            transition: "all 0.2s ease",
+            ...(onInstalledClick && {
+              "&:hover": {
+                bgcolor: alpha(theme.palette.success.light, 0.2),
+                borderColor: "success.main",
+                boxShadow: `0 2px 8px ${alpha(theme.palette.success.main, 0.25)}`,
+                transform: "translateY(-1px)",
+              },
+              "&:active": {
+                transform: "translateY(0)",
+                boxShadow: "none",
+              },
+            }),
           }}
         >
-          <Typography variant="caption" color="text.secondary" display="block">
+          <Typography variant="caption" color="text.secondary" display="block" sx={{ mb: 0.25 }}>
             Installed
           </Typography>
           <Typography variant="body2" color="success.main" fontWeight="bold">
@@ -57,14 +76,31 @@ export function UpdateCardBreakdown({
       </Grid>
       <Grid size={{ xs: 6 }}>
         <Paper
+          onClick={onPendingClick}
+          variant="outlined"
           sx={{
-            p: 1,
+            p: 1.5,
             textAlign: "center",
-            borderColor: "warning.light",
-            bgcolor: alpha(theme.palette["warning"].light, 0.1),
+            border: "1px solid",
+            borderColor: alpha(theme.palette.warning.main, 0.35),
+            bgcolor: alpha(theme.palette.warning.light, 0.08),
+            cursor: onPendingClick ? "pointer" : "default",
+            transition: "all 0.2s ease",
+            ...(onPendingClick && {
+              "&:hover": {
+                bgcolor: alpha(theme.palette.warning.light, 0.2),
+                borderColor: "warning.main",
+                boxShadow: `0 2px 8px ${alpha(theme.palette.warning.main, 0.25)}`,
+                transform: "translateY(-1px)",
+              },
+              "&:active": {
+                transform: "translateY(0)",
+                boxShadow: "none",
+              },
+            }),
           }}
         >
-          <Typography variant="caption" color="text.secondary" display="block">
+          <Typography variant="caption" color="text.secondary" display="block" sx={{ mb: 0.25 }}>
             Pending
           </Typography>
           <Typography variant="body2" color="warning.main" fontWeight="bold">

@@ -62,10 +62,10 @@ export function PendingUpdatesList({
           justifyContent: "center",
           alignItems: "center",
           flexDirection: "column",
-          py: 5,
+          minHeight: "55vh",
         }}
       >
-        <img src={error500Svg} alt="" aria-hidden="true" style={{ width: 200, height: "auto" }} />
+        <img src={error500Svg} alt="" aria-hidden="true" style={{ width: 300, height: "auto" }} />
         <Typography variant="body2" color="text.secondary" sx={{ mt: 2 }}>
           {PENDING_UPDATES_LIST_ERROR_MESSAGE}
         </Typography>

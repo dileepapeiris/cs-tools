@@ -94,6 +94,18 @@ export default function ListStatGrid<T extends string>({
           <Box
             key={stat.key}
             onClick={onStatClick ? () => onStatClick(stat.key) : undefined}
+            role={onStatClick ? "button" : undefined}
+            tabIndex={onStatClick ? 0 : undefined}
+            onKeyDown={
+              onStatClick
+                ? (e) => {
+                    if (e.key === "Enter" || e.key === " ") {
+                      e.preventDefault();
+                      onStatClick(stat.key);
+                    }
+                  }
+                : undefined
+            }
             sx={{
               position: "relative",
               minWidth: 0,

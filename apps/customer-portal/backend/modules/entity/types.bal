@@ -431,6 +431,8 @@ public type CaseSearchFilters record {|
     int[] stateKeys?;
     # Severity key
     int severityKey?;
+    # Engagement type key (required for engagement type cases)
+    int engagementTypeKey?;
     # Deployment ID
     string deploymentId?;
     # Case created by the logged in user
@@ -585,6 +587,10 @@ public type ProjectFeatures record {|
     boolean hasDeploymentWriteAccess;
     # Indicates if deployment read access is enabled
     boolean hasDeploymentReadAccess;
+    # Allowed categories for default case creation in deployed product search
+    ProductCategory[]? defaultCaseProductCategories;
+    # Allowed categories for service request creation in deployed product search
+    ProductCategory[]? srProductCategories;
     json...;
 |};
 
@@ -635,6 +641,22 @@ public type ProjectStatsResponse record {|
     int deployedProductCount;
     # Instance count associated with the project
     int instanceCount;
+    # Outstanding count breakdown
+    record {|
+        # Outstanding case count
+        int caseCount;
+        # Outstanding service request count
+        int serviceRequestCount;
+        # Outstanding engagement count
+        int engagementCount;
+        # Outstanding SRA count
+        int sraCount;
+        # Outstanding change request count
+        int changeRequestCount;
+        # Outstanding announcement count
+        int announcementCount;
+        json...;
+    |} outstandingCount;
     json...;
 |};
 
@@ -681,6 +703,8 @@ public type ProjectCaseStatsResponse record {|
     int activeCount;
     # Outstanding case count (cases that are not solution proposed or closed)
     int outstandingCount;
+    # Action required from customer case count
+    int actionRequiredCount;
     # Average response time
     decimal averageResponseTime;
     # Resolved case count breakdown
@@ -762,6 +786,8 @@ public type Comment record {|
     string? createdByFirstName;
     # Last name of the user who created the comment
     string? createdByLastName;
+    # Full name of the user who created the comment
+    string? createdByFullName;
     json...;
 |};
 
@@ -1997,6 +2023,8 @@ public type ChangeRequest record {|
     string number;
     # Change request title
     string? title;
+    # Change request description
+    string? description;
     # Associated project information
     ReferenceTableItem? project;
     # Service request information (case)
@@ -2091,8 +2119,6 @@ public type CatalogItemVariablesResponse record {|
 # Change request details information.
 public type ChangeRequestResponse record {|
     *ChangeRequest;
-    # Change request description
-    string? description;
     # User who created the change request
     string createdBy;
     # Justification for the change request
@@ -2126,6 +2152,8 @@ public type ProjectChangeRequestStatsResponse record {|
     int activeCount;
     # Outstanding change request count
     int outstandingCount;
+    # Action required from customer change request count
+    int actionRequiredCount;
     # Count of change requests by state
     ChoiceListItem[] stateCount;
     json...;
@@ -2164,4 +2192,50 @@ public type UpdatedChangeRequest record {|
     # User who updated the change request
     string updatedBy;
     json...;
+|};
+
+# Request payload for searching case activities.
+public type CaseActivitySearchPayload record {|
+    # Pagination details
+    Pagination pagination?;
+|};
+
+# Activity item.
+public type Activity record {|
+    # ID of the activity
+    IdString id;
+    # HTML content of the activity
+    string content;
+    # Created date and time
+    string createdOn;
+    # Created by (user email)
+    string createdBy;
+    # First name of the creator
+    string? createdByFirstName;
+    # Last name of the creator
+    string? createdByLastName;
+    # Full name of the creator
+    string? createdByFullName;
+    # Activity type ("attachment" or "comment")
+    string 'type;
+    # File name (only for attachments)
+    string fileName?;
+    # Content type MIME type (only for attachments)
+    string contentType?;
+    # File size in bytes (only for attachments)
+    int sizeBytes?;
+    # Download URL (only for attachments)
+    string downloadUrl?;
+    # Comment type (only for comments, e.g., "comments")
+    string commentType?;
+    json...;
+|};
+
+# Case activities search response from ServiceNow.
+public type CaseActivitySearchResponse record {|
+    # List of activities
+    Activity[] activity;
+    # Total records count
+    int totalRecords;
+    *Pagination;
 |};

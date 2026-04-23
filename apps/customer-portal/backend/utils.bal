@@ -102,11 +102,11 @@ public isolated function searchCases(string idToken, string projectId, types:Cas
     };
 }
 
-# Get project features for a given project.
+# Map project features for a given project.
 #
 # + projectMetadata - Project metadata response
 # + return - Project features or error
-public isolated function getProjectFeatures(entity:ProjectMetadataResponse projectMetadata)
+public isolated function mapProjectFeatures(entity:ProjectMetadataResponse projectMetadata)
     returns types:ProjectFeatures {
 
     types:ReferenceItem[] acceptedSeverityValues =
@@ -123,7 +123,9 @@ public isolated function getProjectFeatures(entity:ProjectMetadataResponse proje
         hasUpdatesReadAccess: projectMetadata.features.hasUpdatesReadAccess,
         hasTimeLogsReadAccess: projectMetadata.features.hasTimeLogsReadAccess,
         hasDeploymentWriteAccess: projectMetadata.features.hasDeploymentWriteAccess,
-        hasDeploymentReadAccess: projectMetadata.features.hasDeploymentReadAccess
+        hasDeploymentReadAccess: projectMetadata.features.hasDeploymentReadAccess,
+        defaultCaseProductCategories: projectMetadata.features.defaultCaseProductCategories,
+        srProductCategories: projectMetadata.features.srProductCategories
     };
 }
 
@@ -231,7 +233,8 @@ public isolated function mapCommentsResponse(entity:CommentsResponse response) r
             hasInlineAttachments: comment.hasInlineAttachments,
             inlineAttachments: comment.inlineAttachments,
             createdByFirstName: comment.createdByFirstName,
-            createdByLastName: comment.createdByLastName
+            createdByLastName: comment.createdByLastName,
+            createdByFullName: comment.createdByFullName
         };
 
     return {
@@ -448,6 +451,7 @@ public isolated function mapCaseStats(entity:ProjectCaseStatsResponse response) 
         changeRate: response.changeRate,
         activeCount: response.activeCount,
         outstandingCount: response.outstandingCount,
+        actionRequiredCount: response.actionRequiredCount,
         stateCount,
         severityCount,
         outstandingSeverityCount,
@@ -752,6 +756,7 @@ public isolated function mapChangeRequestSearchResponse(entity:ChangeRequestSear
             startDate: changeRequest.plannedStartOn,
             endDate: changeRequest.plannedEndOn,
             duration: changeRequest.duration,
+            description: changeRequest.description,
             hasServiceOutage: changeRequest.hasServiceOutage,
             createdOn: changeRequest.createdOn,
             updatedOn: changeRequest.updatedOn,
@@ -864,6 +869,7 @@ public isolated function mapProjectChangeRequestStatsResponse(entity:ProjectChan
         totalCount: response.totalCount,
         activeCount: response.activeCount,
         outstandingCount: response.outstandingCount,
+        actionRequiredCount: response.actionRequiredCount,
         stateCount
     };
 }
@@ -1080,4 +1086,30 @@ public isolated function mapUpdatedCaseResponse(entity:UpdatedCase updatedCase) 
         'type: {id: 'type.id, label: 'type.name},
         updatedBy: updatedCase.updatedBy
     };
+}
+
+# Map case activity search response to the desired structure.
+# 
+# + response - Case activity search response from the entity service
+# + return - Mapped case activity search response
+public isolated function mapCaseActivitySummaryResponse(entity:CaseActivitySearchResponse response)
+    returns types:CaseActivitySearchResponse {
+
+    types:Activity[] activities = from entity:Activity activity in response.activity
+        select {
+            id: activity.id,
+            'type: activity.'type,
+            createdOn: activity.createdOn,
+            createdBy: activity.createdBy,
+            content: activity.content,
+            createdByFirstName: activity.createdByFirstName,
+            createdByLastName: activity.createdByLastName,
+            createdByFullName: activity.createdByFullName,
+            fileName: activity.fileName,
+            contentType: activity.contentType,
+            sizeBytes: activity.sizeBytes,
+            downloadUrl: activity.downloadUrl,
+            commentType: activity.commentType
+        };
+    return {activities, totalRecords: response.totalRecords, 'limit: response.'limit, offset: response.offset};
 }

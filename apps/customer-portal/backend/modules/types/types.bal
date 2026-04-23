@@ -60,6 +60,8 @@ public type CaseSearchFilters record {|
     entity:CaseType[] caseTypes?;
     # Severity ID
     int severityId?;
+    # Engagement type key (required for engagement type cases)
+    int engagementTypeKey?;
     # Deployment ID
     string deploymentId?;
     # Case created by the logged in user
@@ -292,6 +294,10 @@ public type ProjectFeatures record {|
     boolean hasDeploymentWriteAccess;
     # Indicates if deployment read access is enabled
     boolean hasDeploymentReadAccess;
+    # Allowed categories for default case creation in deployed product search.
+    entity:ProductCategory[]? defaultCaseProductCategories;
+    # Allowed categories for service request creation in deployed product search.
+    entity:ProductCategory[]? srProductCategories;
 |};
 
 # Project filter options.
@@ -441,6 +447,8 @@ public type ProjectCaseStats record {|
     int activeCount;
     # Outstanding case count (cases that are not solution proposed or closed)
     int outstandingCount;
+    # Action required from customer case count
+    int actionRequiredCount;
     # Average response time
     decimal averageResponseTime;
     # Resolved case count breakdown
@@ -499,6 +507,18 @@ public type ProjectStats record {|
     int deployments?;
     # SLA status
     string slaStatus?;
+    # Outstanding case count
+    int outstandingCaseCount?;
+    # Outstanding service request count
+    int outstandingServiceRequestCount?;
+    # Outstanding engagement count
+    int outstandingEngagementCount?;
+    # Outstanding SRA count
+    int outstandingSraCount?;
+    # Outstanding change request count
+    int outstandingChangeRequestCount?;
+    # Outstanding announcement count
+    int outstandingAnnouncementCount?;
 |};
 
 # Recent activity details.
@@ -560,6 +580,8 @@ public type Comment record {|
     string? createdByFirstName;
     # Last name of the user who created the comment
     string? createdByLastName;
+    # Full name of the user who created the comment
+    string? createdByFullName;
 |};
 
 # Comments response with pagination.
@@ -1388,6 +1410,8 @@ public type ChangeRequest record {|
     string number;
     # Change request title
     string? title;
+    # Change request description
+    string? description;
     # Project
     ReferenceItem? project;
     # Service request information (case)
@@ -1476,8 +1500,6 @@ public type CatalogSearchPayload record {|
 # Change request details information.
 public type ChangeRequestResponse record {|
     *ChangeRequest;
-    # Change request description
-    string? description;
     # User who created the change request
     string createdBy;
     # Justification for the change request
@@ -1510,6 +1532,8 @@ public type ProjectChangeRequestStatsResponse record {|
     int activeCount;
     # Outstanding change request count
     int outstandingCount;
+    # Action required from customer change request count
+    int actionRequiredCount;
     # Count of change requests by state
     ReferenceItem[] stateCount;
 |};
@@ -1609,4 +1633,43 @@ public type InstanceUsageResponse record {|
     string startDate;
     # End date of the queried range
     string endDate;
+|};
+
+# Activity item.
+public type Activity record {|
+    # ID of the activity
+    entity:IdString id;
+    # HTML content of the activity
+    string content;
+    # Created date and time
+    string createdOn;
+    # Created by (user email)
+    string createdBy;
+    # First name of the creator
+    string? createdByFirstName;
+    # Last name of the creator
+    string? createdByLastName;
+    # Full name of the creator
+    string? createdByFullName;
+    # Activity type ("attachment" or "comment")
+    string 'type;
+    # File name (only for attachments)
+    string fileName?;
+    # Content type MIME type (only for attachments)
+    string contentType?;
+    # File size in bytes (only for attachments)
+    int sizeBytes?;
+    # Download URL (only for attachments)
+    string downloadUrl?;
+    # Comment type (only for comments, e.g., "comments")
+    string commentType?;
+|};
+
+# Case activities search response from ServiceNow.
+public type CaseActivitySearchResponse record {|
+    # List of activities
+    Activity[] activities;
+    # Total records count
+    int totalRecords;
+    *entity:Pagination;
 |};

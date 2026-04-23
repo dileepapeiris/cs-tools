@@ -100,6 +100,7 @@ export default function ListSearchPanel({
         filtersForCount,
       )}
       onClearFilters={onClearFilters}
+      hideFiltersButton={hideFiltersButton}
       isLoading={isProjectContextLoading}
       filtersContent={
         <ListFilters

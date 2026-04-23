@@ -24,6 +24,7 @@ import { SupportOverviewIconVariant } from "@features/support/types/supportOverv
 import OutstandingCasesList from "@features/support/components/support-overview-cards/OutstandingCasesList";
 import type { CaseListItem } from "@features/support/types/cases";
 import {
+  CaseStatus,
   OPERATIONS_STAT_CONFIGS,
   OPERATIONS_OVERVIEW_LIST_LIMIT,
   CaseType,
@@ -41,6 +42,7 @@ import { SortOrder } from "@/types/common";
 import { resolveCasesTableDefaultStatusIds } from "@features/dashboard/utils/casesTable";
 import ErrorIndicator from "@components/error-indicator/ErrorIndicator";
 import {
+  ChangeRequestStates,
   OPERATIONS_HUB_CARD_TITLE_CR,
   OPERATIONS_HUB_CARD_TITLE_SR,
   OPERATIONS_HUB_FOOTER_VIEW_ALL_CR,
@@ -191,27 +193,27 @@ export default function OperationsPage(): JSX.Element {
 
   // Action Required SRs = Awaiting Info + Solution Proposed
   const awaitingInfoSrCount =
-    srStats?.stateCount?.find((s) => s.label === "Awaiting Info")?.count ?? 0;
+    srStats?.stateCount?.find((s) => s.label === CaseStatus.AWAITING_INFO)?.count ?? 0;
   const solutionProposedSrCount =
-    srStats?.stateCount?.find((s) => s.label === "Solution Proposed")?.count ?? 0;
-  const activeServiceRequests = awaitingInfoSrCount + solutionProposedSrCount;
+    srStats?.stateCount?.find((s) => s.label === CaseStatus.SOLUTION_PROPOSED)?.count ?? 0;
+  const actionRequiredSrCount = awaitingInfoSrCount + solutionProposedSrCount;
 
   // Outstanding SRs = all SR states except Closed
   const closedSrCount =
-    srStats?.stateCount?.find((s) => s.label === "Closed")?.count ?? 0;
+    srStats?.stateCount?.find((s) => s.label === CaseStatus.CLOSED)?.count ?? 0;
   const totalSrCount =
     srStats?.stateCount?.reduce((sum, s) => sum + (s.count ?? 0), 0) ?? 0;
-  const activeChangeRequests = totalSrCount - closedSrCount;
+  const outstandingSrCount = totalSrCount - closedSrCount;
 
   // Action Required CRs = Customer Approval + Customer Review
   const customerApprovalCrCount =
-    crStats?.stateCount?.find((s) => s.label === "Customer Approval")?.count ?? 0;
+    crStats?.stateCount?.find((s) => s.label === ChangeRequestStates.CUSTOMER_APPROVAL)?.count ?? 0;
   const customerReviewCrCount =
-    crStats?.stateCount?.find((s) => s.label === "Customer Review")?.count ?? 0;
-  const completedThisMonth = customerApprovalCrCount + customerReviewCrCount;
+    crStats?.stateCount?.find((s) => s.label === ChangeRequestStates.CUSTOMER_REVIEW)?.count ?? 0;
+  const actionRequiredCrCount = customerApprovalCrCount + customerReviewCrCount;
 
   const scheduledCrCount =
-    crStats?.stateCount?.find((s) => s.label === "Scheduled")?.count ?? 0;
+    crStats?.stateCount?.find((s) => s.label === ChangeRequestStates.SCHEDULED)?.count ?? 0;
 
   const srReady = !isServiceRequestEnabled || srStats !== undefined;
   const crReady = !isChangeRequestEnabled || crStats !== undefined;
@@ -222,11 +224,11 @@ export default function OperationsPage(): JSX.Element {
       : srReady && crReady
         ? {
             ...(isServiceRequestEnabled && {
-              activeServiceRequests,
-              activeChangeRequests,
+              actionRequiredServiceRequests: actionRequiredSrCount,
+              outstandingServiceRequests: outstandingSrCount,
             }),
             ...(isChangeRequestEnabled && {
-              completedThisMonth,
+              actionRequiredChangeRequests: actionRequiredCrCount,
             }),
             ...(isChangeRequestEnabled &&
               scheduledCrCount > 0 && {
@@ -250,25 +252,25 @@ export default function OperationsPage(): JSX.Element {
     return OPERATIONS_STAT_CONFIGS.filter(
       (c) =>
         (isServiceRequestEnabled ||
-          (c.key !== "activeServiceRequests" && c.key !== "activeChangeRequests")) &&
+          (c.key !== "actionRequiredServiceRequests" && c.key !== "outstandingServiceRequests")) &&
         (isChangeRequestEnabled ||
-          (c.key !== "completedThisMonth" && c.key !== "upcomingChanges")),
+          (c.key !== "actionRequiredChangeRequests" && c.key !== "upcomingChanges")),
     );
   }, [permissionsReady, isServiceRequestEnabled, isChangeRequestEnabled]);
 
   const handleStatClick = (key: OperationsStatKey) => {
     switch (key) {
-      case "activeServiceRequests":
+      case "actionRequiredServiceRequests":
         navigate(`/projects/${projectId}/operations/service-requests`, {
           state: { returnTo: operationsPath, actionRequired: true },
         });
         break;
-      case "activeChangeRequests":
+      case "outstandingServiceRequests":
         navigate(`/projects/${projectId}/operations/service-requests`, {
           state: { returnTo: operationsPath, outstandingOnly: true },
         });
         break;
-      case "completedThisMonth":
+      case "actionRequiredChangeRequests":
         navigate(`/projects/${projectId}/operations/change-requests`, {
           state: { returnTo: operationsPath, actionRequired: true },
         });

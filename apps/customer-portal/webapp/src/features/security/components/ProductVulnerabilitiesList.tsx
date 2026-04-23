@@ -67,8 +67,8 @@ const ProductVulnerabilitiesList = ({
               <TableCell>Component Name</TableCell>
               <TableCell>Component Version</TableCell>
               <TableCell>Component Type</TableCell>
-              <TableCell>WSO2 Resolution</TableCell>
-              <TableCell>Usecase</TableCell>
+              <TableCell>Update Level</TableCell>
+              <TableCell>Use Case</TableCell>
               <TableCell>Justification</TableCell>
               <TableCell>Resolution</TableCell>
             </TableRow>
@@ -175,18 +175,33 @@ const ProductVulnerabilitiesList = ({
                         {row.updateLevel ?? "--"}
                       </Typography>
                     </TableCell>
-                    <TableCell>
-                      <Typography variant="body2" color="text.secondary">
+                    <TableCell sx={{ maxWidth: 160 }}>
+                      <Typography
+                        variant="body2"
+                        color="text.secondary"
+                        noWrap
+                        title={row.useCase ?? undefined}
+                      >
                         {row.useCase ?? "--"}
                       </Typography>
                     </TableCell>
-                    <TableCell>
-                      <Typography variant="body2" color="text.secondary">
+                    <TableCell sx={{ maxWidth: 160 }}>
+                      <Typography
+                        variant="body2"
+                        color="text.secondary"
+                        noWrap
+                        title={row.justification ?? undefined}
+                      >
                         {row.justification ?? "--"}
                       </Typography>
                     </TableCell>
-                    <TableCell>
-                      <Typography variant="body2" color="text.secondary">
+                    <TableCell sx={{ maxWidth: 160 }}>
+                      <Typography
+                        variant="body2"
+                        color="text.secondary"
+                        noWrap
+                        title={row.resolution ?? undefined}
+                      >
                         {row.resolution ?? "--"}
                       </Typography>
                     </TableCell>

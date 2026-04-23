@@ -80,8 +80,8 @@ export type ProductVulnerability = {
   cveId: string;
   vulnerabilityId: string;
   severity: MetadataItem;
-  productName?: string | null;
-  productVersion?: string | null;
+  productName?: string;
+  productVersion?: string;
   componentName: string;
   version: string;
   type: string;

@@ -19,7 +19,7 @@ import {
 } from "@features/security/constants/securityConstants";
 
 /**
- * Counts search + severity filters for the product vulnerabilities table header.
+ * Counts search, severity, product name, and product version filters for the product vulnerabilities table header.
  *
  * @param searchInput - Current search text.
  * @param filters - Raw filter state.

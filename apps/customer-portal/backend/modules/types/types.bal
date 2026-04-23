@@ -856,10 +856,6 @@ public type ProductVulnerability record {|
 # Product vulnerability information.
 public type ProductVulnerabilityResponse record {|
     *ProductVulnerability;
-    # Type of the component
-    string componentType?;
-    # Update level for the vulnerability
-    string updateLevel?;
 |};
 
 # Product vulnerabilities response with pagination.

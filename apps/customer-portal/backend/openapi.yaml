@@ -4686,14 +4686,6 @@ components:
       description: Product vulnerability information.
       allOf:
       - $ref: '#/components/schemas/ProductVulnerability'
-      - type: object
-        properties:
-          componentType:
-            type: string
-            description: Type of the component
-          updateLevel:
-            type: string
-            description: Update level for the vulnerability
     ProductVulnerabilitySearchPayload:
       type: object
       properties:
@@ -4712,6 +4704,12 @@ components:
               type: integer
               description: Severity ID
               format: int64
+            productName:
+              type: string
+              description: Product name
+            productVersion:
+              type: string
+              description: Product version
           description: Filter criteria
         sortBy:
           $ref: '#/components/schemas/SortBy'

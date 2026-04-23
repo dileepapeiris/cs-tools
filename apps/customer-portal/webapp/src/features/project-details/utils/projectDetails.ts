@@ -533,10 +533,10 @@ export function formatMinutesAsHrMin(
   const totalMinutes = Math.round(minutes);
   const h = Math.floor(totalMinutes / 60);
   const m = totalMinutes % 60;
-  const hrPart = h === 0 ? "" : h === 1 ? "1 hr" : `${h} hrs`;
-  const minPart = m === 0 ? "" : m === 1 ? "1 min" : `${m} min`;
+  const hrPart = h === 0 ? "" : `${h}h`;
+  const minPart = m === 0 ? "" : `${m}m`;
   if (hrPart && minPart) {
-    return `${hrPart} and ${minPart}`;
+    return `${hrPart} ${minPart}`;
   }
   if (hrPart) {
     return hrPart;
@@ -544,5 +544,5 @@ export function formatMinutesAsHrMin(
   if (minPart) {
     return minPart;
   }
-  return "0 min";
+  return "0m";
 }

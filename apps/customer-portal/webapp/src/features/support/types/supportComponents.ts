@@ -418,7 +418,7 @@ export type CaseDetailsBackButtonProps = {
 };
 
 export type CaseDetailsActionRowProps = {
-  assignedEngineer: unknown;
+  assignedEngineer: AssignedEngineerValue;
   engineerInitials: string;
   statusLabel?: string | null;
   closedOn?: string | null;

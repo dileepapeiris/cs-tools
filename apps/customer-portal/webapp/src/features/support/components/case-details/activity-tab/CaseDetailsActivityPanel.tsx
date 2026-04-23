@@ -16,18 +16,21 @@
 
 import {
   Box,
+  IconButton,
   Skeleton,
   Stack,
+  Tooltip,
   Typography,
   alpha,
   useTheme,
 } from "@wso2/oxygen-ui";
-import { useMemo, useEffect, useRef, useState, type JSX } from "react";
+import { ChevronUp } from "@wso2/oxygen-ui-icons-react";
+import { useMemo, useRef, useState, type JSX } from "react";
 import useGetCaseComments from "@features/support/api/useGetCaseComments";
 import { useGetConversationMessages } from "@features/support/api/useGetConversationMessages";
 import useGetUserDetails from "@features/settings/api/useGetUserDetails";
 import EmptyIcon from "@components/empty-state/EmptyIcon";
-import { compareByCreatedOnThenId, formatCommentDate } from "@features/support/utils/support";
+import { compareByCreatedOnThenId } from "@features/support/utils/support";
 import ActivityCommentInput from "@case-details-activity/ActivityCommentInput";
 import CommentBubble from "@case-details-activity/CommentBubble";
 import ImageFullscreenModal from "@case-details-activity/ImageFullscreenModal";
@@ -41,7 +44,7 @@ import ApiErrorState from "@components/error/ApiErrorState";
 
 // TODO : DUE TO URGENCY THIS COMPONENT BREAKS THE BEST PRACTICES , NEED FULL REFACTOR
 /**
- * Renders the Activity tab content: timeline of case comments (current user on right, others on left).
+ * Renders the Activity tab: editor at top, comments below (latest first), floating scroll-to-top button.
  *
  * @param {CaseDetailsActivityPanelProps} props - projectId, caseId, optional case created date.
  * @returns {JSX.Element} The activity timeline panel.
@@ -50,10 +53,12 @@ export default function CaseDetailsActivityPanel({
   projectId,
   caseId,
   conversationId,
-  caseCreatedOn,
   caseStatus,
 }: CaseDetailsActivityPanelProps): JSX.Element {
   const theme = useTheme();
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const [showScrollTop, setShowScrollTop] = useState(false);
+
   const { data: userDetails } = useGetUserDetails();
   const {
     data: commentsData,
@@ -79,7 +84,9 @@ export default function CaseDetailsActivityPanel({
       type: comment.type ?? "comments",
       isEscalated: comment.isEscalated ?? false,
     }));
-    return [...caseComments, ...conversationComments].sort(compareByCreatedOnThenId);
+    return [...caseComments, ...conversationComments].sort(
+      (a, b) => -compareByCreatedOnThenId(a, b),
+    );
   }, [commentsData?.comments, conversationData?.pages]);
 
   const commentsToShow = useMemo(
@@ -90,37 +97,39 @@ export default function CaseDetailsActivityPanel({
   const primaryLight = theme.palette.primary?.light ?? "#fa7b3f";
   const primaryBg = alpha(primaryLight, 0.1);
 
-  // Render content based on state
-  let content: JSX.Element;
-
   const isLoading = isCommentsLoading || (!!conversationId && isConversationLoading);
   const isError = isCommentsError || (!!conversationId && isConversationError);
   const resolvedError = commentsError ?? conversationError;
 
+  const handleScroll = () => {
+    if (scrollRef.current) {
+      setShowScrollTop(scrollRef.current.scrollTop > 120);
+    }
+  };
+
+  const scrollToTop = () => {
+    scrollRef.current?.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
+  let commentsContent: JSX.Element;
+
   if (isLoading) {
-    content = (
-      <Box sx={{ p: 2, flex: 1, minHeight: 0, overflow: "auto" }}>
-        <Stack spacing={2}>
-          {[1, 2, 3].map((i) => (
-            <Stack
-              key={i}
-              direction="row"
-              spacing={1.5}
-              alignItems="flex-start"
-            >
-              <Skeleton variant="circular" width={32} height={32} />
-              <Box sx={{ flex: 1 }}>
-                <Skeleton variant="text" width="40%" height={20} />
-                <Skeleton variant="rectangular" height={60} sx={{ mt: 1 }} />
-              </Box>
-            </Stack>
-          ))}
-        </Stack>
-      </Box>
+    commentsContent = (
+      <Stack spacing={2} sx={{ p: 2 }}>
+        {[1, 2, 3].map((i) => (
+          <Stack key={i} direction="row" spacing={1.5} alignItems="flex-start">
+            <Skeleton variant="circular" width={32} height={32} />
+            <Box sx={{ flex: 1 }}>
+              <Skeleton variant="text" width="40%" height={20} />
+              <Skeleton variant="rectangular" height={60} sx={{ mt: 1 }} />
+            </Box>
+          </Stack>
+        ))}
+      </Stack>
     );
   } else if (isError || !commentsData) {
-    content = (
-      <Box sx={{ p: 2, flex: 1, minHeight: 0, overflow: "auto" }}>
+    commentsContent = (
+      <Box sx={{ p: 2 }}>
         <ApiErrorState
           error={resolvedError}
           fallbackMessage="Unable to load activity."
@@ -128,10 +137,10 @@ export default function CaseDetailsActivityPanel({
       </Box>
     );
   } else {
-    content = (
+    commentsContent = (
       <ActivityContentWithImageModal
         commentsToShow={commentsToShow}
-        caseCreatedOn={caseCreatedOn}
+        caseCreatedOn={undefined}
         currentUserEmail={currentUserEmail}
         primaryBg={primaryBg}
         userDetails={userDetails}
@@ -144,13 +153,51 @@ export default function CaseDetailsActivityPanel({
       sx={{
         display: "flex",
         flexDirection: "column",
-        minHeight: "100%",
         height: "100%",
         overflow: "hidden",
+        position: "relative",
       }}
     >
-      {content}
-      <ActivityCommentInput caseId={caseId} caseStatus={caseStatus} />
+      {/* Single scrollable area — editor + comments scroll together */}
+      <Box
+        ref={scrollRef}
+        onScroll={handleScroll}
+        sx={{
+          flex: 1,
+          overflow: "auto",
+          display: "flex",
+          flexDirection: "column",
+          WebkitOverflowScrolling: "touch",
+        }}
+      >
+        <Box sx={{ px: 2, pt: 2, pb: 1 }}>
+          <ActivityCommentInput caseId={caseId} caseStatus={caseStatus} />
+        </Box>
+        {commentsContent}
+      </Box>
+
+      {/* Floating scroll-to-top button */}
+      {showScrollTop && (
+        <Tooltip title="Back to top">
+          <IconButton
+            onClick={scrollToTop}
+            size="small"
+            aria-label="Scroll to top"
+            sx={{
+              position: "absolute",
+              bottom: 16,
+              right: 16,
+              bgcolor: "transparent",
+              boxShadow: 3,
+              zIndex: 10,
+              width: 36,
+              height: 36,
+            }}
+          >
+            <ChevronUp size={18} />
+          </IconButton>
+        </Tooltip>
+      )}
     </Box>
   );
 }
@@ -158,9 +205,7 @@ export default function CaseDetailsActivityPanel({
 function ActivityContentWithImageModal(
   props: ActivityContentProps,
 ): JSX.Element {
-  const [fullscreenImageSrc, setFullscreenImageSrc] = useState<string | null>(
-    null,
-  );
+  const [fullscreenImageSrc, setFullscreenImageSrc] = useState<string | null>(null);
   return (
     <>
       <ActivityContent
@@ -178,70 +223,14 @@ function ActivityContentWithImageModal(
 
 function ActivityContent({
   commentsToShow,
-  caseCreatedOn,
   currentUserEmail,
   primaryBg,
   userDetails,
   onImageClick,
 }: ActivityContentProps): JSX.Element {
-  const scrollContainerRef = useRef<HTMLDivElement>(null);
-
-  // Scroll to bottom on initial load
-  useEffect(() => {
-    if (scrollContainerRef.current) {
-      scrollContainerRef.current.scrollTop =
-        scrollContainerRef.current.scrollHeight;
-    }
-  }, []); // Empty dependency array - only run on mount
-
-  // Scroll to bottom when new comments are added
-  useEffect(() => {
-    if (scrollContainerRef.current && commentsToShow.length > 0) {
-      scrollContainerRef.current.scrollTop =
-        scrollContainerRef.current.scrollHeight;
-    }
-  }, [commentsToShow.length]); // Run when comments count changes
-
   return (
-    <Box
-      ref={scrollContainerRef}
-      sx={{
-        p: 2,
-        flex: 1,
-        minHeight: 0,
-        overflow: "auto",
-        WebkitOverflowScrolling: "touch",
-      }}
-    >
+    <Box sx={{ p: 2, flex: 1 }}>
       <Stack spacing={2}>
-        {caseCreatedOn && (
-          <Box
-            sx={{
-              display: "flex",
-              alignItems: "center",
-              gap: 1,
-            }}
-          >
-            <Box
-              sx={{
-                flex: 1,
-                height: 1,
-                bgcolor: "divider",
-              }}
-            />
-            <Typography variant="caption" color="text.secondary">
-              Case created on {formatCommentDate(caseCreatedOn)}
-            </Typography>
-            <Box
-              sx={{
-                flex: 1,
-                height: 1,
-                bgcolor: "divider",
-              }}
-            />
-          </Box>
-        )}
-
         {commentsToShow.length === 0 ? (
           <Stack
             spacing={2}

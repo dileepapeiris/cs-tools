@@ -14,8 +14,8 @@
 // specific language governing permissions and limitations
 // under the License.
 
-import { Box, IconButton, Paper, Stack, Typography } from "@wso2/oxygen-ui";
-import { ArrowLeft, RefreshCw } from "@wso2/oxygen-ui-icons-react";
+import { Box, IconButton, Paper, Stack, Typography, alpha, useTheme } from "@wso2/oxygen-ui";
+import { ArrowLeft, CircleCheck, Clock } from "@wso2/oxygen-ui-icons-react";
 import { useParams, useSearchParams, useNavigate } from "react-router";
 import { useCallback, useMemo, type JSX } from "react";
 import { usePostUpdateLevelsSearch } from "@features/updates/api/usePostUpdateLevelsSearch";
@@ -32,11 +32,13 @@ import { ROUTE_PREVIOUS_PAGE } from "@features/project-hub/constants/navigationC
  */
 export default function PendingUpdatesPage(): JSX.Element {
   const navigate = useNavigate();
+  const theme = useTheme();
   const { projectId } = useParams<{ projectId: string }>();
   const [searchParams] = useSearchParams();
 
   const productName = searchParams.get("productName") ?? "";
   const productBaseVersion = searchParams.get("productBaseVersion") ?? "";
+  const mode = searchParams.get("mode");
   const startParam = searchParams.get("startingUpdateLevel");
   const endParam = searchParams.get("endingUpdateLevel");
   const startingUpdateLevel = Number(startParam ?? "0");
@@ -154,32 +156,70 @@ export default function PendingUpdatesPage(): JSX.Element {
           borderRadius: 0,
         }}
       >
-        <Stack direction="row" alignItems="center" gap={2}>
-          <IconButton onClick={handleBack} size="small" aria-label="Back">
+        <Stack direction="row" alignItems="flex-start" gap={2}>
+          <IconButton onClick={handleBack} size="small" aria-label="Back" sx={{ mt: 0.5 }}>
             <ArrowLeft size={20} />
           </IconButton>
-          <Box
-            sx={{
-              p: 1,
-              bgcolor: "warning.lighter",
-              color: "warning.main",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-            }}
-          >
-            <RefreshCw size={24} />
-          </Box>
-          <Box>
-            <Typography variant="h5" color="text.primary" fontWeight={600}>
-              {displayTitle} - Pending Updates
-            </Typography>
-            {levelRange && (
-              <Typography variant="body2" color="text.secondary">
-                {levelRange}
+          {mode === "installed" ? (
+            <>
+              <Box
+                sx={{
+                  p: 1,
+                  borderRadius: "50%",
+                  bgcolor: alpha(theme.palette.success.light, 0.1),
+                  color: theme.palette.success.light,
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                }}
+              >
+                <CircleCheck size={24} />
+              </Box>
+              <Box>
+                <Typography variant="h5" color="text.primary" fontWeight={600}>
+                  Installed Updates
+                </Typography>
+                <Typography variant="body2" color="text.secondary">
+                  {displayTitle}
+                </Typography>
+              </Box>
+            </>
+          ) : mode === "pending" ? (
+            <>
+              <Box
+                sx={{
+                  p: 1,
+                  borderRadius: "50%",
+                  bgcolor: alpha(theme.palette.warning.light, 0.1),
+                  color: theme.palette.warning.light,
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                }}
+              >
+                <Clock size={24} />
+              </Box>
+              <Box>
+                <Typography variant="h5" color="text.primary" fontWeight={600}>
+                  Pending Updates
+                </Typography>
+                <Typography variant="body2" color="text.secondary">
+                  {displayTitle}
+                </Typography>
+              </Box>
+            </>
+          ) : (
+            <Box>
+              <Typography variant="h5" color="text.primary" fontWeight={600}>
+                {displayTitle} — Pending Updates
               </Typography>
-            )}
-          </Box>
+              {levelRange && (
+                <Typography variant="body2" color="text.secondary">
+                  {levelRange}
+                </Typography>
+              )}
+            </Box>
+          )}
         </Stack>
       </Paper>
 

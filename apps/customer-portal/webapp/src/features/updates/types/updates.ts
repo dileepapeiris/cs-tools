@@ -249,7 +249,8 @@ export type UpdateProductGridProps = {
 
 export type UpdateProductCardProps = {
   item: RecommendedUpdateLevelItem;
-  onViewPendingUpdates?: () => void;
+  onInstalledClick?: () => void;
+  onPendingClick?: () => void;
 };
 
 export type UpdateCardHeaderProps = {
@@ -265,6 +266,8 @@ export type UpdateCardBreakdownProps = {
   pendingRegular: number;
   pendingSecurity: number;
   totalPending: number;
+  onInstalledClick?: () => void;
+  onPendingClick?: () => void;
 };
 
 export type UpdateCardLevelsProps = {

@@ -42,6 +42,7 @@ import {
 import ListPageHeader from "@components/list-view/ListPageHeader";
 import ListItems from "@components/list-view/ListItems";
 import ChangeRequestsList from "@features/operations/components/change-requests/ChangeRequestsList";
+import ErrorIndicator from "@components/error-indicator/ErrorIndicator";
 import type { CaseListItem } from "@features/support/types/cases";
 import type { ChangeRequestItem } from "@features/operations/types/changeRequests";
 
@@ -83,7 +84,10 @@ export default function DashboardItemsPage({
   }, [project, isProjectLoading, projectFeatures]);
 
   // --- Filter metadata → case status IDs ---
-  const { data: filterMetadata } = useGetProjectFilters(projectId || "");
+  const {
+    data: filterMetadata,
+    isError: isFilterMetadataError,
+  } = useGetProjectFilters(projectId || "");
 
   // Resolve case status IDs from filter metadata labels.
   // Returns undefined while metadata is loading, or a (possibly empty) array once loaded.
@@ -109,7 +113,8 @@ export default function DashboardItemsPage({
       : CR_OUTSTANDING_STATE_KEYS;
 
   // filterMetadataLoaded tracks whether the metadata response has arrived (distinct from having IDs).
-  const filterMetadataLoaded = !!filterMetadata;
+  // An error counts as "loaded" so the page does not stay on skeletons forever.
+  const filterMetadataLoaded = !!filterMetadata || isFilterMetadataError;
 
   // Queries are enabled once metadata is loaded AND there are status IDs to filter by.
   // An empty caseStatusIds array (no matching statuses) means no items exist — skip the query.
@@ -327,7 +332,10 @@ export default function DashboardItemsPage({
       items: cases,
       hideSeverity: false,
       entityName: "cases",
-      viewAllPath: "../../support/cases",
+      viewAllPath:
+        mode === "outstanding-interactions"
+          ? "../../support/cases?statusFilter=active"
+          : "../../support/cases",
       viewAllLabel: "View all cases",
       onItemClick: handleCaseClick,
     },
@@ -392,8 +400,9 @@ export default function DashboardItemsPage({
   ];
 
   const isPageLoading = isProjectLoading || !filterMetadataLoaded;
+  const isPageError = !isProjectLoading && isFilterMetadataError;
 
-  const visibleSections = isPageLoading
+  const visibleSections = isPageLoading || isPageError
     ? []
     : sections.filter(
         (s) => s.hasPermission && (s.isLoading || s.total > 0 || s.isError),
@@ -536,7 +545,13 @@ export default function DashboardItemsPage({
           </Accordion>
         ))}
 
-        {!isPageLoading && visibleSections.length === 0 && (
+        {isPageError && (
+          <Box sx={{ py: 4 }}>
+            <ErrorIndicator entityName="items" />
+          </Box>
+        )}
+
+        {!isPageLoading && !isPageError && visibleSections.length === 0 && (
           <Box sx={{ textAlign: "center", py: 8 }}>
             <Typography variant="body1" color="text.secondary">
               No items found.

@@ -78,7 +78,11 @@ export default function AllCasesPage(): JSX.Element {
   const [searchParams, setSearchParams] = useSearchParams();
   const createdByMe = searchParams.get("createdByMe") === "true";
   const initialSeverityId = searchParams.get("severityId");
-  const statusFilter = searchParams.get("statusFilter") as "active" | "resolved" | null;
+  const rawStatusFilter = searchParams.get("statusFilter");
+  const statusFilter: "active" | "resolved" | null =
+    rawStatusFilter === "active" || rawStatusFilter === "resolved"
+      ? rawStatusFilter
+      : null;
   const isDashboardSeverityNavigation = Boolean(initialSeverityId);
 
   const sessionPrefix = `${projectId ?? "unknown"}-cases`;
@@ -120,12 +124,15 @@ export default function AllCasesPage(): JSX.Element {
   // Fetch filter metadata first to get Incident and Query IDs for stats API
   const { data: filterMetadata } = useGetProjectFilters(projectId || "");
 
-  // When navigating from Dashboard with ?statusFilter=resolved, set the Closed status in the filter UI
-  // once metadata loads. The guard on filters.statusId prevents re-applying after user changes/clears it.
+  // When navigating from Dashboard with ?statusFilter=resolved, force the Closed status into the filter
+  // so the list only shows resolved cases. We guard on "already equals closed id" rather than "any truthy
+  // statusId" to avoid skipping the update when a prior session filter is a different status.
   useEffect(() => {
-    if (statusFilter !== "resolved" || !filterMetadata?.caseStates || filters.statusId) return;
+    if (statusFilter !== "resolved" || !filterMetadata?.caseStates) return;
     const closedState = filterMetadata.caseStates.find((s) => s.label === CaseStatus.CLOSED);
-    if (closedState) setFilters((prev) => ({ ...prev, statusId: String(closedState.id) }));
+    if (closedState && filters.statusId !== String(closedState.id)) {
+      setFilters((prev) => ({ ...prev, statusId: String(closedState.id) }));
+    }
   }, [statusFilter, filterMetadata, filters.statusId, setFilters]);
 
   // Fetch deployments for the deployment filter (10 at a time)
@@ -334,7 +341,11 @@ export default function AllCasesPage(): JSX.Element {
               : "Manage and track all your support cases";
           })()
         }
-        backLabel={returnTo ? "Back to Dashboard" : "Back to Support Center"}
+        backLabel={
+          returnTo && (initialSeverityId || statusFilter !== null)
+            ? "Back to Dashboard"
+            : "Back to Support Center"
+        }
         onBack={() => {
           if (returnTo) {
             setFilters({});

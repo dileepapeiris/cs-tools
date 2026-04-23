@@ -4731,6 +4731,7 @@ components:
             format: int64
     ProjectCaseStats:
       required:
+      - actionRequiredCount
       - activeCount
       - averageResponseTime
       - caseTypeCount
@@ -4758,6 +4759,10 @@ components:
           type: integer
           description: Outstanding case count (cases that are not solution proposed
             or closed)
+          format: int64
+        actionRequiredCount:
+          type: integer
+          description: Action required from customer case count
           format: int64
         averageResponseTime:
           type: number
@@ -4837,6 +4842,7 @@ components:
       description: Case statistics for a project.
     ProjectChangeRequestStatsResponse:
       required:
+      - actionRequiredCount
       - activeCount
       - outstandingCount
       - stateCount
@@ -4855,6 +4861,10 @@ components:
         outstandingCount:
           type: integer
           description: Outstanding change request count
+          format: int64
+        actionRequiredCount:
+          type: integer
+          description: Action required from customer change request count
           format: int64
         stateCount:
           type: array

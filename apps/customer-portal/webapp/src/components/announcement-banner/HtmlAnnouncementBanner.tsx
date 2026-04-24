@@ -14,7 +14,7 @@
 // specific language governing permissions and limitations
 // under the License.
 
-import { useState, type JSX } from "react";
+import { useState, type JSX, type MouseEvent } from "react";
 import { announcementBannerConfig } from "@config/announcementBannerConfig";
 
 function isDismissed(storageKey: string): boolean {
@@ -34,55 +34,31 @@ function persistDismissal(storageKey: string): void {
 }
 
 /**
- * HTML-rendering announcement banner shown below the main notification banner.
+ * Renders the announcement banner from fully self-contained HTML configured in config.js.
+ * All styling (background, padding, colors) lives in the HTML string.
+ * Add `data-close-banner` attribute to any element in the HTML to make it dismiss the banner.
  * Dismissed state is persisted in localStorage per storageKey.
  */
 export default function HtmlAnnouncementBanner(): JSX.Element | null {
   const { visible, storageKey, html } = announcementBannerConfig;
-
   const [closed, setClosed] = useState(() => isDismissed(storageKey));
 
-  if (!visible || closed) return null;
+  if (!visible || !html || closed) return null;
 
-  const handleClose = () => {
-    persistDismissal(storageKey);
-    setClosed(true);
+  const handleClick = (e: MouseEvent<HTMLDivElement>) => {
+    const target = e.target as HTMLElement;
+    if (target.closest("[data-close-banner]")) {
+      persistDismissal(storageKey);
+      setClosed(true);
+    }
   };
 
   return (
+    // biome-ignore lint/a11y/useKeyWithClickEvents: close is handled by the button inside the HTML
     <div
-      style={{
-        position: "relative",
-        background: "#fff8e1",
-        borderBottom: "1px solid #ffe082",
-        padding: "10px 48px 10px 16px",
-        fontSize: 14,
-        lineHeight: 1.5,
-        color: "#5d4037",
-      }}
-    >
-      {/* eslint-disable-next-line react/no-danger */}
-      <div dangerouslySetInnerHTML={{ __html: html }} />
-      <button
-        onClick={handleClose}
-        aria-label="Close announcement"
-        style={{
-          position: "absolute",
-          top: "50%",
-          right: 12,
-          transform: "translateY(-50%)",
-          background: "none",
-          border: "none",
-          cursor: "pointer",
-          fontSize: 18,
-          lineHeight: 1,
-          color: "#8d6e63",
-          padding: "2px 6px",
-          borderRadius: 4,
-        }}
-      >
-        ×
-      </button>
-    </div>
+      onClick={handleClick}
+      // biome-ignore lint/security/noDangerouslySetInnerHtml: operator-controlled config HTML
+      dangerouslySetInnerHTML={{ __html: html }}
+    />
   );
 }

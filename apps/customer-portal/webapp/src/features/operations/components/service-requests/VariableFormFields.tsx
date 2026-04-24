@@ -33,6 +33,7 @@ import {
   isAttachmentField,
   isFileCopyPathField,
   isDescriptionField,
+  isDateTimeField,
 } from "@features/operations/utils/serviceRequestValidation";
 import Editor from "@components/rich-text-editor/Editor";
 
@@ -479,6 +480,25 @@ export default function VariableFormFields({
               </Box>
             )}
           </Box>
+        </Grid>
+      );
+    }
+
+    if (isDateTimeField(variable)) {
+      return (
+        <Grid key={variable.id} size={{ xs: 12, sm: 6 }}>
+          <Box sx={{ mb: 1 }}>
+            <FieldLabel questionText={variable.questionText ?? ""} />
+          </Box>
+          <TextField
+            fullWidth
+            size="small"
+            type="datetime-local"
+            value={displayValue}
+            onChange={(e) => onChange(variable.id, e.target.value)}
+            disabled={isContext}
+            slotProps={{ inputLabel: { shrink: true } }}
+          />
         </Grid>
       );
     }

@@ -20,21 +20,16 @@ export interface AnnouncementBannerConfig {
   /** Unique key used in localStorage to remember whether the user dismissed this banner.
    *  Change the key whenever you update the banner content so it shows again. */
   storageKey: string;
-  /** Raw HTML content rendered inside the banner. */
+  /** Complete self-contained HTML rendered as the banner.
+   *  Include all wrapper styles (background, padding, colors) and a close button
+   *  with data-close-banner attribute to trigger dismissal. */
   html: string;
 }
 
 export const announcementBannerConfig: AnnouncementBannerConfig = {
-  visible: true,
-  storageKey: "announcement_banner_v1",
-  html: `
-    <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
-      <span style="font-size:18px;">📢</span>
-      <span>
-        <strong>Welcome to the WSO2 Customer Portal!</strong>
-        &nbsp;We've made improvements to help you manage your support cases, change requests, and engagements more easily.
-        <a href="https://wso2.com" target="_blank" rel="noopener noreferrer" style="color:inherit;font-weight:600;margin-left:6px;">Learn more →</a>
-      </span>
-    </div>
-  `,
+  visible: window.config?.CUSTOMER_PORTAL_ANNOUNCEMENT_BANNER_VISIBLE ?? false,
+  storageKey:
+    window.config?.CUSTOMER_PORTAL_ANNOUNCEMENT_BANNER_STORAGE_KEY ??
+    "announcement_banner_v1",
+  html: window.config?.CUSTOMER_PORTAL_ANNOUNCEMENT_BANNER_HTML ?? "",
 };

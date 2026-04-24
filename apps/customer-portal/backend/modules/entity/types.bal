@@ -126,6 +126,8 @@ public type Project record {|
     int activeCasesCount;
     # Active chats/conversations count
     int activeChatsCount;
+    # Action Required cases count
+    int actionRequiredCasesCount;
     # SLA status (e.g., "Needs Attention")
     string slaStatus;
     json...;
@@ -406,6 +408,8 @@ public type ReferenceTableItem record {|
     string name;
     # Number
     string? number?;
+    # Internal ID
+    string? internalId?;
     # Count value
     int count?;
     # Abbreviation

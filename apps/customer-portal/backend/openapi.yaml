@@ -2795,10 +2795,12 @@ components:
           type: string
           description: Allowed domain list of the account
           nullable: true
+          default: ""
         classification:
           type: string
           description: Account classification
           nullable: true
+          default: ""
         isPartner:
           type: boolean
           description: Whether the account is a partner or not
@@ -5464,6 +5466,10 @@ components:
           type: integer
           description: Count
           format: int64
+        internalId:
+          type: string
+          description: WSO2 Internal ID
+          nullable: true
         number:
           type: string
           description: Number

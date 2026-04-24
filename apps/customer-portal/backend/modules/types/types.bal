@@ -189,6 +189,8 @@ public type ReferenceItem record {|
     string label;
     # Count
     int count?;
+    # WSO2 Internal ID
+    string? internalId?;
     # Number
     string? number?;
     # Abbreviation

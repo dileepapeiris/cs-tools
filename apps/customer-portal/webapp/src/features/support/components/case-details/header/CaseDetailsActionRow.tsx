@@ -104,8 +104,9 @@ export default function CaseDetailsActionRow({
 
   const availableActions = getAvailableCaseActions(statusLabel).filter(
     (label) => {
-      if (label === "Open Related Case" && !isWithinOpenRelatedCaseWindow(closedOn)) {
-        return false;
+      if (label === "Open Related Case") {
+        if (!onOpenRelatedCase) return false;
+        if (!isWithinOpenRelatedCaseWindow(closedOn)) return false;
       }
       return true;
     },

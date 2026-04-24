@@ -150,8 +150,7 @@ export default function CaseDetailsContent({
   const hideCallsTab = isSecurityReportAnalysis || !isCallSchedulingAllowed;
   const hideKnowledgeBaseTab =
     isSecurityReportAnalysis || isEngagementRoute || isServiceRequest;
-  const hideRelatedChangeRequestsTab =
-    !isServiceRequest || !data?.changeRequests?.length;
+  const hideRelatedChangeRequestsTab = !isServiceRequest || !(data?.changeRequests?.length);
 
   // Eagerly fetch KB recommendations so the tab count is available on page load.
   // React Query deduplicates the network call when the KB tab component mounts later.

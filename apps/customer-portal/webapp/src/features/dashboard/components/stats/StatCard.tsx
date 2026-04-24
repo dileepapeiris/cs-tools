@@ -138,14 +138,16 @@ export const StatCard = ({
           )}
         </Typography>
 
-        <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+        <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 1 }}>
           {/* Label */}
           <Typography variant="body2">{label}</Typography>
 
           {/* Tooltip */}
-          <Tooltip title={tooltipText} arrow placement="bottom">
-            <Info size={14} />
-          </Tooltip>
+          {tooltipText && (
+            <Tooltip title={tooltipText} arrow placement="bottom">
+              <Info size={14} />
+            </Tooltip>
+          )}
         </Box>
       </Box>
     </Card>

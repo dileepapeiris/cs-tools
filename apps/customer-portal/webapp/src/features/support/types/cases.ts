@@ -147,7 +147,7 @@ export type DashboardMockStats = {
 // Item type for case list items.
 export type CaseListItem = AuditMetadata & {
   id: string;
-  internalId: string;
+  internalId?: string;
   number: string;
   title: string;
   description: string;

@@ -62,10 +62,10 @@ public type CaseSearchFilters record {|
     int severityId?;
     # Engagement type keys (required for engagement type cases)
     int[] engagementTypeKeys?;
-    # Start date
-    entity:UtcDateTimeString startDate?;
-    # End date
-    entity:UtcDateTimeString endDate?;
+    # Closed start date
+    entity:UtcDateTimeString closedStartDate?;
+    # Closed end date
+    entity:UtcDateTimeString closedEndDate?;
     # Deployment ID
     string deploymentId?;
     # Case created by the logged in user
@@ -1502,6 +1502,10 @@ public type ChangeRequestSearchPayload record {|
         int[] stateKeys?;
         # Change request impact key
         int impactKey?;
+        # Start date for closed date filter (UTC format: YYYY-MM-DDTHH:MM:SSZ)
+        entity:UtcDateTimeString closedStartDate?;
+        # End date for closed date filter (UTC format: YYYY-MM-DDTHH:MM:SSZ)
+        entity:UtcDateTimeString closedEndDate?;
     |} filters?;
     # Pagination details
     entity:Pagination pagination?;
@@ -1552,6 +1556,15 @@ public type ProjectChangeRequestStatsResponse record {|
     int actionRequiredCount;
     # Count of change requests by state
     ReferenceItem[] stateCount;
+    # Resolved change request count breakdown
+    record {|
+        # Total resolved count
+        int total;
+        # Current month resolved count
+        int currentMonth;
+        # Past thirty days resolved count
+        int pastThirtyDays;
+    |} resolvedCount;
 |};
 
 # Registry token creation payload.

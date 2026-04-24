@@ -438,6 +438,7 @@ export type CasesOverviewStatCardProps = {
   isLoading: boolean;
   isError?: boolean;
   stats: ProjectSupportStats | undefined;
+  onStatClick?: (key: keyof ProjectSupportStats) => void;
 };
 
 export type ChatHistoryListProps = {

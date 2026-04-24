@@ -651,8 +651,27 @@ export default function CreateCasePage(): JSX.Element {
 
   useEffect(() => {
     if (!selectedDeploymentId || !sortedBaseProductOptions.length) return;
-    // In related-case / no-AI mode, keep Product Version unselected by default.
-    if (noAiMode && relatedCase) return;
+    if (noAiMode && relatedCase) {
+      // Pre-select the deployed product from the related case, but only once.
+      setProduct((current) => {
+        if (current?.trim()) return current;
+        if (relatedCase.deployedProductId) {
+          const found = sortedBaseProductOptions.some(
+            (o) => o.id === relatedCase.deployedProductId,
+          );
+          if (found) return relatedCase.deployedProductId;
+        }
+        if (relatedCase.deployedProductLabel) {
+          const fromLabel = findMatchingProductId(
+            relatedCase.deployedProductLabel,
+            sortedBaseProductOptions,
+          );
+          if (fromLabel) return fromLabel;
+        }
+        return current;
+      });
+      return;
+    }
     setProduct((current) => {
       if (!current?.trim()) {
         const fromClassification = findMatchingProductId(
@@ -750,6 +769,10 @@ export default function CreateCasePage(): JSX.Element {
     const descriptionPlain = htmlToPlainText(description).trim();
     if (!titlePlain) {
       showError("Please enter a case title.");
+      return;
+    }
+    if (titlePlain.length > 160) {
+      showError("Case title must be 160 characters or fewer.");
       return;
     }
     if (!descriptionPlain) {
@@ -884,11 +907,11 @@ export default function CreateCasePage(): JSX.Element {
 
         // Refetch security vulnerabilities if this was a security report
         if (isCreatedSecurityReport) {
-          navigate(
+          window.location.assign(
             `/projects/${projectId}/security-center/security-report-analysis/${caseId}?tab=${SecurityTabId.VULNERABILITIES}`,
           );
         } else {
-          navigate(`/projects/${projectId}/support/cases/${caseId}`);
+          window.location.assign(`/projects/${projectId}/support/cases/${caseId}`);
         }
         showSuccess("Case created successfully");
       },
@@ -959,7 +982,7 @@ export default function CreateCasePage(): JSX.Element {
             }
             isRelatedCaseMode={noAiMode}
             extraProductOptions={extraProductOptions}
-            isDeploymentDisabled={!!relatedCase}
+            isDeploymentDisabled={false}
             hideDeploymentField={isPrimaryProductionOnly}
             onLoadMoreDeployments={() => {
               if (
@@ -1005,7 +1028,7 @@ export default function CreateCasePage(): JSX.Element {
                 : undefined
             }
             isRelatedCaseMode={noAiMode}
-            isTitleDisabled={!!relatedCase}
+            isTitleDisabled={false}
             relatedCaseNumber={relatedCase?.number ?? ""}
             isSecurityReport={isSecurityReport}
             excludeS0={excludeS0}

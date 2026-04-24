@@ -53,6 +53,7 @@ export type ProjectContact = {
   lastName: string;
   isCsAdmin: boolean;
   isCsIntegrationUser: boolean;
+  isPortalUser?: boolean;
   isSecurityContact: boolean;
   membershipStatus: string;
   account?: AccountInfo;

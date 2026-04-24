@@ -3369,6 +3369,8 @@ service http:InterceptableService / on new http:Listener(9090, listenerConf) {
                     contactFirstName: payload.contactFirstName,
                     contactLastName: payload.contactLastName,
                     isCsIntegrationUser: payload.isCsIntegrationUser,
+                    isCsAdmin: payload.isCsAdmin,
+                    isPortalUser: payload.isPortalUser,
                     isSecurityContact: payload.isSecurityContact
 
                 });
@@ -3474,7 +3476,7 @@ service http:InterceptableService / on new http:Listener(9090, listenerConf) {
     # + payload - Updated role information
     # + return - Membership information or error response
     resource function patch projects/[entity:IdString id]/contacts/[string email](http:RequestContext ctx,
-            types:MembershipSecurityPayload payload)
+            types:MembershipRolePayload payload)
         returns user_management:Membership|http:Unauthorized|http:Forbidden|http:InternalServerError {
 
         authorization:UserInfoPayload|error userInfo = ctx.getWithType(authorization:HEADER_USER_INFO);
@@ -3515,9 +3517,11 @@ service http:InterceptableService / on new http:Listener(9090, listenerConf) {
             };
         }
 
-        user_management:Membership|error response = user_management:updateMembershipFlag(projectResponse.sfId, email,
+        user_management:Membership|error response = user_management:updateMembershipRole(projectResponse.sfId, email,
                 {
                     adminEmail: userInfo.email,
+                    isCsAdmin: payload.isCsAdmin,
+                    isPortalUser: payload.isPortalUser,
                     isSecurityContact: payload.isSecurityContact
                 });
         if response is error {

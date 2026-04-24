@@ -86,7 +86,9 @@ export type CreateProjectContactRequest = {
   contactEmail: string;
   contactFirstName: string;
   contactLastName: string;
+  isCsAdmin?: boolean;
   isCsIntegrationUser: boolean;
+  isPortalUser?: boolean;
   isSecurityContact: boolean;
 };
 

@@ -50,7 +50,11 @@ import {
   getFirstEmptyRequiredField,
   isContextField,
   isDescriptionField,
+  isDateTimeField,
 } from "@features/operations/utils/serviceRequestValidation";
+import { datetimeLocalWallTimeToUtcMs } from "@features/support/utils/support";
+import { resolveDisplayTimeZone } from "@utils/dateTime";
+import useGetUserDetails from "@features/settings/api/useGetUserDetails";
 import {
   getBaseDeploymentOptions,
   getBaseProductOptions,
@@ -196,6 +200,8 @@ export default function CreateServiceRequestPage(): JSX.Element {
   const { showSuccess } = useSuccessBanner();
   const queryClient = useQueryClient();
   const authFetch = useAuthApiClient();
+  const { data: userDetails } = useGetUserDetails();
+  const userTimeZone = userDetails?.timeZone?.trim() || resolveDisplayTimeZone();
 
   const [deployment, setDeployment] = useState("");
   const [product, setProduct] = useState("");
@@ -514,9 +520,15 @@ export default function CreateServiceRequestPage(): JSX.Element {
       .filter((v) => !isContextField(v.questionText ?? ""))
       .map((v) => {
         const raw = variableValues[v.id] ?? "";
-        const value = isDescriptionField(v.questionText ?? "")
-          ? raw.trim()
-          : htmlToPlainText(raw).trim();
+        let value: string;
+        if (isDescriptionField(v.questionText ?? "")) {
+          value = raw.trim();
+        } else if (isDateTimeField(v) && raw.trim()) {
+          const utcMs = datetimeLocalWallTimeToUtcMs(raw.trim(), userTimeZone);
+          value = utcMs != null ? new Date(utcMs).toISOString() : raw.trim();
+        } else {
+          value = htmlToPlainText(raw).trim();
+        }
         return { id: v.id, value };
       })
       .filter((v) => v.value !== "");
@@ -698,6 +710,7 @@ export default function CreateServiceRequestPage(): JSX.Element {
               attachments={attachments}
               onAttachmentClick={handleAttachmentClick}
               onAttachmentRemove={handleAttachmentRemove}
+              userTimeZone={userTimeZone}
             />
           </div>
         )}

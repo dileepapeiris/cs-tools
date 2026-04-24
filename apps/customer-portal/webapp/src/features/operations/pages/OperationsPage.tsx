@@ -397,6 +397,7 @@ export default function OperationsPage(): JSX.Element {
                   <OutstandingCasesList
                     cases={serviceRequests}
                     isLoading={isSrLoading}
+                    showInternalId
                     onCaseClick={
                       projectId
                         ? (c) =>

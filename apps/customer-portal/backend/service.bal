@@ -24,6 +24,7 @@ import customer_portal.types;
 import customer_portal.updates;
 import customer_portal.user_management;
 
+import ballerina/cache;
 import ballerina/http;
 import ballerina/log;
 import ballerina/time;
@@ -51,6 +52,15 @@ service class ErrorInterceptor {
         return err;
     }
 }
+
+// In-memory cache for bulk product-vulnerability fetches (limit > 50).
+// The dataset is org-wide — identical for every authenticated user — so a single
+// shared cache is safe.  TTL: 12 hours.
+final cache:Cache productVulnerabilityCache = new ({
+    capacity: 20,
+    evictionFactor: 0.2,
+    defaultMaxAge: 12 * 60 * 60
+});
 
 configurable int wsPort = 9091;
 
@@ -2979,6 +2989,138 @@ service http:InterceptableService / on new http:Listener(9090, listenerConf) {
             return <http:InternalServerError>{
                 body: {
                     message: ERR_MSG_USER_INFO_HEADER_NOT_FOUND
+                }
+            };
+        }
+
+        int reqLimit = payload.pagination?.'limit ?: 10;
+
+        // The entity service has a hard limit of 50 records per request.
+        // When the caller requests more than 50 (e.g. a "fetch all" call from the frontend),
+        // we transparently batch through the entity service and aggregate the results here.
+        if reqLimit > 50 {
+            int reqOffset = payload.pagination?.offset ?: 0;
+
+            // Cache key covers all filter and sort dimensions so distinct queries
+            // never share a cache entry.
+            string cacheKey = string `sq=${payload.filters?.searchQuery ?: ""},` +
+                string `sv=${payload.filters?.severityId ?: ""},` +
+                string `st=${payload.filters?.statusId ?: ""},` +
+                string `pn=${payload.filters?.productName ?: ""},` +
+                string `pv=${payload.filters?.productVersion ?: ""},` +
+                string `sb=${payload.sortBy?.'field ?: ""}-${payload.sortBy?.'order ?: ""}`;
+
+            // Return cached result if available (TTL: 12 hours).
+            any|cache:Error cachedEntry = productVulnerabilityCache.get(cacheKey);
+            if cachedEntry is types:ProductVulnerability[] {
+                log:printDebug(string `[vulnerabilities] Cache hit for key: ${cacheKey}`);
+                int totalCached = cachedEntry.length();
+                types:ProductVulnerability[] cachedPage = reqOffset >= totalCached
+                    ? []
+                    : (reqOffset + reqLimit >= totalCached
+                        ? cachedEntry.slice(reqOffset)
+                        : cachedEntry.slice(reqOffset, reqOffset + reqLimit));
+                return <http:Ok>{
+                    body: <types:ProductVulnerabilitySearchResponse>{
+                        productVulnerabilities: cachedPage,
+                        totalRecords: totalCached,
+                        'limit: reqLimit,
+                        offset: reqOffset
+                    }
+                };
+            }
+
+            // First call with limit=1 to get the total number of available records.
+            entity:ProductVulnerabilitySearchPayload countPayload = {
+                filters: payload.filters,
+                sortBy: payload.sortBy,
+                pagination: {offset: 0, 'limit: 1}
+            };
+
+            entity:ProductVulnerabilitySearchResponse|error countResponse =
+                entity:searchProductVulnerabilities(userInfo.idToken, countPayload);
+            if countResponse is error {
+                if getStatusCode(countResponse) == http:STATUS_FORBIDDEN {
+                    log:printWarn(string `Access to product vulnerabilities information is forbidden for user: ${
+                            userInfo.userId}`);
+                    return <http:Forbidden>{
+                        body: {
+                            message: "Access to product vulnerabilities information is forbidden for the user!"
+                        }
+                    };
+                }
+                string customError = "Failed to search product vulnerabilities.";
+                log:printError(customError, countResponse);
+                return <http:InternalServerError>{body: {message: customError}};
+            }
+
+            int totalFromEntity = countResponse.totalRecords;
+            if totalFromEntity == 0 {
+                return <http:Ok>{
+                    body: <types:ProductVulnerabilitySearchResponse>{
+                        productVulnerabilities: [],
+                        totalRecords: 0,
+                        'limit: reqLimit,
+                        offset: reqOffset
+                    }
+                };
+            }
+
+            // Fetch all records in batches of 50.
+            int batchSize = 50;
+            int batchCount = (totalFromEntity + batchSize - 1) / batchSize;
+            types:ProductVulnerability[] allVulnerabilities = [];
+
+            foreach int batchIndex in 0 ..< batchCount {
+                entity:ProductVulnerabilitySearchPayload fetchPayload = {
+                    filters: payload.filters,
+                    sortBy: payload.sortBy,
+                    pagination: {offset: batchIndex * batchSize, 'limit: batchSize}
+                };
+
+                entity:ProductVulnerabilitySearchResponse|error batchResponse =
+                    entity:searchProductVulnerabilities(userInfo.idToken, fetchPayload);
+                if batchResponse is error {
+                    if getStatusCode(batchResponse) == http:STATUS_FORBIDDEN {
+                        log:printWarn(string `Access to product vulnerabilities information is forbidden for user: ${
+                                userInfo.userId}`);
+                        return <http:Forbidden>{
+                            body: {
+                                message: "Access to product vulnerabilities information is forbidden for the user!"
+                            }
+                        };
+                    }
+                    string customError = "Failed to search product vulnerabilities.";
+                    log:printError(customError, batchResponse);
+                    return <http:InternalServerError>{body: {message: customError}};
+                }
+
+                types:ProductVulnerabilitySearchResponse mappedBatch =
+                    mapProductVulnerabilitySearchResponse(batchResponse);
+                foreach var v in mappedBatch.productVulnerabilities {
+                    allVulnerabilities.push(v);
+                }
+            }
+
+            // Store the full aggregated set in cache for 12 hours.
+            cache:Error? putErr = productVulnerabilityCache.put(cacheKey, allVulnerabilities);
+            if putErr is cache:Error {
+                log:printWarn("Failed to store product vulnerabilities in cache.", putErr);
+            }
+
+            int totalAll = allVulnerabilities.length();
+            types:ProductVulnerability[] responsePage = reqOffset >= totalAll
+                ? []
+                : (reqOffset + reqLimit >= totalAll
+                    ? allVulnerabilities.slice(reqOffset)
+                    : allVulnerabilities.slice(reqOffset, reqOffset + reqLimit));
+
+            return <http:Ok>{
+                body: <types:ProductVulnerabilitySearchResponse>{
+                    productVulnerabilities: responsePage,
+                    totalRecords: totalAll,
+                    'limit: reqLimit,
+                    offset: reqOffset
                 }
             };
         }

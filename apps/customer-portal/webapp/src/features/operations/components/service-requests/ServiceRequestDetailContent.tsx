@@ -20,6 +20,7 @@ import {
   Button,
   Divider,
   Paper,
+  Skeleton,
   Stack,
   Typography,
   Avatar,
@@ -240,27 +241,88 @@ export default function ServiceRequestDetailContent({
 
   if (isLoading) {
     return (
-      <Box>
+      <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
         <Button
           startIcon={<ArrowLeft size={16} />}
           onClick={onBack}
-          sx={{ mb: 2 }}
+          sx={{ alignSelf: "flex-start", mb: 0.5 }}
           variant="text"
         >
           Back to Service Requests
         </Button>
-        <Paper variant="outlined" sx={{ p: 3 }}>
-          <Stack spacing={2}>
-            <Box sx={{ height: 24, width: 120 }} />
-            <Box sx={{ height: 32, width: "60%" }} />
-            <Box sx={{ height: 56, width: "100%" }} />
-            <Stack direction="row" spacing={3} sx={{ pt: 2 }}>
-              {[1, 2, 3, 4].map((i) => (
-                <Box key={i} sx={{ height: 40, width: 140 }} />
-              ))}
+        <Paper variant="outlined" sx={{ p: 2, borderRadius: 0 }}>
+          <Stack spacing={1.5}>
+            {/* Header: WSO2 Case ID | Number | Status */}
+            <Stack direction="row" spacing={1.5} alignItems="center" sx={{ flexWrap: "wrap" }}>
+              <Skeleton variant="text" width={80} height={18} />
+              <Skeleton variant="rectangular" width={1} height={14} />
+              <Skeleton variant="text" width={100} height={20} />
+              <Stack direction="row" spacing={0.75} alignItems="center">
+                <Skeleton variant="circular" width={8} height={8} />
+                <Skeleton variant="text" width={70} height={16} />
+              </Stack>
             </Stack>
+            {/* Title */}
+            <Skeleton variant="text" width="55%" height={28} />
+            {/* Meta grid: Environment / Product / Requested By / Requested On */}
+            <Box
+              sx={{
+                mt: 1,
+                display: "grid",
+                gridTemplateColumns: { xs: "1fr 1fr", md: "repeat(4, minmax(0, 1fr))" },
+                gap: 3,
+              }}
+            >
+              {[1, 2, 3, 4].map((i) => (
+                <Stack key={i} spacing={0.5}>
+                  <Skeleton variant="text" width={80} height={14} />
+                  <Skeleton variant="text" width="85%" height={20} />
+                </Stack>
+              ))}
+            </Box>
           </Stack>
         </Paper>
+        {/* Content area: Attachments + Communication / Details panel */}
+        <Box
+          sx={{
+            display: "grid",
+            gridTemplateColumns: { xs: "1fr", md: "1fr 360px" },
+            gap: 3,
+            alignItems: "start",
+          }}
+        >
+          <Stack spacing={3}>
+            <Paper variant="outlined" sx={{ p: 2, borderRadius: 0 }}>
+              <Skeleton variant="text" width={110} height={22} sx={{ mb: 1.5 }} />
+              <Stack spacing={2}>
+                {[1, 2].map((i) => (
+                  <Box key={i} sx={{ display: "flex", gap: 1.5 }}>
+                    <Skeleton variant="circular" width={32} height={32} sx={{ flexShrink: 0 }} />
+                    <Box sx={{ flex: 1 }}>
+                      <Skeleton variant="text" width="40%" height={16} sx={{ mb: 0.5 }} />
+                      <Skeleton variant="rounded" width="100%" height={52} />
+                    </Box>
+                  </Box>
+                ))}
+              </Stack>
+            </Paper>
+            <Paper variant="outlined" sx={{ p: 2, borderRadius: 0 }}>
+              <Skeleton variant="text" width={130} height={22} sx={{ mb: 1.5 }} />
+              <Skeleton variant="rounded" width="100%" height={80} />
+            </Paper>
+          </Stack>
+          <Paper variant="outlined" sx={{ p: 2, borderRadius: 0 }}>
+            <Skeleton variant="text" width={80} height={22} sx={{ mb: 2 }} />
+            <Stack spacing={2}>
+              {[1, 2, 3, 4, 5].map((i) => (
+                <Stack key={i} spacing={0.5}>
+                  <Skeleton variant="text" width="55%" height={14} />
+                  <Skeleton variant="text" width="75%" height={20} />
+                </Stack>
+              ))}
+            </Stack>
+          </Paper>
+        </Box>
       </Box>
     );
   }

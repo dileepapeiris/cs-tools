@@ -16,7 +16,6 @@
 
 import {
   Box,
-  Button,
   FormControl,
   InputLabel,
   MenuItem,
@@ -28,7 +27,6 @@ import type { SelectChangeEvent } from "@wso2/oxygen-ui";
 import {
   PRODUCT_VULNERABILITIES_ALL_PRODUCTS_LABEL,
   PRODUCT_VULNERABILITIES_ALL_VERSIONS_LABEL,
-  PRODUCT_VULNERABILITIES_CLEAR_FILTERS_LABEL,
   PRODUCT_VULNERABILITIES_PRODUCT_LABEL,
   PRODUCT_VULNERABILITIES_PRODUCT_VERSION_LABEL,
   PRODUCT_VULNERABILITIES_SEVERITY_ALL_LABEL,
@@ -49,7 +47,6 @@ export default function ProductVulnerabilitiesFilters({
   productOptions = [],
   productVersionOptions = [],
   onFilterChange,
-  onClearFilters,
 }: ProductVulnerabilitiesFiltersProps): JSX.Element {
   const handleSeverityChange = (event: SelectChangeEvent<string | number>) => {
     onFilterChange("severityId", event.target.value);
@@ -143,16 +140,6 @@ export default function ProductVulnerabilitiesFilters({
         </Select>
       </FormControl>
 
-      {/* Clear Filters */}
-      <Button
-        variant="outlined"
-        color="warning"
-        size="small"
-        onClick={onClearFilters}
-        sx={{ whiteSpace: "nowrap", height: 40 }}
-      >
-        {PRODUCT_VULNERABILITIES_CLEAR_FILTERS_LABEL}
-      </Button>
     </Box>
   );
 }

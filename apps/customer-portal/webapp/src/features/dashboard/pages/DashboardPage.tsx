@@ -529,7 +529,7 @@ export default function DashboardPage(): JSX.Element {
 
     return {
       totalCases: casesActionCount + crActionCount,
-      openCases: casesOutstandingCount + crOutstandingCount,
+      openCases: resolvedProject?.outstandingCount ?? (casesOutstandingCount + crOutstandingCount),
       resolvedCases: Math.max(0, closedTotal - s0ClosedCount),
       avgResponseTime,
     };
@@ -539,6 +539,7 @@ export default function DashboardPage(): JSX.Element {
     defaultCaseStats,
     includeCrStats,
     permissions.includeS0InSupportMetrics,
+    resolvedProject?.outstandingCount,
   ]);
 
   const isDashboardStatsLoading =

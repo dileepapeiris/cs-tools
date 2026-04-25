@@ -708,17 +708,12 @@ export default function CreateCasePage(): JSX.Element {
   ]);
 
   const handleBack = () => {
-    if (projectId && conversationId) {
-      navigate(`/projects/${projectId}/support/chat/${conversationId}`, {
-        state: {
-          messages: chatMessages,
-        },
-      });
+    const returnTo = (location.state as { returnTo?: string } | null)?.returnTo;
+    if (returnTo) {
+      navigate(returnTo);
       return;
     }
-    if (window.history.length > 1) {
-      navigate(ROUTE_PREVIOUS_PAGE);
-    } else if (projectId) {
+    if (projectId) {
       navigate(`/projects/${projectId}/support/cases`);
     } else {
       navigate("/");
@@ -964,8 +959,8 @@ export default function CreateCasePage(): JSX.Element {
 
   const renderContent = () => (
     <Grid container spacing={3}>
-      {/* left column - form content (full width when skipChat) */}
-      <Grid size={{ xs: 12, md: skipChatMode ? 12 : 8 }}>
+      {/* left column - form content (full width when skipChat or no sidebar content) */}
+      <Grid size={{ xs: 12, md: (skipChatMode || (!relatedCase && !conversationId)) ? 12 : 8 }}>
         {/* case creation form */}
         <Box
           component="form"
@@ -1081,8 +1076,8 @@ export default function CreateCasePage(): JSX.Element {
         </Box>
       </Grid>
 
-      {/* right column - sidebar (hidden when skipChat) */}
-      {!skipChatMode && (
+      {/* right column - sidebar (hidden when skipChat or no sidebar content) */}
+      {!skipChatMode && (relatedCase || conversationId) && (
         <Grid size={{ xs: 12, md: 4 }}>
           {relatedCase ? (
             <RelatedCaseSummary

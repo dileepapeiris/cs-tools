@@ -35,7 +35,7 @@ export type ProjectListItem = {
   activeCasesCount: number;
   activeChatsCount: number;
   actionRequiredCount: number;
-  outstandingCount?: number;
+  outstandingCount?: number | null;
   slaStatus: string;
 };
 
@@ -82,6 +82,7 @@ export type ProjectDetails = {
   onboardingStatus?: string | null;
   suspendedOn?: string | null;
   suspensionReasons?: string[];
+  outstandingCount?: number | null;
 };
 
 // Response type for project search responses.

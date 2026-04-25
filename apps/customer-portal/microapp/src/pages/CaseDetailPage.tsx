@@ -233,6 +233,7 @@ export default function CaseDetailPage() {
             </Grid>
           </Grid>
         </SectionCard>
+        {/* <SectionCard title="Attachments"></SectionCard> */}
         <SectionCard title="Activity Timeline">
           <Stack gap={2} pt={1}>
             {comments ? (

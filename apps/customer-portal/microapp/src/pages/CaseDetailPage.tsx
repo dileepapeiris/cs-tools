@@ -15,8 +15,8 @@
 // under the License.
 
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
-import { Download, Image, Paperclip, CheckIcon, PlusIcon, User, Users, CircleX } from "@wso2/oxygen-ui-icons-react";
-import { Box, Card, CircularProgress, Grid, IconButton, Skeleton, Stack, Typography, pxToRem } from "@wso2/oxygen-ui";
+import { CheckIcon, CircleX, Download, Image, Paperclip, PlusIcon, User, Users } from "@wso2/oxygen-ui-icons-react";
+import { Box, Card, Grid, IconButton, Skeleton, Stack, Typography, pxToRem } from "@wso2/oxygen-ui";
 import {
   CommentSkeleton,
   InfoField,
@@ -26,7 +26,7 @@ import {
   type MenuOptionProps,
 } from "@components/features/detail";
 import { PriorityChip, StatusChip } from "@components/features/support";
-import { RichText, SectionCard } from "@components/shared";
+import { AttachmentPreviewDialog, RichText, SectionCard } from "@components/shared";
 import { useLayout } from "@context/layout";
 import { cases } from "@src/services/cases";
 import { CASE_STATE_IDS } from "@src/config/constants";
@@ -170,6 +170,26 @@ export default function CaseDetailPage() {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [comments]);
 
+  const [previewAttachment, setPreviewAttachment] = useState<Attachment | null>(null);
+  const [previewSrc, setPreviewSrc] = useState<string | null>(null);
+  const [, setIsPreviewLoading] = useState(false);
+
+  const handlePreviewOpen = async (attachment: Attachment, blob: Blob) => {
+    setPreviewAttachment(attachment);
+    setIsPreviewLoading(true);
+    try {
+      const url = URL.createObjectURL(blob);
+      setPreviewSrc(url);
+    } finally {
+      setIsPreviewLoading(false);
+    }
+  };
+
+  const handlePreviewClose = () => {
+    setPreviewAttachment(null);
+    setPreviewSrc(null);
+  };
+
   return (
     <>
       <Stack gap={2} mb={10}>
@@ -251,7 +271,7 @@ export default function CaseDetailPage() {
             <Grid spacing={1.5} container>
               {attachments.map((attachment) => (
                 <Grid key={attachment.id} size={{ xs: 12 }}>
-                  <AttachmentCard attachment={attachment} />
+                  <AttachmentCard attachment={attachment} onPreview={handlePreviewOpen} />
                 </Grid>
               ))}
             </Grid>
@@ -289,74 +309,79 @@ export default function CaseDetailPage() {
         loading={isSendingComment}
       />
 
+      <AttachmentPreviewDialog
+        open={Boolean(previewAttachment)}
+        attachment={previewAttachment}
+        onClose={handlePreviewClose}
+        src={previewSrc}
+      />
+
       <div ref={bottomRef} />
     </>
   );
 }
 
-function AttachmentCard({ attachment }: { attachment: Attachment }) {
+function AttachmentCard({
+  attachment,
+  onPreview,
+}: {
+  attachment: Attachment;
+  onPreview: (attachment: Attachment, blob: Blob) => void;
+}) {
   const queryClient = useQueryClient();
   const { fromNow } = useDateTime();
-  const [isDownloading, setIsDownloading] = useState(false);
 
-  const handleDownload = async () => {
-    setIsDownloading(true);
-    try {
-      const data = await queryClient.fetchQuery(cases.attachment(attachment.id));
+  const handlePreview = async () => {
+    const data = await queryClient.fetchQuery(cases.attachment(attachment.id));
 
-      const [prefix, base64] = data.content.split(",");
-      const mimeType = prefix.split(":")[1].split(";")[0];
+    const [prefix, base64] = data.content.split(",");
+    const mimeType = prefix.split(":")[1].split(";")[0];
 
-      const byteCharacters = atob(base64);
-      const byteArray = new Uint8Array(byteCharacters.length);
-      for (let i = 0; i < byteCharacters.length; i++) {
-        byteArray[i] = byteCharacters.charCodeAt(i);
-      }
-
-      const blob = new Blob([byteArray], { type: mimeType });
-      const url = URL.createObjectURL(blob);
-      const link = document.createElement("a");
-      link.href = url;
-      link.download = attachment.fileName;
-      link.click();
-      URL.revokeObjectURL(url);
-    } finally {
-      setIsDownloading(false);
+    const byteCharacters = atob(base64);
+    const byteArray = new Uint8Array(byteCharacters.length);
+    for (let i = 0; i < byteCharacters.length; i++) {
+      byteArray[i] = byteCharacters.charCodeAt(i);
     }
+
+    const blob = new Blob([byteArray], { type: mimeType });
+
+    onPreview(attachment, blob);
   };
 
   return (
-    <Card sx={{ p: 1.5 }}>
-      <Stack direction="row" alignItems="flex-start" gap={1}>
-        <Box
-          sx={{
-            flexShrink: 0,
-            width: 40,
-            height: 40,
-            borderRadius: 0.5,
-            overflow: "hidden",
-            bgcolor: "action.hover",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            color: "text.secondary",
-          }}
-        >
-          {attachment.type === "image" ? <Image size={pxToRem(18)} /> : <Paperclip size={pxToRem(18)} />}
-        </Box>
-        <Stack gap={0.25} minWidth={0} flex={1}>
-          <Typography variant="subtitle2" fontWeight="medium" noWrap>
-            {attachment.fileName}
-          </Typography>
-          <Typography variant="caption" color="text.secondary" noWrap>
-            {attachment.createdBy} · {fromNow(attachment.createdOn)}
-          </Typography>
+    <>
+      <Card sx={{ p: 1.5 }}>
+        <Stack direction="row" alignItems="flex-start" gap={1}>
+          <Box
+            sx={{
+              flexShrink: 0,
+              width: 40,
+              height: 40,
+              borderRadius: 0.5,
+              overflow: "hidden",
+              bgcolor: "action.hover",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              color: "text.secondary",
+            }}
+          >
+            {attachment.type === "image" ? <Image size={pxToRem(18)} /> : <Paperclip size={pxToRem(18)} />}
+          </Box>
+          <Stack gap={0.25} minWidth={0} flex={1}>
+            <Typography variant="subtitle2" fontWeight="medium" noWrap>
+              {attachment.fileName}
+            </Typography>
+            <Typography variant="caption" color="text.secondary" noWrap>
+              {attachment.createdBy} · {fromNow(attachment.createdOn)}
+            </Typography>
+          </Stack>
+          <IconButton onClick={handlePreview}>
+            <Download size={pxToRem(18)} />
+          </IconButton>
         </Stack>
-        <IconButton onClick={handleDownload} disabled={isDownloading}>
-          {isDownloading ? <CircularProgress size={pxToRem(18)} /> : <Download size={pxToRem(18)} />}
-        </IconButton>
-      </Stack>
-    </Card>
+      </Card>
+    </>
   );
 }
 

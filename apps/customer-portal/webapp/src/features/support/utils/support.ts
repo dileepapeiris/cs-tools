@@ -1875,3 +1875,19 @@ export function isClosedLikeCaseStatus(statusLabel?: string | null): boolean {
   const normalized = statusLabel?.trim().toLowerCase() ?? "";
   return normalized === CASE_STATUS.CLOSED.toLowerCase();
 }
+
+/**
+ * Returns the UTC ISO date range covering the last 30 days,
+ * for use with closedStartDate / closedEndDate filter fields.
+ */
+export function getLast30DaysUtcRange(): {
+  closedStartDate: string;
+  closedEndDate: string;
+} {
+  const pad = (n: number) => String(n).padStart(2, "0");
+  const fmt = (d: Date) =>
+    `${d.getUTCFullYear()}-${pad(d.getUTCMonth() + 1)}-${pad(d.getUTCDate())}T${pad(d.getUTCHours())}:${pad(d.getUTCMinutes())}:${pad(d.getUTCSeconds())}Z`;
+  const now = new Date();
+  const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+  return { closedStartDate: fmt(thirtyDaysAgo), closedEndDate: fmt(now) };
+}

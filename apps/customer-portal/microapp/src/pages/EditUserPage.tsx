@@ -41,6 +41,14 @@ import { projects } from "../services/projects";
 import { useNotify } from "../context/snackbar";
 import { ConfirmDialog } from "../components/shared/ConfirmDialog";
 
+type UserActionFeedbackState = {
+  action: "invite" | "edit" | "delete";
+  email: string;
+  firstName?: string;
+  lastName?: string;
+  roles?: Role[];
+};
+
 export default function EditUserPage({ mode = "invite" }: { mode?: "invite" | "edit" }) {
   const location = useLocation();
   const navigate = useNavigate();
@@ -80,7 +88,15 @@ export default function EditUserPage({ mode = "invite" }: { mode?: "invite" | "e
     ...users.create(projectId!),
     onSuccess: () => {
       queryClient.resetQueries({ queryKey: ["users", projectId] });
-      navigate(-1);
+      navigate("/users", {
+        state: {
+          action: "invite",
+          email,
+          firstName,
+          lastName,
+          roles,
+        } satisfies UserActionFeedbackState,
+      });
     },
     onError: (error) => notify.error(getApiErrorMessage(error) ?? inviteFallbackMessage),
   });
@@ -89,7 +105,15 @@ export default function EditUserPage({ mode = "invite" }: { mode?: "invite" | "e
     ...users.edit(projectId!, email),
     onSuccess: () => {
       queryClient.resetQueries({ queryKey: ["users", projectId] });
-      navigate(-1);
+      navigate("/users", {
+        state: {
+          action: "edit",
+          email,
+          firstName,
+          lastName,
+          roles,
+        } satisfies UserActionFeedbackState,
+      });
     },
     onError: (error) => notify.error(getApiErrorMessage(error) ?? editFallbackMessage),
   });
@@ -98,7 +122,14 @@ export default function EditUserPage({ mode = "invite" }: { mode?: "invite" | "e
     ...users.delete(projectId!, email),
     onSuccess: () => {
       queryClient.resetQueries({ queryKey: ["users", projectId] });
-      navigate(-1);
+      navigate("/users", {
+        state: {
+          action: "delete",
+          email,
+          firstName,
+          lastName,
+        } satisfies UserActionFeedbackState,
+      });
     },
     onError: (error) => notify.error(getApiErrorMessage(error) ?? deleteFallbackMessage),
   });

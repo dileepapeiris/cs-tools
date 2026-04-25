@@ -83,6 +83,12 @@ export const CasesTrendChart = ({
     () =>
       new Map<string, string>([
         [
+          normalizeCategory("consultancy"),
+          colors.green?.[DASHBOARD_CHART_DARK_MODE_SHADE] ??
+            colors.green?.[300] ??
+            "#86EFAC",
+        ],
+        [
           normalizeCategory("onboarding"),
           colors.blue?.[DASHBOARD_CHART_DARK_MODE_SHADE] ??
             colors.blue?.[300] ??
@@ -95,22 +101,10 @@ export const CasesTrendChart = ({
             "#FDBA74",
         ],
         [
-          normalizeCategory("services"),
-          colors.green?.[DASHBOARD_CHART_DARK_MODE_SHADE] ??
-            colors.green?.[300] ??
-            "#86EFAC",
-        ],
-        [
-          normalizeCategory("follow-up"),
+          normalizeCategory("follow up"),
           colors.purple?.[DASHBOARD_CHART_DARK_MODE_SHADE] ??
             colors.purple?.[300] ??
-            "#D8B4FE",
-        ],
-        [
-          normalizeCategory("improvements"),
-          colors.brown?.[DASHBOARD_CHART_DARK_MODE_SHADE] ??
-            colors.brown?.[300] ??
-            "#D6BFA8",
+            "#C4B5FD",
         ],
       ]),
     [],
@@ -210,7 +204,7 @@ export const CasesTrendChart = ({
                 tooltip={{ show: !isError, wrapperStyle: { zIndex: 1000 } }}
               >
                 <Pie
-                  data={displayChartData}
+                  data={displayChartData.filter((d) => d.value > 0)}
                   cx="50%"
                   cy="50%"
                   innerRadius={60}
@@ -231,14 +225,15 @@ export const CasesTrendChart = ({
                   onMouseLeave={onSliceClick && !isError ? () => setActivePieIndex(undefined) : undefined}
                   onClick={
                     onSliceClick && !isError
-                      ? (_data: unknown, index: number) => {
-                          const id = displayChartData[index]?.id ?? displayChartData[index]?.name;
+                      ? (data: { name?: string; ids?: string[]; id?: string } | unknown) => {
+                          const entry = data as { name?: string; ids?: string[]; id?: string };
+                          const id = entry?.ids?.join(",") ?? entry?.id ?? entry?.name;
                           if (id) onSliceClick(String(id));
                         }
                       : undefined
                   }
                 >
-                  {displayChartData.map((entry, index) => (
+                  {displayChartData.filter((d) => d.value > 0).map((entry, index) => (
                     <Cell
                       key={`cell-${index}`}
                       fill={entry.color}
@@ -285,7 +280,7 @@ export const CasesTrendChart = ({
                 name: item.name,
                 value: item.value,
                 color: item.color,
-                id: item.id ?? item.name,
+                id: item.ids?.join(",") ?? item.id ?? item.name,
               }))}
               isError={isError}
               showValues

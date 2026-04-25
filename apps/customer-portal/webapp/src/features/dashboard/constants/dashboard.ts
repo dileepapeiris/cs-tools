@@ -200,11 +200,10 @@ export const SEVERITY_FRIENDLY_LABEL: Record<SeverityLegendKey, string> = {
 
 // Outstanding engagements category chart data.
 export const OUTSTANDING_ENGAGEMENTS_CATEGORY_CHART_DATA = [
+  { key: "consultancy", name: "Consultancy", color: colors.green[500] },
   { key: "onboarding", name: "Onboarding", color: colors.blue[500] },
   { key: "migration", name: "Migration", color: colors.orange[500] },
-  { key: "services", name: "Services", color: colors.green[500] },
-  { key: "follow-up", name: "Follow up", color: colors.purple[500] },
-  { key: "improvements", name: "Improvements", color: colors.brown[500] },
+  { key: "follow-up", name: "Follow Up", color: colors.purple[500] },
 ] as const;
 
 // Configuration for Cases Trend Chart (same legend order as Outstanding Engagements).

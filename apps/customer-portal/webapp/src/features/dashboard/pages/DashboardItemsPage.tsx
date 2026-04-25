@@ -835,6 +835,7 @@ export default function DashboardItemsPage({
                       onCaseClick={section.onItemClick}
                       entityName={section.entityName}
                       hideSeverity={section.hideSeverity}
+                      showInternalId
                     />
                   </Box>
                   {section.total > 10 && (

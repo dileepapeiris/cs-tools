@@ -30,6 +30,7 @@ import { useGetProjectCasesStats } from "@features/dashboard/api/useGetProjectCa
 import { useGetProjectChangeRequestsStats } from "@features/dashboard/api/useGetProjectChangeRequestsStats";
 import {
   DASHBOARD_STATS,
+  OUTSTANDING_ENGAGEMENTS_CATEGORY_CHART_DATA,
   SEVERITY_API_LABELS,
 } from "@/features/dashboard/constants/dashboard";
 import { OperationsChartMode } from "@/features/dashboard/types/charts";
@@ -47,7 +48,6 @@ import type { SupportStatConfig } from "@features/support/constants/supportConst
 import {
   getAllCoreFailedState,
   getDashboardChartsLoadingState,
-  normalizeEngagementLabel,
 } from "@features/dashboard/utils/dashboard";
 
 /**
@@ -72,7 +72,7 @@ export default function DashboardPage(): JSX.Element {
   type ChartNavAction =
     | { chart: "outstanding"; severityId: string }
     | { chart: "operations"; key: string }
-    | { chart: "engagements"; id: string };
+    | { chart: "engagements"; id: string; label?: string };
 
   const handleChartNavigation = useCallback(
     (action: ChartNavAction) => {
@@ -95,7 +95,11 @@ export default function DashboardPage(): JSX.Element {
         }
         case "engagements":
           navigate(`/projects/${projectId}/engagements`, {
-            state: { returnTo: location.pathname, engagementTypeId: action.id },
+            state: {
+              returnTo: location.pathname,
+              engagementTypeId: action.id,
+              engagementTypeLabel: action.label,
+            },
           });
           break;
       }
@@ -111,11 +115,6 @@ export default function DashboardPage(): JSX.Element {
 
   const handleOperationsClick = useCallback(
     (key: string) => handleChartNavigation({ chart: "operations", key }),
-    [handleChartNavigation],
-  );
-
-  const handleEngagementsClick = useCallback(
-    (id: string) => handleChartNavigation({ chart: "engagements", id }),
     [handleChartNavigation],
   );
 
@@ -410,23 +409,37 @@ export default function DashboardPage(): JSX.Element {
     permissions,
   ]);
 
-  // outstanding engagements
+  // outstanding engagements — grouped into 4 display categories, Services = Follow Up + Consultancy
   const outstandingEngagements = useMemo(() => {
-    const source = engagementStats;
-    const outstanding = source?.outstandingEngagementTypeCount ?? [];
+    const outstanding = engagementStats?.outstandingEngagementTypeCount ?? [];
 
-    const categories = outstanding.map((item) => ({
-      name: normalizeEngagementLabel(item.label),
-      value: item.count ?? 0,
-      id: item.id,
-    }));
+    const categories = OUTSTANDING_ENGAGEMENTS_CATEGORY_CHART_DATA.map((chartEntry) => {
+      const matching = outstanding.filter(
+        (item) => item.label.toLowerCase() === chartEntry.name.toLowerCase(),
+      );
+      const value = matching.reduce((sum, item) => sum + (item.count ?? 0), 0);
+      const matchingIds = matching.map((item) => item.id);
+      return {
+        name: chartEntry.name,
+        value,
+        ...(matchingIds.length === 1 ? { id: matchingIds[0] } : {}),
+        ...(matchingIds.length > 1 ? { ids: matchingIds } : {}),
+      };
+    });
+
     const total = categories.reduce((sum, item) => sum + item.value, 0);
-
-    return {
-      categories,
-      total,
-    };
+    return { categories, total };
   }, [engagementStats]);
+
+  const handleEngagementsClick = useCallback(
+    (id: string) => {
+      const category = outstandingEngagements.categories.find(
+        (c) => (c.ids?.join(",") ?? c.id ?? c.name) === id,
+      );
+      handleChartNavigation({ chart: "engagements", id, label: category?.name });
+    },
+    [handleChartNavigation, outstandingEngagements],
+  );
 
   // is charts loading
   const isChartsLoading = getDashboardChartsLoadingState({

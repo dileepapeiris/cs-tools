@@ -216,9 +216,9 @@ export default function AllUpdatesTab(): JSX.Element {
   if (isProductLevelsLoading) {
     return (
       <Stack spacing={3} sx={{ width: "100%" }}>
-        <Card variant="outlined" sx={{ borderRadius: 0 }}>
+        <Card variant="outlined">
           <CardContent sx={{ p: 3 }}>
-            <Typography variant="subtitle1" fontWeight={600} sx={{ mb: 2 }}>
+            <Typography variant="subtitle1" sx={{ mb: 2 }}>
               {ALL_UPDATES_SECTION_TITLE}
             </Typography>
             <Grid container spacing={2}>
@@ -265,7 +265,7 @@ export default function AllUpdatesTab(): JSX.Element {
 
   return (
     <Stack spacing={3} sx={{ width: "100%" }}>
-      <Card variant="outlined" sx={{ borderRadius: 0 }}>
+      <Card variant="outlined">
         <CardContent sx={{ p: 3 }}>
           <Typography variant="subtitle1" sx={{ mb: 2 }}>
             {ALL_UPDATES_SECTION_TITLE}
@@ -450,11 +450,7 @@ export default function AllUpdatesTab(): JSX.Element {
           >
             Search for updates
           </Typography>
-          <Typography
-            variant="body2"
-            
-            sx={{ mt: 0.5, whiteSpace: "nowrap" }}
-          >
+          <Typography variant="body2" sx={{ mt: 0.5, whiteSpace: "nowrap" }}>
             {ALL_UPDATES_IDLE_HINT}
           </Typography>
         </Box>

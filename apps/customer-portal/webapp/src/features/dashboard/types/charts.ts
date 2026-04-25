@@ -30,6 +30,7 @@ export type CasesTrendChartData = {
     name: string;
     value: number;
     id?: string;
+    ids?: string[];
   }>;
   total: number;
 };
@@ -47,6 +48,7 @@ export type ChartPieSlice = {
   value: number;
   color: string;
   id?: string;
+  ids?: string[];
 };
 
 // Active cases chart: both series or service requests only.

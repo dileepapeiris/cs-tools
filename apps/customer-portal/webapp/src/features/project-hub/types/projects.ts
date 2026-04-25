@@ -170,6 +170,8 @@ export type ProjectFeatures = {
   hasTimeLogsReadAccess: boolean;
   hasDeploymentWriteAccess: boolean;
   hasDeploymentReadAccess: boolean;
+  defaultCaseProductCategories?: string[] | null;
+  srProductCategories?: string[] | null;
 };
 
 // Request type for patching a project.

@@ -183,9 +183,18 @@ export default function EditUserPage({ mode = "invite" }: { mode?: "invite" | "e
 
         <SectionCard title="User Role">
           {isSystemUserReadOnly && (
-            <Typography variant="caption" color="warning.dark" fontWeight="medium">
-              A contact cannot be both a CS Integration User and have roles.
-            </Typography>
+            <Box
+              sx={(theme) => ({
+                px: 1.5,
+                py: 1,
+                bgcolor: alpha(theme.palette.info.main, 0.15),
+                borderLeft: `2px solid ${theme.palette.info.main}`,
+              })}
+            >
+              <Typography variant="caption" color="info.dark" fontWeight="medium">
+                A contact cannot be both a CS Integration User and have roles.
+              </Typography>
+            </Box>
           )}
           <RoleSelector value={roles} onChange={setRoles} readOnly={isSystemUserReadOnly} />
         </SectionCard>

@@ -82,7 +82,6 @@ import {
   htmlToPlainText,
 } from "@features/support/utils/richTextEditor";
 import UploadAttachmentModal from "@features/support/components/case-details/attachments-tab/UploadAttachmentModal";
-import { ROUTE_PREVIOUS_PAGE } from "@features/project-hub/constants/navigationConstants";
 import type { ProductCategory, ProjectDeploymentItem } from "@features/project-details/types/deployments";
 import type {
   RelatedCaseState,

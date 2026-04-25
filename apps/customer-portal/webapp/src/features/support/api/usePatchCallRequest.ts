@@ -24,6 +24,7 @@ import { useAuthApiClient } from "@/hooks/useAuthApiClient";
 import { useLogger } from "@hooks/useLogger";
 import { ApiQueryKeys } from "@constants/apiConstants";
 import type {
+import { parseApiResponseMessage } from "@utils/ApiError";
   PatchCallRequest,
   CreateCallResponse,
 } from "@features/support/types/calls";
@@ -103,18 +104,7 @@ export function usePatchCallRequest(
 
         if (!response.ok) {
           const text = await response.text();
-          let errorMessage = `Error updating call request: ${response.status} ${response.statusText}`;
-          try {
-            const json = JSON.parse(text) as { message?: string };
-            if (typeof json.message === "string") {
-              errorMessage = json.message;
-            } else if (text) {
-              errorMessage += ` - ${text}`;
-            }
-          } catch {
-            if (text) errorMessage += ` - ${text}`;
-          }
-          throw new Error(errorMessage);
+          throw new Error(parseApiResponseMessage(text, response.status, response.statusText));
         }
 
         const data: CreateCallResponse = await response.json();

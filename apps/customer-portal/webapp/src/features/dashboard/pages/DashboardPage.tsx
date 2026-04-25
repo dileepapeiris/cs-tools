@@ -71,7 +71,8 @@ export default function DashboardPage(): JSX.Element {
 
   type ChartNavAction =
     | { chart: "outstanding"; severityId: string }
-    | { chart: "operations"; key: string };
+    | { chart: "operations"; key: string }
+    | { chart: "engagements"; id: string };
 
   const handleChartNavigation = useCallback(
     (action: ChartNavAction) => {
@@ -92,6 +93,11 @@ export default function DashboardPage(): JSX.Element {
           });
           break;
         }
+        case "engagements":
+          navigate(`/projects/${projectId}/engagements`, {
+            state: { returnTo: location.pathname, engagementTypeId: action.id },
+          });
+          break;
       }
     },
     [navigate, projectId, location.pathname],
@@ -105,6 +111,11 @@ export default function DashboardPage(): JSX.Element {
 
   const handleOperationsClick = useCallback(
     (key: string) => handleChartNavigation({ chart: "operations", key }),
+    [handleChartNavigation],
+  );
+
+  const handleEngagementsClick = useCallback(
+    (id: string) => handleChartNavigation({ chart: "engagements", id }),
     [handleChartNavigation],
   );
 
@@ -583,6 +594,7 @@ export default function DashboardPage(): JSX.Element {
         showEngagementsChart={permissions.hasEngagements}
         onSeverityClick={handleSeverityClick}
         onOperationsClick={handleOperationsClick}
+        onEngagementsClick={handleEngagementsClick}
       />
       {/* Cases Table */}
       {projectId && (

@@ -28,6 +28,7 @@ export default function TopBanner(): JSX.Element | null {
 
   return (
     <div
+      style={{ display: "block", lineHeight: 0, fontSize: 0, overflow: "hidden" }}
       dangerouslySetInnerHTML={{ __html: html }}
     />
   );

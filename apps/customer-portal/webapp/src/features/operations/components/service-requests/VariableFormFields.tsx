@@ -35,6 +35,8 @@ import {
   isDescriptionField,
   isDateTimeField,
 } from "@features/operations/utils/serviceRequestValidation";
+import { computeMinScheduleDatetimeLocalForTimeZone } from "@features/support/utils/support";
+import { resolveDisplayTimeZone } from "@utils/dateTime";
 import Editor from "@components/rich-text-editor/Editor";
 
 export interface VariableFormFieldsProps {
@@ -54,6 +56,7 @@ export interface VariableFormFieldsProps {
   onAttachmentClick?: () => void;
   onAttachmentRemove?: (index: number) => void;
   onAttachmentAdd?: (file: File, variableLabel?: string) => void;
+  userTimeZone?: string;
 }
 
 const VARIABLE_TYPE_SINGLE_LINE = "Single Line Text";
@@ -204,7 +207,10 @@ export default function VariableFormFields({
   onAttachmentClick,
   onAttachmentRemove,
   onAttachmentAdd,
+  userTimeZone,
 }: VariableFormFieldsProps): JSX.Element {
+  const effectiveTimeZone = userTimeZone ?? resolveDisplayTimeZone();
+  const minDatetime = computeMinScheduleDatetimeLocalForTimeZone(0, effectiveTimeZone);
   const sortedVariables = useMemo(
     () => (variables ? [...variables].sort((a, b) => a.order - b.order) : []),
     [variables],
@@ -498,6 +504,8 @@ export default function VariableFormFields({
             onChange={(e) => onChange(variable.id, e.target.value)}
             disabled={isContext}
             slotProps={{ inputLabel: { shrink: true } }}
+            inputProps={{ min: minDatetime }}
+            helperText={`Timezone: ${effectiveTimeZone}`}
           />
         </Grid>
       );

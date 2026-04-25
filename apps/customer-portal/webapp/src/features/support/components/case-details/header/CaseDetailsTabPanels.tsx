@@ -15,8 +15,8 @@
 // under the License.
 
 import type { CaseDetailsTabPanelsProps } from "@features/support/types/supportComponents";
-import { Box, Chip, Paper, Stack, Typography } from "@wso2/oxygen-ui";
-import { GitBranch } from "@wso2/oxygen-ui-icons-react";
+import { Box, Paper, Stack, Typography } from "@wso2/oxygen-ui";
+import { ClipboardList } from "@wso2/oxygen-ui-icons-react";
 import { type JSX } from "react";
 import { useNavigate, useParams } from "react-router";
 import CaseDetailsActivityPanel from "@case-details-activity/CaseDetailsActivityPanel";
@@ -155,8 +155,33 @@ export default function CaseDetailsTabPanels({
                 )
               }
             >
-              <GitBranch size={18} aria-hidden />
+              <Box
+                sx={{
+                  width: 36,
+                  height: 36,
+                  borderRadius: 1,
+                  bgcolor: "primary.main",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  flexShrink: 0,
+                  color: "primary.contrastText",
+                  opacity: 0.85,
+                }}
+              >
+                <ClipboardList size={18} aria-hidden />
+              </Box>
               <Box sx={{ flex: 1, minWidth: 0 }}>
+                <Box sx={{ display: "flex", alignItems: "center", gap: 1, flexWrap: "wrap" }}>
+                  {cr.number && (
+                    <Typography variant="caption" fontWeight={600} color="primary.main">
+                      {cr.number}
+                    </Typography>
+                  )}
+                  <Typography variant="caption" color="text.secondary">
+                    {cr.id}
+                  </Typography>
+                </Box>
                 <Typography
                   variant="body2"
                   fontWeight={500}
@@ -166,7 +191,6 @@ export default function CaseDetailsTabPanels({
                   {cr.label}
                 </Typography>
               </Box>
-              <Chip label="Change Request" size="small" variant="outlined" />
             </Paper>
           ))}
         </Stack>

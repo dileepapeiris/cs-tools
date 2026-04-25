@@ -721,6 +721,8 @@ export default function DashboardItemsPage({
             <Skeleton variant="rounded" height={56} />
             <Skeleton variant="rounded" height={56} />
             <Skeleton variant="rounded" height={56} />
+            <Skeleton variant="rounded" height={56} />
+            <Skeleton variant="rounded" height={56} />
           </>
         )}
 

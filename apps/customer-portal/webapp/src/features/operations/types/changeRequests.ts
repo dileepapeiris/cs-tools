@@ -25,6 +25,7 @@ import type {
 // Item type for a change request.
 export type ChangeRequestItem = AuditMetadata & {
   id: string;
+  internalId?: string | null;
   number: string;
   title: string;
   description?: string | null;

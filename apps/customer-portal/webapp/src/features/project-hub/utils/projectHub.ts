@@ -40,8 +40,8 @@ export function resolveProjectHubContentView(
   isAuthLoading: boolean,
   isLoading: boolean,
   isError: boolean,
-  totalRecords: number,
-  searchQuery: string,
+  _totalRecords: number,
+  _searchQuery: string,
   projectsLength: number,
 ): ProjectHubContentView {
   if (isRedirectingToSingleProject) {
@@ -55,12 +55,6 @@ export function resolveProjectHubContentView(
   }
   if (isError) {
     return ProjectHubContentView.ERROR;
-  }
-  if (
-    totalRecords > PROJECT_HUB_MIN_PROJECTS_FOR_SEARCH &&
-    !searchQuery.trim()
-  ) {
-    return ProjectHubContentView.NO_GRID;
   }
   if (projectsLength === 0) {
     return ProjectHubContentView.EMPTY_STATE;
@@ -132,19 +126,13 @@ export function shouldShowProjectHubSearchBar(
  * @param isError - Query error.
  */
 export function shouldShowProjectHubSearchOnlyLayout(
-  totalRecords: number,
-  searchQuery: string,
-  isLoading: boolean,
-  isAuthLoading: boolean,
-  isError: boolean,
+  _totalRecords: number,
+  _searchQuery: string,
+  _isLoading: boolean,
+  _isAuthLoading: boolean,
+  _isError: boolean,
 ): boolean {
-  return (
-    totalRecords > PROJECT_HUB_MIN_PROJECTS_FOR_SEARCH &&
-    !searchQuery.trim() &&
-    !isLoading &&
-    !isAuthLoading &&
-    !isError
-  );
+  return false;
 }
 
 /**

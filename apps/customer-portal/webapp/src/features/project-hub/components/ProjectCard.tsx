@@ -37,7 +37,6 @@ export default function ProjectCard({
   projectKey,
   title,
   date,
-  activeCasesCount,
   activeChatsCount,
   actionRequiredCount,
   outstandingCount,

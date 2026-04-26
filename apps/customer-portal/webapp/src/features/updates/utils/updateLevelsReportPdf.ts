@@ -56,6 +56,79 @@ function isInstructionsNonEmpty(text: string | null | undefined): boolean {
   return t !== "" && t !== "n/a" && t !== "na";
 }
 
+export type DescriptionSections = {
+  generalDescription: string;
+  implementationDetails: string;
+  impact: string;
+};
+
+/**
+ * Parses a description string that may contain embedded section labels
+ * ("General Description :", "Implementation details :", "Impact :") and
+ * returns each section separately. Falls back to treating the whole string
+ * as the general description when no labels are found.
+ */
+export function parseDescriptionSections(raw: string | null | undefined): DescriptionSections {
+  const empty: DescriptionSections = { generalDescription: "", implementationDetails: "", impact: "" };
+  if (!raw?.trim() || raw.trim().toLowerCase() === "n/a") return empty;
+
+  const headerRe = /(?:^|\n)\s*(General\s+Description|Implementation\s+Details?|Impact)\s*:/gi;
+  if (!headerRe.test(raw)) {
+    return { ...empty, generalDescription: raw.trim() };
+  }
+  headerRe.lastIndex = 0;
+
+  const hits: Array<{ label: string; headerStart: number; contentStart: number }> = [];
+  let m: RegExpExecArray | null;
+  while ((m = headerRe.exec(raw)) !== null) {
+    hits.push({
+      label: m[1].replace(/\s+/g, "").toLowerCase(),
+      headerStart: m.index,
+      contentStart: m.index + m[0].length,
+    });
+  }
+
+  const result = { ...empty };
+  for (let i = 0; i < hits.length; i++) {
+    const { label, contentStart } = hits[i];
+    const end = i + 1 < hits.length ? hits[i + 1].headerStart : raw.length;
+    const content = raw.slice(contentStart, end).trim();
+    if (label === "generaldescription") result.generalDescription = content;
+    else if (label.startsWith("implementationdetail")) result.implementationDetails = content;
+    else if (label === "impact") result.impact = content;
+  }
+  return result;
+}
+
+export function isSafeHttpUrl(url: string): boolean {
+  try {
+    const { protocol } = new URL(url);
+    return protocol === "http:" || protocol === "https:";
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * Parses the bugFixes field, which may be a JSON-encoded array of URL strings
+ * or a plain string, filtering out "N/A" values and non-http(s) schemes.
+ */
+export function parseBugFixes(raw: string | null | undefined): string[] {
+  if (!raw?.trim()) return [];
+  try {
+    const parsed = JSON.parse(raw);
+    if (Array.isArray(parsed)) {
+      return parsed
+        .map((item) => String(item).trim())
+        .filter((item) => item && item.toLowerCase() !== "n/a" && isSafeHttpUrl(item));
+    }
+  } catch {
+    // not JSON
+  }
+  const t = raw.trim();
+  return t && t.toLowerCase() !== "n/a" && isSafeHttpUrl(t) ? [t] : [];
+}
+
 /**
  * Computes structured report data for the Update Levels Report.
  * Used by UpdateLevelsReportModal for in-app display.
@@ -206,6 +279,35 @@ export function generateUpdateLevelsReportPdf(reportData: UpdateLevelsReportData
     pending.push({ srcPage: pg, x, y: baseY - 4, w, h: 6, key });
   };
 
+  // Render a labelled list of URLs as blue underlined external hyperlinks.
+  const renderUrlListField = (label: string, urls: string[]): void => {
+    if (urls.length === 0) return;
+    ensureSpace(14);
+    doc.setFontSize(9);
+    doc.setFont("helvetica", "bold");
+    doc.setTextColor(0, 0, 0);
+    doc.text(`${label}:`, margin, y);
+    y += 5;
+    doc.setFont("helvetica", "normal");
+    for (const url of urls) {
+      const urlLines = doc.splitTextToSize(url, contentW - 4);
+      ensureSpace(urlLines.length * 5 + 3);
+      for (const line of urlLines as string[]) {
+        const lineW = doc.getTextWidth(line);
+        doc.setTextColor(0, 102, 204);
+        doc.text(line, margin + 4, y);
+        doc.setDrawColor(0, 102, 204);
+        doc.line(margin + 4, y + 0.8, margin + 4 + lineW, y + 0.8);
+        doc.setDrawColor(0, 0, 0);
+        doc.link(margin + 4, y - 4, lineW, 5.5, { url });
+        y += 5;
+      }
+      doc.setTextColor(0, 0, 0);
+      y += 2;
+    }
+    y += 3;
+  };
+
   // Render a labelled field, skipping if value is empty.
   const renderField = (label: string, value: string | null | undefined): void => {
     if (!value?.trim()) return;
@@ -314,27 +416,13 @@ export function generateUpdateLevelsReportPdf(reportData: UpdateLevelsReportData
     doc.text(subText, margin + 3, y + headerLines.length * 6 + 6);
     y += boxH + 4;
 
-    renderField("General Description", entry.description);
-    renderField("Implementation Details", entry.bugFixes);
+    const parsedDesc = parseDescriptionSections(entry.description);
+    const bugFixUrls = parseBugFixes(entry.bugFixes);
 
-    // Impact (aggregated from security advisories)
-    const advisoriesWithImpact = entry.securityAdvisories?.filter((a) => a.impact?.trim());
-    if (advisoriesWithImpact && advisoriesWithImpact.length > 0) {
-      ensureSpace(14);
-      doc.setFontSize(9);
-      doc.setFont("helvetica", "bold");
-      doc.setTextColor(0, 0, 0);
-      doc.text("Impact:", margin, y);
-      y += 5;
-      doc.setFont("helvetica", "normal");
-      for (const adv of advisoriesWithImpact) {
-        const impLines = doc.splitTextToSize(adv.impact.trim(), contentW - 4);
-        ensureSpace(impLines.length * 5 + 3);
-        doc.text(impLines, margin + 4, y);
-        y += impLines.length * 5 + 3;
-      }
-      y += 2;
-    }
+    if (parsedDesc.generalDescription) renderField("General Description", parsedDesc.generalDescription);
+    if (parsedDesc.implementationDetails) renderField("Implementation Details", parsedDesc.implementationDetails);
+    if (parsedDesc.impact) renderField("Impact", parsedDesc.impact);
+    if (bugFixUrls.length > 0) renderUrlListField("Bug Fixes", bugFixUrls);
 
     // Instructions
     if (isInstructionsNonEmpty(entry.instructions)) {

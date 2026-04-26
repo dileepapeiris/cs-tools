@@ -66,7 +66,7 @@ function UpdateDescriptionItem({ item }: { item: UpdateDescriptionLevel }): JSX.
             <span key={i}>
               {i > 0 && ", "}
               {isSafeHttpUrl(url) ? (
-                <a href={url} target="_blank" rel="noreferrer">{url}</a>
+                <a href={url} target="_blank" rel="noreferrer" style={{ color: "#1976d2", textDecoration: "underline" }}>{url}</a>
               ) : (
                 url
               )}
@@ -361,7 +361,7 @@ export default function UpdateLevelsReportModal({
                       {bugFixUrls.map((url, j) => (
                         <Typography key={j} variant="body2">
                           {isSafeHttpUrl(url) ? (
-                            <a href={url} target="_blank" rel="noreferrer">{url}</a>
+                            <a href={url} target="_blank" rel="noreferrer" style={{ color: "#1976d2", textDecoration: "underline" }}>{url}</a>
                           ) : (
                             url
                           )}

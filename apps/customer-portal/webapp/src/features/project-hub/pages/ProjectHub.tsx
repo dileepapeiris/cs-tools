@@ -54,7 +54,6 @@ import {
   resolveProjectHubHeaderTitle,
   shouldHideProjectHubHeaderBlock,
   shouldShowProjectHubSearchBar,
-  shouldShowProjectHubSearchOnlyLayout,
 } from "@features/project-hub/utils/projectHub";
 
 /**
@@ -163,8 +162,6 @@ export default function ProjectHub(): JSX.Element {
         isAuthLoading,
         isLoading,
         isError,
-        totalRecords,
-        searchQuery,
         projects.length,
       ),
     [
@@ -173,22 +170,10 @@ export default function ProjectHub(): JSX.Element {
       isLoading,
       isRedirectingToSingleProject,
       projects.length,
-      searchQuery,
-      totalRecords,
     ],
   );
 
-  const showSearchBar = shouldShowProjectHubSearchBar(
-    totalRecords,
-    searchQuery,
-  );
-  const showOnlySearchBar = shouldShowProjectHubSearchOnlyLayout(
-    totalRecords,
-    searchQuery,
-    isLoading,
-    isAuthLoading,
-    isError,
-  );
+  const showSearchBar = shouldShowProjectHubSearchBar(totalRecords);
   const hideHeaderBlock = shouldHideProjectHubHeaderBlock(
     isError,
     isLoading,
@@ -197,14 +182,8 @@ export default function ProjectHub(): JSX.Element {
     searchQuery,
   );
 
-  const headerTitle = resolveProjectHubHeaderTitle(
-    totalRecords,
-    hasSearchQuery,
-  );
-  const headerSubtitle = resolveProjectHubHeaderSubtitle(
-    totalRecords,
-    hasSearchQuery,
-  );
+  const headerTitle = resolveProjectHubHeaderTitle(totalRecords);
+  const headerSubtitle = resolveProjectHubHeaderSubtitle();
 
   const centeredLoader = (message: string): JSX.Element => (
     <Box
@@ -431,20 +410,18 @@ export default function ProjectHub(): JSX.Element {
             )}
           </Box>
         )}
-        {!showOnlySearchBar && (
-          <Box
-            sx={{
-              width: "100%",
-              display: "flex",
-              flexDirection: "column",
-              justifyContent: "center",
-              alignItems: "center",
-              py: 1,
-            }}
-          >
-            {renderMainContent()}
-          </Box>
-        )}
+        <Box
+          sx={{
+            width: "100%",
+            display: "flex",
+            flexDirection: "column",
+            justifyContent: "center",
+            alignItems: "center",
+            py: 1,
+          }}
+        >
+          {renderMainContent()}
+        </Box>
       </Box>
     </Box>
   );

@@ -34,5 +34,5 @@ export default function SearchCaseCard({
   caseItem,
   onClick,
 }: SearchCaseCardProps): JSX.Element {
-  return <ListCard caseItem={caseItem} onClick={onClick} showInternalId />;
+  return <ListCard caseItem={caseItem} onClick={onClick} />;
 }

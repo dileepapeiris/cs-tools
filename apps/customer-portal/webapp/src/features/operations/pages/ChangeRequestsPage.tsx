@@ -114,10 +114,12 @@ export default function ChangeRequestsPage(): JSX.Element {
     enabled: !!projectId,
   });
 
-  const changeRequestSearchRequest = useMemo(
-    () => buildChangeRequestSearchRequest(filters, searchTerm, outstandingOnly, actionRequired, scheduledOnly, filterMetadata?.changeRequestStates),
-    [searchTerm, filters, outstandingOnly, actionRequired, scheduledOnly, filterMetadata?.changeRequestStates],
-  );
+  const changeRequestSearchRequest = useMemo(() => {
+    const isPresetMode = outstandingOnly || actionRequired || scheduledOnly;
+    const effectiveFilters = isPresetMode ? {} : filters;
+    const effectiveSearchTerm = isPresetMode ? "" : searchTerm;
+    return buildChangeRequestSearchRequest(effectiveFilters, effectiveSearchTerm, outstandingOnly, actionRequired, scheduledOnly, filterMetadata?.changeRequestStates);
+  }, [searchTerm, filters, outstandingOnly, actionRequired, scheduledOnly, filterMetadata?.changeRequestStates]);
 
   const offset = (page - 1) * rowsPerPage;
 

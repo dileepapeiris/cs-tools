@@ -164,7 +164,7 @@ export default function ProjectSwitcher({
             px: 1.5,
             border: "1px solid",
             borderColor: "action.disabledBackground",
-            borderRadius: 0,
+            borderRadius: 1,
           }}
         >
           <FolderOpen size={16} />
@@ -202,7 +202,7 @@ export default function ProjectSwitcher({
             px: 1.5,
             border: "1px solid",
             borderColor: "error.main",
-            borderRadius: 0,
+            borderRadius: 1,
             color: "error.main",
           }}
         >
@@ -227,7 +227,7 @@ export default function ProjectSwitcher({
             px: 1.5,
             border: "1px solid",
             borderColor: "divider",
-            borderRadius: 0,
+            borderRadius: 1,
             backgroundColor: "background.paper",
           }}
         >
@@ -332,6 +332,14 @@ export default function ProjectSwitcher({
                 startAdornment: (
                   <Search size={16} style={{ marginRight: 8, flexShrink: 0 }} />
                 ),
+              }}
+              inputProps={{ autoComplete: "off" }}
+              sx={{
+                "& input:-webkit-autofill, & input:-webkit-autofill:hover, & input:-webkit-autofill:focus": {
+                  WebkitBoxShadow: "0 0 0 100px transparent inset",
+                  WebkitTextFillColor: "inherit",
+                  transition: "background-color 5000s ease-in-out 0s",
+                },
               }}
             />
           </Box>

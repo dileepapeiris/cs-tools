@@ -271,7 +271,9 @@ export default function UploadAttachmentModal({
             onClose={() => setFileTypeErrorVisible(false)}
             sx={{ mb: 2 }}
           >
-            This file type is not supported. Supported types: PDF, DOC, DOCX, XLS, XLSX, PPT, PPTX, ZIP, JSON, XML, TXT, CSV, JPG, PNG, WebP, SH, HAR.
+            This file type is not supported. Supported types: pdf, doc, docx,
+            xls, xlsx, ppt, pptx, zip, json, xml, txt, csv, jpg, jpeg, png,
+            webp, sh, har.
           </Alert>
         )}
         {fileSizeErrorVisible && (

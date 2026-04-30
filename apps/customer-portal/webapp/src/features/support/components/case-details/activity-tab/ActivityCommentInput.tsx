@@ -246,7 +246,7 @@ export default function ActivityCommentInput({
             }
             onInlineImageTypeError={() =>
               showError(
-                "Only JPG, JPEG, PNG, and WebP images can be inserted inline.",
+                "Only jpg, jpeg, png, and webp images can be inserted inline.",
               )
             }
             overlayElement={

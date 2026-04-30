@@ -79,7 +79,10 @@ function parseRequiredLabel(questionText: string): { label: string } {
 
 function isTitleField(questionText: string): boolean {
   return (
-    questionText.replace(/^\s*\*?\s*/, "").trim().toLowerCase() === "title"
+    questionText
+      .replace(/^\s*\*?\s*/, "")
+      .trim()
+      .toLowerCase() === "title"
   );
 }
 
@@ -216,7 +219,10 @@ export default function VariableFormFields({
 }: VariableFormFieldsProps): JSX.Element {
   const { showError } = useErrorBanner();
   const effectiveTimeZone = userTimeZone ?? resolveDisplayTimeZone();
-  const minDatetime = computeMinScheduleDatetimeLocalForTimeZone(0, effectiveTimeZone);
+  const minDatetime = computeMinScheduleDatetimeLocalForTimeZone(
+    0,
+    effectiveTimeZone,
+  );
   const sortedVariables = useMemo(
     () => (variables ? [...variables].sort((a, b) => a.order - b.order) : []),
     [variables],
@@ -357,7 +363,9 @@ export default function VariableFormFields({
             attachments={attachments.map((a) => a.file)}
             onAttachmentRemove={onAttachmentRemove}
             onInlineImageTypeError={() =>
-              showError("Only JPG, JPEG, PNG, and WebP images can be inserted inline.")
+              showError(
+                "Only jpg, jpeg, png, and webp images can be inserted inline.",
+              )
             }
           />
         </Grid>
@@ -536,7 +544,11 @@ export default function VariableFormFields({
           onChange={(e) => onChange(variable.id, e.target.value)}
           disabled={isContext}
           error={isTitleTooLong}
-          helperText={isTitleTooLong ? "Title must be 160 characters or fewer." : undefined}
+          helperText={
+            isTitleTooLong
+              ? "Title must be 160 characters or fewer."
+              : undefined
+          }
         />
         {isTitle && (
           <Typography

@@ -243,7 +243,7 @@ const Toolbar = ({
       };
       if (!ALLOWED_INLINE_IMAGE_MIME_TYPES.has(file.type)) {
         showError(
-          `Image "${file.name}" is not a supported type. Only JPG, JPEG, PNG, and WebP images can be inserted inline.`,
+          `Image "${file.name}" is not a supported type. Only jpg, jpeg, png, and webp images can be inserted inline.`,
         );
         resetInput();
         return;

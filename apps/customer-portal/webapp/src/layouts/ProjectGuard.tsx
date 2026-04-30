@@ -58,10 +58,10 @@ function ProjectGuardContent(): JSX.Element {
     return (
       <Box
         sx={{
+          flex: 1,
           display: "flex",
           justifyContent: "center",
           alignItems: "center",
-          minHeight: "60vh",
         }}
       >
         <LinearProgress sx={{ width: "60%", maxWidth: 400 }} />

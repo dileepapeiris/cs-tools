@@ -16,20 +16,23 @@
 
 import {
   Box,
-  ComplexSelect,
   Header as HeaderUI,
+  MenuItem,
+  Paper,
+  Popover,
   Skeleton,
   TextField,
   Tooltip,
   Typography,
 } from "@wso2/oxygen-ui";
-import { FolderOpen, Search } from "@wso2/oxygen-ui-icons-react";
+import { ChevronDown, ChevronUp, FolderOpen, Search } from "@wso2/oxygen-ui-icons-react";
 import {
   useCallback,
   useMemo,
   useRef,
   useState,
   type JSX,
+  type MouseEvent,
   type UIEvent,
 } from "react";
 import useInfiniteProjects, {
@@ -71,7 +74,9 @@ export default function ProjectSwitcher({
   isAuthLoading = false,
 }: ProjectSwitcherProps): JSX.Element {
   const [searchQuery, setSearchQuery] = useState("");
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
+  const isMenuOpen = Boolean(anchorEl);
+
   const debouncedSearchQuery = useDebouncedValue(
     searchQuery,
     PROJECT_HUB_SEARCH_DEBOUNCE_MS,
@@ -134,9 +139,12 @@ export default function ProjectSwitcher({
     [hasNextPage, isFetchingNextPage, fetchNextPage],
   );
 
-  const handleOpen = useCallback(() => setIsMenuOpen(true), []);
+  const handleOpen = useCallback((event: MouseEvent<HTMLElement>) => {
+    setAnchorEl(event.currentTarget);
+  }, []);
+
   const handleClose = useCallback(() => {
-    setIsMenuOpen(false);
+    setAnchorEl(null);
     setSearchQuery("");
   }, []);
 
@@ -240,75 +248,79 @@ export default function ProjectSwitcher({
 
   return (
     <HeaderUI.Switchers showDivider={false}>
-      <ComplexSelect
-        value={projectId || ""}
-        onChange={(event: any) => onProjectChange(event.target.value)}
-        onOpen={handleOpen}
-        onClose={handleClose}
-        size="small"
+      {/* Trigger button — styled to match the other switcher states */}
+      <Paper
+        onClick={handleOpen}
         sx={{
+          display: "flex",
+          alignItems: "center",
+          gap: 1,
+          height: 40,
           minWidth: 200,
-          "& .MuiOutlinedInput-root": {
-            "& fieldset": { borderColor: "divider" },
-            "&:hover fieldset": { borderColor: "action.active" },
-            "&.Mui-focused fieldset": { borderColor: "primary.main" },
-          },
+          px: 1.5,
+          cursor: "pointer",
+          border: "1px solid",
+          borderColor: isMenuOpen ? "primary.main" : "divider",
+          userSelect: "none",
+          "&:hover": { borderColor: "action.active" },
         }}
-        MenuProps={{
-          PaperProps: {
-            sx: { overflow: "hidden" },
-          },
-          MenuListProps: {
-            sx: {
-              p: 0,
-              maxHeight: PAGINATED_SELECT_MENU_MAX_HEIGHT_PX,
-              overflowY: "auto",
-            },
-            onScroll: handleMenuScroll as any,
-          },
-        }}
-        renderValue={() => (
-          <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-            <FolderOpen size={16} />
-            <Tooltip title={displayName}>
-              <Typography
-                variant="body2"
-                noWrap
-                sx={{
-                  maxWidth: 220,
-                  overflow: "hidden",
-                  textOverflow: "ellipsis",
-                }}
-              >
-                {displayName}
-              </Typography>
-            </Tooltip>
-          </Box>
-        )}
       >
-        {/* Search box — sticky header, only shown when project count exceeds the minimum threshold */}
+        <FolderOpen size={16} />
+        <Tooltip title={displayName}>
+          <Typography
+            variant="body2"
+            noWrap
+            sx={{
+              flex: 1,
+              maxWidth: 220,
+              overflow: "hidden",
+              textOverflow: "ellipsis",
+            }}
+          >
+            {displayName}
+          </Typography>
+        </Tooltip>
+        {isMenuOpen ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+      </Paper>
+
+      {/* Dropdown — Popover gives us full layout control: fixed search bar + scrollable items */}
+      <Popover
+        open={isMenuOpen}
+        anchorEl={anchorEl}
+        onClose={handleClose}
+        anchorOrigin={{ vertical: "bottom", horizontal: "left" }}
+        transformOrigin={{ vertical: "top", horizontal: "left" }}
+        disableAutoFocus
+        disableEnforceFocus
+        slotProps={{
+          paper: {
+            sx: {
+              minWidth: anchorEl ? anchorEl.offsetWidth : 200,
+              display: "flex",
+              flexDirection: "column",
+              overflow: "hidden",
+              mt: 0.5,
+            },
+          },
+        }}
+      >
+        {/* Fixed search bar — never scrolls */}
         {unfilteredTotalRef.current > PROJECT_HUB_MIN_PROJECTS_FOR_SEARCH && (
           <Box
-            component="li"
             sx={{
-              position: "sticky",
-              top: 0,
-              zIndex: 1,
-              bgcolor: "background.paper",
+              flexShrink: 0,
               px: 1,
               pt: 1,
               pb: 0.5,
               borderBottom: "1px solid",
               borderColor: "divider",
-              listStyle: "none",
+              bgcolor: "background.paper",
             }}
-            onKeyDown={(e) => e.stopPropagation()}
-            onMouseDown={(e) => e.stopPropagation()}
-            onClick={(e) => e.stopPropagation()}
           >
             <TextField
               size="small"
               fullWidth
+              autoFocus
               placeholder={PROJECT_HUB_SEARCH_PLACEHOLDER}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
@@ -321,44 +333,58 @@ export default function ProjectSwitcher({
           </Box>
         )}
 
-        {/* Skeleton items shown while a new search query loads (keeps dropdown open) */}
-        {isLoading &&
-          [...Array(DROPDOWN_SKELETON_COUNT)].map((_, i) => (
-            <Box component="li" key={`skel-${i}`} sx={{ px: 2, py: 0.75, width: "100%", listStyle: "none" }}>
-              <Skeleton variant="rounded" width="100%" height={40} />
-            </Box>
-          ))}
+        {/* Scrollable items container — sits below the search bar */}
+        <Box
+          sx={{ maxHeight: PAGINATED_SELECT_MENU_MAX_HEIGHT_PX, overflowY: "auto" }}
+          onScroll={handleMenuScroll}
+        >
+          {/* Skeleton items shown while a new search query loads */}
+          {isLoading &&
+            [...Array(DROPDOWN_SKELETON_COUNT)].map((_, i) => (
+              <Box key={`skel-${i}`} sx={{ px: 2, py: 0.75, width: "100%" }}>
+                <Skeleton variant="rounded" width="100%" height={40} />
+              </Box>
+            ))}
 
-        {/* Project list items — direct children so MUI wires up click handlers */}
-        {!isLoading &&
-          projects.map((project) => (
-            <ComplexSelect.MenuItem key={project.id} value={project.id}>
-              <ComplexSelect.MenuItem.Text
-                primary={project.name}
-                secondary={project.key}
-              />
-            </ComplexSelect.MenuItem>
-          ))}
+          {/* Project list items */}
+          {!isLoading &&
+            projects.map((project) => (
+              <MenuItem
+                key={project.id}
+                selected={project.id === projectId}
+                onClick={() => {
+                  onProjectChange(project.id);
+                  handleClose();
+                }}
+                sx={{ display: "flex", flexDirection: "column", alignItems: "flex-start" }}
+              >
+                <Typography variant="body2">{project.name}</Typography>
+                <Typography variant="caption" color="text.secondary">
+                  {project.key}
+                </Typography>
+              </MenuItem>
+            ))}
 
-        {/* Spinner row while the next page loads on scroll */}
-        {!isLoading && (
-          <SelectMenuLoadMoreRow
-            visible={Boolean(isFetchingNextPage && projects.length > 0)}
-          />
-        )}
-
-        {/* Empty search result */}
-        {!isLoading &&
-          !isFetchingNextPage &&
-          projects.length === 0 &&
-          Boolean(debouncedSearchQuery) && (
-            <Box component="li" sx={{ px: 2, py: 1.5, textAlign: "center", listStyle: "none" }}>
-              <Typography variant="body2" color="text.secondary">
-                No projects found
-              </Typography>
-            </Box>
+          {/* Spinner row while the next page loads on scroll */}
+          {!isLoading && (
+            <SelectMenuLoadMoreRow
+              visible={Boolean(isFetchingNextPage && projects.length > 0)}
+            />
           )}
-      </ComplexSelect>
+
+          {/* Empty search result */}
+          {!isLoading &&
+            !isFetchingNextPage &&
+            projects.length === 0 &&
+            Boolean(debouncedSearchQuery) && (
+              <Box sx={{ px: 2, py: 1.5, textAlign: "center" }}>
+                <Typography variant="body2" color="text.secondary">
+                  No projects found
+                </Typography>
+              </Box>
+            )}
+        </Box>
+      </Popover>
     </HeaderUI.Switchers>
   );
 }

@@ -14,7 +14,7 @@
 // specific language governing permissions and limitations
 // under the License.
 
-import { Box, LinearProgress, Skeleton, TextField, Typography } from "@wso2/oxygen-ui";
+import { Box, LinearProgress, Skeleton, TextField, Typography, useMediaQuery, useTheme } from "@wso2/oxygen-ui";
 import { useEffect, useMemo, useRef, useState, type JSX } from "react";
 import { useNavigate } from "react-router";
 import useInfiniteProjects, {
@@ -61,6 +61,9 @@ import {
  * @returns {JSX.Element} The ProjectHub component.
  */
 export default function ProjectHub(): JSX.Element {
+  const theme = useTheme();
+  const isLgUp = useMediaQuery(theme.breakpoints.up("lg"));
+  const isXlUp = useMediaQuery(theme.breakpoints.up("xl"));
   const logger = useLogger();
   const navigate = useNavigate();
   const { showLoader, hideLoader } = useLoader();
@@ -89,11 +92,12 @@ export default function ProjectHub(): JSX.Element {
   const totalRecords = getTotalRecords(data);
 
   // Track the unfiltered total separately so the title never shows a search-result count.
+  // Only update while not loading so the skeleton can use the previously known count.
   const totalProjectsRef = useRef(0);
-  if (!debouncedSearchQuery) {
+  if (!debouncedSearchQuery && !isLoading) {
     totalProjectsRef.current = totalRecords;
   }
-  const titleTotalRecords = debouncedSearchQuery ? totalProjectsRef.current : totalRecords;
+  const titleTotalRecords = (!isLoading && !debouncedSearchQuery) ? totalRecords : totalProjectsRef.current;
 
   const sentinelRef = useRef<HTMLDivElement>(null);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
@@ -208,17 +212,37 @@ export default function ProjectHub(): JSX.Element {
   const headerTitle = resolveProjectHubHeaderTitle(titleTotalRecords);
   const headerSubtitle = resolveProjectHubHeaderSubtitle();
 
-  const gridSx = {
-    display: "grid",
-    gridTemplateColumns: {
-      xs: "repeat(3, 1fr)",
-      lg: "repeat(4, 1fr)",
-      xl: "repeat(5, 1fr)",
-    },
-    gap: 3,
-    width: "100%",
-    py: 1,
-  };
+  const colsPerRow = isXlUp ? 5 : isLgUp ? 4 : 3;
+  // During loading use the cached count so the skeleton mirrors the expected layout.
+  const effectiveCount = isLoading ? totalProjectsRef.current : projects.length;
+  const isCenteredLayout = effectiveCount <= colsPerRow;
+  // When effectiveCount is 0 (first-ever load), fill one full row of skeleton cards.
+  const displayCount = effectiveCount === 0 ? colsPerRow : effectiveCount;
+
+  const gridSx = isCenteredLayout
+    ? {
+        display: "grid",
+        gridTemplateColumns: {
+          xs: `repeat(${Math.min(displayCount, 3)}, minmax(0, 350px))`,
+          lg: `repeat(${Math.min(displayCount, 4)}, minmax(0, 350px))`,
+          xl: `repeat(${Math.min(displayCount, 5)}, minmax(0, 350px))`,
+        },
+        justifyContent: "center",
+        gap: 3,
+        pt: 1,
+        pb: 1,
+      }
+    : {
+        display: "grid",
+        gridTemplateColumns: {
+          xs: "repeat(3, 1fr)",
+          lg: "repeat(4, 1fr)",
+          xl: "repeat(5, 1fr)",
+        },
+        gap: 3,
+        width: "100%",
+        py: 1,
+      };
 
   const GRID_GHOST_COUNT = 5;
   const gridGhostSx = { overflow: "hidden", height: 0, visibility: "hidden" } as const;
@@ -249,17 +273,19 @@ export default function ProjectHub(): JSX.Element {
         );
       case ProjectHubContentView.AUTH_PENDING:
         return null;
-      case ProjectHubContentView.LOADING_SKELETONS:
+      case ProjectHubContentView.LOADING_SKELETONS: {
+        const skeletonCount = isCenteredLayout ? colsPerRow : PROJECT_HUB_PROJECTS_PAGE_SIZE;
         return (
           <Box sx={gridSx}>
-            {[...Array(PROJECT_HUB_PROJECTS_PAGE_SIZE)].map((_, index) => (
+            {[...Array(skeletonCount)].map((_, index) => (
               <ProjectCardSkeleton key={index} />
             ))}
-            {[...Array(GRID_GHOST_COUNT)].map((_, i) => (
+            {!isCenteredLayout && [...Array(GRID_GHOST_COUNT)].map((_, i) => (
               <Box key={`ghost-init-${i}`} aria-hidden="true" sx={gridGhostSx} />
             ))}
           </Box>
         );
+      }
       case ProjectHubContentView.ERROR:
         return (
           <Box
@@ -310,8 +336,8 @@ export default function ProjectHub(): JSX.Element {
             </Typography>
           </Box>
         );
-      case ProjectHubContentView.PROJECT_LIST:
-        return (
+      case ProjectHubContentView.PROJECT_LIST: {
+        const grid = (
           <Box sx={gridSx}>
             {projects.map((project) => (
               <ProjectCard
@@ -343,6 +369,9 @@ export default function ProjectHub(): JSX.Element {
             />
           </Box>
         );
+
+        return grid;
+      }
       default:
         return null;
     }
@@ -361,6 +390,7 @@ export default function ProjectHub(): JSX.Element {
         display: "flex",
         flexDirection: "column",
         overflow: "hidden",
+        justifyContent: isCenteredLayout ? "center" : "flex-start",
       }}
     >
       {/* Fixed header: title, subtitle, search bar */}
@@ -372,14 +402,14 @@ export default function ProjectHub(): JSX.Element {
             flexDirection: "column",
             alignItems: "center",
             textAlign: "center",
-            pt: 2,
-            pb: 1,
+            pt: isCenteredLayout ? 1.5 : 2,
+            pb: isCenteredLayout ? 1 : 1,
             px: 2,
           }}
         >
           <Box
             sx={{
-              mb: 1,
+              mb: isCenteredLayout ? 0.5 : 1,
               display: "flex",
               alignItems: "center",
               gap: 1.5,
@@ -401,7 +431,7 @@ export default function ProjectHub(): JSX.Element {
             {headerSubtitle}
           </Typography>
 
-          {(isLoading || showSearchBar) && (
+          {showSearchBar && (
             <Box sx={{ mt: 2, width: "100%", maxWidth: isLoading ? 700 : 500 }}>
               {isLoading ? (
                 <Skeleton variant="rounded" height={40} width="100%" />
@@ -428,12 +458,12 @@ export default function ProjectHub(): JSX.Element {
       <Box
         ref={scrollContainerRef}
         sx={{
-          flex: 1,
-          minHeight: 0,
+          flex: isCenteredLayout ? "none" : "1 1 auto",
+          minHeight: isCenteredLayout ? 0 : "auto",
           overflowY: "auto",
           overflowX: "hidden",
           px: 2,
-          pb: 2,
+          pb: isCenteredLayout ? 0 : 2,
         }}
       >
         {renderMainContent()}

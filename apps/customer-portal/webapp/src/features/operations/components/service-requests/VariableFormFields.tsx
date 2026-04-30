@@ -28,6 +28,11 @@ import {
 } from "@wso2/oxygen-ui";
 import { Upload, X } from "@wso2/oxygen-ui-icons-react";
 import { useEffect, useMemo, type JSX } from "react";
+import { useErrorBanner } from "@context/error-banner/ErrorBannerContext";
+import {
+  ALLOWED_ATTACHMENT_ACCEPT,
+  isAllowedAttachment,
+} from "@features/support/constants/supportConstants";
 import type { CatalogItemVariable } from "@features/operations/types/serviceRequests";
 import {
   isAttachmentField,
@@ -209,6 +214,7 @@ export default function VariableFormFields({
   onAttachmentAdd,
   userTimeZone,
 }: VariableFormFieldsProps): JSX.Element {
+  const { showError } = useErrorBanner();
   const effectiveTimeZone = userTimeZone ?? resolveDisplayTimeZone();
   const minDatetime = computeMinScheduleDatetimeLocalForTimeZone(0, effectiveTimeZone);
   const sortedVariables = useMemo(
@@ -350,6 +356,9 @@ export default function VariableFormFields({
             onAttachmentClick={onAttachmentClick}
             attachments={attachments.map((a) => a.file)}
             onAttachmentRemove={onAttachmentRemove}
+            onInlineImageTypeError={() =>
+              showError("Only JPG, JPEG, PNG, and WebP images can be inserted inline.")
+            }
           />
         </Grid>
       );
@@ -420,16 +429,20 @@ export default function VariableFormFields({
                   type="file"
                   hidden
                   multiple
+                  accept={ALLOWED_ATTACHMENT_ACCEPT}
                   onChange={(e) => {
                     const files = e.target.files;
                     if (files?.length) {
                       for (let i = 0; i < files.length; i++) {
                         const f = files[i];
-                        if (f)
-                          onAttachmentAdd(
-                            f,
-                            variable.questionText ?? undefined,
+                        if (!f) continue;
+                        if (!isAllowedAttachment(f)) {
+                          showError(
+                            `"${f.name}" is not a supported file type. Supported types: PDF, DOC, DOCX, XLS, XLSX, PPT, PPTX, ZIP, JSON, XML, TXT, CSV, JPG, PNG, WebP, SH, HAR.`,
                           );
+                          continue;
+                        }
+                        onAttachmentAdd(f, variable.questionText ?? undefined);
                       }
                       e.target.value = "";
                     }

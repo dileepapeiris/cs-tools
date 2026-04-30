@@ -84,6 +84,6 @@ export default function useGetProjectDetails(
       }
     },
     enabled: !!projectId && isSignedIn && !isAuthLoading,
-    staleTime: 0,
+    staleTime: 5 * 60 * 1000,
   });
 }

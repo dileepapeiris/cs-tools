@@ -14,7 +14,15 @@
 // specific language governing permissions and limitations
 // under the License.
 
-import { Box, LinearProgress, Skeleton, TextField, Typography, useMediaQuery, useTheme } from "@wso2/oxygen-ui";
+import {
+  Box,
+  LinearProgress,
+  Skeleton,
+  TextField,
+  Typography,
+  useMediaQuery,
+  useTheme,
+} from "@wso2/oxygen-ui";
 import { useEffect, useMemo, useRef, useState, type JSX } from "react";
 import { useNavigate } from "react-router";
 import useInfiniteProjects, {
@@ -97,12 +105,14 @@ export default function ProjectHub(): JSX.Element {
   if (!debouncedSearchQuery && !isLoading) {
     totalProjectsRef.current = totalRecords;
   }
-  const titleTotalRecords = (!isLoading && !debouncedSearchQuery) ? totalRecords : totalProjectsRef.current;
+  const titleTotalRecords =
+    !isLoading && !debouncedSearchQuery
+      ? totalRecords
+      : totalProjectsRef.current;
 
   const sentinelRef = useRef<HTMLDivElement>(null);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
 
-  
   useEffect(() => {
     const sentinel = sentinelRef.current;
     if (!sentinel) return;
@@ -118,7 +128,6 @@ export default function ProjectHub(): JSX.Element {
     return () => observer.disconnect();
   }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
 
-  
   useEffect(() => {
     const allLoadedAreSuspended =
       projects.length > 0 &&
@@ -127,7 +136,13 @@ export default function ProjectHub(): JSX.Element {
     if (allLoadedAreSuspended && hasNextPage && !isFetchingNextPage) {
       fetchNextPage();
     }
-  }, [projects, debouncedSearchQuery, hasNextPage, isFetchingNextPage, fetchNextPage]);
+  }, [
+    projects,
+    debouncedSearchQuery,
+    hasNextPage,
+    isFetchingNextPage,
+    fetchNextPage,
+  ]);
 
   useEffect(() => {
     if (isLoading) {
@@ -200,7 +215,10 @@ export default function ProjectHub(): JSX.Element {
     ],
   );
 
-  const showSearchBar = shouldShowProjectHubSearchBar(titleTotalRecords, searchQuery);
+  const showSearchBar = shouldShowProjectHubSearchBar(
+    titleTotalRecords,
+    searchQuery,
+  );
   const hideHeaderBlock = shouldHideProjectHubHeaderBlock(
     isError,
     isLoading,
@@ -245,7 +263,11 @@ export default function ProjectHub(): JSX.Element {
       };
 
   const GRID_GHOST_COUNT = 5;
-  const gridGhostSx = { overflow: "hidden", height: 0, visibility: "hidden" } as const;
+  const gridGhostSx = {
+    overflow: "hidden",
+    height: 0,
+    visibility: "hidden",
+  } as const;
 
   const renderMainContent = (): JSX.Element | null => {
     switch (contentView) {
@@ -273,19 +295,27 @@ export default function ProjectHub(): JSX.Element {
         );
       case ProjectHubContentView.AUTH_PENDING:
         return null;
-      case ProjectHubContentView.LOADING_SKELETONS: {
-        const skeletonCount = isCenteredLayout ? colsPerRow : PROJECT_HUB_PROJECTS_PAGE_SIZE;
+      case ProjectHubContentView.LOADING_SKELETONS:
         return (
-          <Box sx={gridSx}>
-            {[...Array(skeletonCount)].map((_, index) => (
-              <ProjectCardSkeleton key={index} />
-            ))}
-            {!isCenteredLayout && [...Array(GRID_GHOST_COUNT)].map((_, i) => (
-              <Box key={`ghost-init-${i}`} aria-hidden="true" sx={gridGhostSx} />
-            ))}
+          <Box
+            sx={{
+              minHeight: 300,
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              justifyContent: "center",
+              gap: 2,
+            }}
+          >
+            <LinearProgress
+              color="inherit"
+              sx={{ width: "60%", maxWidth: 400, height: 2 }}
+            />
+            <Typography variant="body2" color="text.secondary">
+              Loading projects...
+            </Typography>
           </Box>
         );
-      }
       case ProjectHubContentView.ERROR:
         return (
           <Box
@@ -358,15 +388,16 @@ export default function ProjectHub(): JSX.Element {
                   <ProjectCardSkeleton key={`skeleton-next-${i}`} />
                 ))}
                 {[...Array(GRID_GHOST_COUNT)].map((_, i) => (
-                  <Box key={`ghost-next-${i}`} aria-hidden="true" sx={gridGhostSx} />
+                  <Box
+                    key={`ghost-next-${i}`}
+                    aria-hidden="true"
+                    sx={gridGhostSx}
+                  />
                 ))}
               </>
             )}
             {/* sentinel: spans all columns so IntersectionObserver detects bottom */}
-            <Box
-              ref={sentinelRef}
-              sx={{ gridColumn: "1 / -1", height: 1 }}
-            />
+            <Box ref={sentinelRef} sx={{ gridColumn: "1 / -1", height: 1 }} />
           </Box>
         );
 
@@ -416,10 +447,24 @@ export default function ProjectHub(): JSX.Element {
             }}
           >
             <FolderOpen size={28} />
-            <Typography variant="h4" component="div" sx={{ display: "flex", alignItems: "center" }}>
+            <Typography
+              variant="h4"
+              component="div"
+              sx={{ display: "flex", alignItems: "center" }}
+            >
               {isLoading ? (
-                <>Your Projects&nbsp;(<Skeleton variant="text" width={28} sx={{ display: "inline-block" }} />)</>
-              ) : headerTitle}
+                <>
+                  Your Projects&nbsp;(
+                  <Skeleton
+                    variant="text"
+                    width={28}
+                    sx={{ display: "inline-block" }}
+                  />
+                  )
+                </>
+              ) : (
+                headerTitle
+              )}
             </Typography>
           </Box>
 

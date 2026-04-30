@@ -210,11 +210,13 @@ export default function ProjectHub(): JSX.Element {
 
   const gridSx = {
     display: "grid",
-    gridTemplateColumns: "repeat(auto-fill, minmax(300px, 1fr))",
+    gridTemplateColumns: {
+      xs: "repeat(3, 1fr)",
+      lg: "repeat(4, 1fr)",
+      xl: "repeat(5, 1fr)",
+    },
     gap: 3,
     width: "100%",
-    maxWidth: 1800,
-    mx: "auto",
     py: 1,
   };
 
@@ -428,7 +430,8 @@ export default function ProjectHub(): JSX.Element {
         sx={{
           flex: 1,
           minHeight: 0,
-          overflow: "auto",
+          overflowY: "auto",
+          overflowX: "hidden",
           px: 2,
           pb: 2,
         }}

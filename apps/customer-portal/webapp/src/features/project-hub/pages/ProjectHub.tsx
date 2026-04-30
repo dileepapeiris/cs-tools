@@ -25,6 +25,7 @@ import {
   useMediaQuery,
   useTheme,
 } from "@wso2/oxygen-ui";
+import { createPortal } from "react-dom";
 import { useEffect, useMemo, useRef, useState, type JSX } from "react";
 import { useNavigate } from "react-router";
 import useInfiniteProjects, {
@@ -37,7 +38,7 @@ import { useLoader } from "@context/linear-loader/LoaderContext";
 import { useDebouncedValue } from "@hooks/useDebouncedValue";
 import ProjectCard from "@features/project-hub/components/ProjectCard";
 import ProjectCardSkeleton from "@features/project-hub/components/project-card/ProjectCardSkeleton";
-import { FolderOpen, Search, X } from "@wso2/oxygen-ui-icons-react";
+import { ChevronUp, FolderOpen, Search, X } from "@wso2/oxygen-ui-icons-react";
 import { useAsgardeo } from "@asgardeo/react";
 import EmptyIcon from "@components/empty-state/EmptyIcon";
 import SearchNoResultsIcon from "@components/empty-state/SearchNoResultsIcon";
@@ -112,8 +113,25 @@ export default function ProjectHub(): JSX.Element {
       ? totalRecords
       : totalProjectsRef.current;
 
+  const [showBackToTop, setShowBackToTop] = useState(false);
   const sentinelRef = useRef<HTMLDivElement>(null);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const checkScrolled = () => {
+      let el: HTMLElement | null = scrollContainerRef.current;
+      while (el && el !== document.documentElement) {
+        if (el.scrollTop > 200) {
+          setShowBackToTop(true);
+          return;
+        }
+        el = el.parentElement;
+      }
+      setShowBackToTop(false);
+    };
+    document.addEventListener("scroll", checkScrolled, true);
+    return () => document.removeEventListener("scroll", checkScrolled, true);
+  }, []);
 
   useEffect(() => {
     const sentinel = sentinelRef.current;
@@ -317,7 +335,11 @@ export default function ProjectHub(): JSX.Element {
                 <ProjectCardSkeleton key={`skeleton-search-${i}`} />
               ))}
               {[...Array(GRID_GHOST_COUNT)].map((_, i) => (
-                <Box key={`ghost-search-${i}`} aria-hidden="true" sx={gridGhostSx} />
+                <Box
+                  key={`ghost-search-${i}`}
+                  aria-hidden="true"
+                  sx={gridGhostSx}
+                />
               ))}
             </Box>
           );
@@ -518,11 +540,24 @@ export default function ProjectHub(): JSX.Element {
                     ),
                     endAdornment: searchQuery ? (
                       <InputAdornment position="end">
-                        <IconButton size="small" edge="end" onClick={() => setSearchQuery("")}>
+                        <IconButton
+                          size="small"
+                          edge="end"
+                          onClick={() => setSearchQuery("")}
+                        >
                           <X size={16} />
                         </IconButton>
                       </InputAdornment>
                     ) : undefined,
+                  }}
+                  inputProps={{ autoComplete: "off" }}
+                  sx={{
+                    "& input:-webkit-autofill, & input:-webkit-autofill:hover, & input:-webkit-autofill:focus":
+                      {
+                        WebkitBoxShadow: "0 0 0 100px transparent inset",
+                        WebkitTextFillColor: "inherit",
+                        transition: "background-color 5000s ease-in-out 0s",
+                      },
                   }}
                   size="small"
                 />
@@ -546,6 +581,36 @@ export default function ProjectHub(): JSX.Element {
       >
         {renderMainContent()}
       </Box>
+
+      {showBackToTop &&
+        createPortal(
+          <IconButton
+            aria-label="Back to top"
+            onClick={() => {
+              let el: HTMLElement | null = scrollContainerRef.current;
+              while (el && el !== document.documentElement) {
+                if (el.scrollTop > 0)
+                  el.scrollTo({ top: 0, behavior: "smooth" });
+                el = el.parentElement;
+              }
+            }}
+            sx={{
+              position: "fixed",
+              bottom: 72,
+              right: 24,
+              bgcolor: "primary.main",
+              color: "primary.contrastText",
+              boxShadow: 4,
+              zIndex: 1400,
+              width: 44,
+              height: 44,
+              "&:hover": { bgcolor: "primary.dark" },
+            }}
+          >
+            <ChevronUp size={22} />
+          </IconButton>,
+          document.body,
+        )}
     </Box>
   );
 }

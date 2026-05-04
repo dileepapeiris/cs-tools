@@ -16,6 +16,7 @@
 
 import {
   useInfiniteQuery,
+  type InfiniteData,
   type UseInfiniteQueryResult,
 } from "@tanstack/react-query";
 import { useAsgardeo } from "@asgardeo/react";
@@ -34,12 +35,12 @@ import type {
 export default function useGetCaseCommentsInfinite(
   projectId: string,
   caseId: string,
-): UseInfiniteQueryResult<CaseCommentsResponse, Error> {
+): UseInfiniteQueryResult<InfiniteData<CaseCommentsResponse>, Error> {
   const logger = useLogger();
   const { isSignedIn, isLoading: isAuthLoading } = useAsgardeo();
   const authFetch = useAuthApiClient();
 
-  return useInfiniteQuery<CaseCommentsResponse, Error>({
+  return useInfiniteQuery<CaseCommentsResponse, Error, InfiniteData<CaseCommentsResponse>, (string | number)[], number>({
     queryKey: [ApiQueryKeys.CASE_COMMENTS, projectId, caseId, "infinite"],
     initialPageParam: 0,
     getNextPageParam: (lastPage) => {

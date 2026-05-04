@@ -237,16 +237,11 @@ export function useEngagementsPageState() {
 
   const apiTotalRecords = data?.pages?.[0]?.totalRecords ?? 0;
 
-  const filteredCases = useMemo(
-    () => currentPageCases,
-    [currentPageCases],
-  );
-
   const totalItems = computeEngagementsTotalItems(
     apiTotalRecords,
-    filteredCases.length,
+    currentPageCases.length,
   );
-  const paginatedCases = filteredCases;
+  const paginatedCases = currentPageCases;
 
   const handlePageChange = (_e: ChangeEvent<unknown>, value: number) => {
     setPage(value);

@@ -24,7 +24,6 @@ import useGetProjectCases from "@api/useGetProjectCases";
 import { useGetProjectCasesStats } from "@features/dashboard/api/useGetProjectCasesStats";
 import { useLoader } from "@context/linear-loader/LoaderContext";
 import { getProjectSeverityPolicy } from "@utils/permission";
-import { isS0Case } from "@features/support/utils/support";
 import { hasListSearchOrFilters } from "@features/support/utils/support";
 import { normalizeEngagementLabel } from "@features/dashboard/utils/dashboard";
 import type { AllCasesFilterValues } from "@features/support/types/cases";
@@ -99,7 +98,7 @@ export function useEngagementsPageState() {
   const severityPolicy = areFeaturePermissionsReady
     ? getProjectSeverityPolicy(project?.type?.label, { projectFeatures })
     : { excludeS0: false, restrictSeverityToLow: false };
-  const { excludeS0, restrictSeverityToLow } = severityPolicy;
+  const { restrictSeverityToLow } = severityPolicy;
 
   const { data: filterMetadata } = useGetProjectFilters(projectId || "");
 
@@ -239,11 +238,8 @@ export function useEngagementsPageState() {
   const apiTotalRecords = data?.pages?.[0]?.totalRecords ?? 0;
 
   const filteredCases = useMemo(
-    () =>
-      excludeS0
-        ? currentPageCases.filter((c) => !isS0Case(c))
-        : currentPageCases,
-    [currentPageCases, excludeS0],
+    () => currentPageCases,
+    [currentPageCases],
   );
 
   const totalItems = computeEngagementsTotalItems(
@@ -365,7 +361,6 @@ export function useEngagementsPageState() {
   return {
     projectId,
     projectReady,
-    excludeS0,
     restrictSeverityToLow,
     filterMetadata,
     stats,

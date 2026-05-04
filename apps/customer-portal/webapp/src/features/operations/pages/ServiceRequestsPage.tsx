@@ -38,7 +38,6 @@ import useGetProjectCases from "@api/useGetProjectCases";
 import { usePostProjectDeploymentsSearchInfinite } from "@api/usePostProjectDeploymentsSearch";
 import {
   hasListSearchOrFilters,
-  isS0Case,
 } from "@features/support/utils/support";
 import {
   getProjectPermissions,
@@ -128,7 +127,7 @@ export default function ServiceRequestsPage(): JSX.Element {
         : { excludeS0: false, restrictSeverityToLow: false },
     [projectDetailsReady, project, projectFeatures],
   );
-  const { excludeS0, restrictSeverityToLow } = severityPolicy;
+  const { restrictSeverityToLow } = severityPolicy;
 
   const { data: filterMetadata } = useGetProjectFilters(projectId || "");
   const deploymentsQuery = usePostProjectDeploymentsSearchInfinite(
@@ -229,11 +228,8 @@ export default function ServiceRequestsPage(): JSX.Element {
   const apiTotalRecords = data?.pages?.[0]?.totalRecords ?? 0;
 
   const filteredAndSearchedCases = useMemo(
-    () =>
-      excludeS0
-        ? currentPageCases.filter((c) => !isS0Case(c))
-        : currentPageCases,
-    [currentPageCases, excludeS0],
+    () => currentPageCases,
+    [currentPageCases],
   );
 
   const totalItems = apiTotalRecords || filteredAndSearchedCases.length;
@@ -408,7 +404,6 @@ export default function ServiceRequestsPage(): JSX.Element {
           isFetchingMoreDeployments={deploymentsQuery.isFetchingNextPage}
           onFilterChange={handleFilterChange}
           onClearFilters={handleClearFilters}
-          excludeS0={excludeS0}
           restrictSeverityToLow={restrictSeverityToLow}
           hideSeverityFilter
           hideDeploymentFilter={!permissions.hasDeployments}

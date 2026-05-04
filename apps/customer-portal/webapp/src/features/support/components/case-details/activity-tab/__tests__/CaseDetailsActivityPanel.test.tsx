@@ -28,17 +28,13 @@ const mockCaseComments = [
 
 const mockUserDetails = { id: "u1", email: "user@test.com", lastName: "User", firstName: "Test", timeZone: "UTC" };
 
-vi.mock("@features/support/api/useGetCaseComments", () => ({
+vi.mock("@features/support/api/useGetAIChatHistory", () => ({
   __esModule: true,
   default: vi.fn(() => ({
-    data: {
-      comments: mockCaseComments,
-      totalRecords: mockCaseComments.length,
-      offset: 0,
-      limit: 50,
-    },
+    comments: mockCaseComments,
     isLoading: false,
     isError: false,
+    error: null,
   })),
 }));
 

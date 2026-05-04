@@ -22,19 +22,53 @@ import { ErrorBannerProvider } from "@context/error-banner/ErrorBannerContext";
 import LoggerProvider from "@context/logger/LoggerProvider";
 
 const mockCaseComments = [
-  { id: "c1", content: "Thanks for the detailed recommendations. I'll review with our team.", type: "comments", createdOn: "2026-02-12T11:15:42", createdBy: "user@test.com", isEscalated: false },
-  { id: "c2", content: "Show more content here.", type: "comments", createdOn: "2026-02-12T10:30:15", createdBy: "support@wso2.com", isEscalated: false },
+  {
+    id: "c1",
+    content:
+      "Thanks for the detailed recommendations. I'll review with our team.",
+    type: "comments",
+    createdOn: "2026-02-12T11:15:42",
+    createdBy: "user@test.com",
+    isEscalated: false,
+  },
+  {
+    id: "c2",
+    content: "Show more content here.",
+    type: "comments",
+    createdOn: "2026-02-12T10:30:15",
+    createdBy: "support@wso2.com",
+    isEscalated: false,
+  },
 ];
 
-const mockUserDetails = { id: "u1", email: "user@test.com", lastName: "User", firstName: "Test", timeZone: "UTC" };
+const mockUserDetails = {
+  id: "u1",
+  email: "user@test.com",
+  lastName: "User",
+  firstName: "Test",
+  timeZone: "UTC",
+};
 
-vi.mock("@features/support/api/useGetAIChatHistory", () => ({
+vi.mock("@features/support/api/useGetCaseCommentsInfinite", () => ({
   __esModule: true,
   default: vi.fn(() => ({
-    comments: mockCaseComments,
+    data: {
+      pages: [
+        {
+          comments: mockCaseComments,
+          totalRecords: mockCaseComments.length,
+          offset: 0,
+          limit: 10,
+        },
+      ],
+      pageParams: [0],
+    },
     isLoading: false,
     isError: false,
     error: null,
+    hasNextPage: false,
+    isFetchingNextPage: false,
+    fetchNextPage: vi.fn(),
   })),
 }));
 
@@ -61,11 +95,13 @@ vi.mock("@asgardeo/react", () => ({
   })),
 }));
 
-function renderPanel(props: {
-  projectId?: string;
-  caseId?: string;
-  caseCreatedOn?: string | null;
-} = {}) {
+function renderPanel(
+  props: {
+    projectId?: string;
+    caseId?: string;
+    caseCreatedOn?: string | null;
+  } = {},
+) {
   return render(
     <ThemeProvider theme={createTheme()}>
       <LoggerProvider>
@@ -112,7 +148,9 @@ describe("CaseDetailsActivityPanel", () => {
 
   it("should render input field and send button", () => {
     renderPanel();
-    expect(screen.getByRole("button", { name: /send comment/i })).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: /send comment/i }),
+    ).toBeInTheDocument();
     expect(screen.getByRole("textbox")).toBeInTheDocument();
   });
 });

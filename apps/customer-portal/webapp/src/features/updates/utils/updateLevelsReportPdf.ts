@@ -114,6 +114,11 @@ export function parseFileList(raw: string | null | undefined): string[] {
         parsed.map((f: unknown) => stripBrackets(String(f))).filter(Boolean),
       )].sort();
     }
+    if (typeof parsed === "string") {
+      return [...new Set(
+        stripBrackets(parsed).split(",").map((f) => f.trim()).filter(Boolean),
+      )].sort();
+    }
   } catch {
     // not JSON — try comma-split after stripping outer brackets
   }
@@ -581,9 +586,9 @@ export function generateUpdateLevelsReportPdf(reportData: UpdateLevelsReportData
       y += 6;
     };
 
-    renderFileSection("Files Modified", allFilesModified);
-    renderFileSection("Files Added", allFilesAdded);
-    renderFileSection("Files Removed", allFilesRemoved);
+    renderFileSection("Updated Files", allFilesModified);
+    renderFileSection("Added Files", allFilesAdded);
+    renderFileSection("Removed Files", allFilesRemoved);
   }
 
   // ===== APPLY DEFERRED INTERNAL LINK ANNOTATIONS =====

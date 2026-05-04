@@ -227,13 +227,8 @@ export default function ServiceRequestsPage(): JSX.Element {
 
   const apiTotalRecords = data?.pages?.[0]?.totalRecords ?? 0;
 
-  const filteredAndSearchedCases = useMemo(
-    () => currentPageCases,
-    [currentPageCases],
-  );
-
-  const totalItems = apiTotalRecords || filteredAndSearchedCases.length;
-  const paginatedCases = filteredAndSearchedCases;
+  const totalItems = apiTotalRecords || currentPageCases.length;
+  const paginatedCases = currentPageCases;
 
   const handlePageChange = (_event: ChangeEvent<unknown>, value: number) => {
     setPage(value);

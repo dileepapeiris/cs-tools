@@ -40,7 +40,7 @@ export default function useGetCaseCommentsInfinite(
   const { isSignedIn, isLoading: isAuthLoading } = useAsgardeo();
   const authFetch = useAuthApiClient();
 
-  return useInfiniteQuery<CaseCommentsResponse, Error, InfiniteData<CaseCommentsResponse>, (string | number)[], number>({
+  return useInfiniteQuery<CaseCommentsResponse, Error, InfiniteData<CaseCommentsResponse>>({
     queryKey: [ApiQueryKeys.CASE_COMMENTS, projectId, caseId, "infinite"],
     initialPageParam: 0,
     getNextPageParam: (lastPage) => {

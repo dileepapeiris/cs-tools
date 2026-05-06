@@ -161,6 +161,8 @@ export default function AllConversationsList({
               flexDirection: "column",
               alignItems: "stretch",
               gap: 1,
+              minWidth: 0,
+              overflow: "hidden",
             }}
           >
             <Form.CardHeader
@@ -201,7 +203,7 @@ export default function AllConversationsList({
               <Typography
                 variant="h6"
                 color="text.primary"
-                sx={{ mb: 1, fontWeight: 500 }}
+                sx={{ mb: 1, fontWeight: 500, overflowWrap: "anywhere", wordBreak: "break-word", minWidth: 0 }}
               >
                 {conv.initialMessage || NULL_PLACEHOLDER}
               </Typography>

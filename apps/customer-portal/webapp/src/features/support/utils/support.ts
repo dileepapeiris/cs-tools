@@ -1890,7 +1890,6 @@ export function getLast30DaysUtcRange(): {
  * with clickable anchor tags that open in a new tab.
  */
 export function linkifyBareUrls(html: string): string {
-  // Negative lookbehind: skip URLs already inside href="..." or href='...'
   return html.replace(
     /(?<!href=["'])(https?:\/\/[^\s<>"']+)/g,
     '<a href="$1" target="_blank" rel="noopener noreferrer" style="color:inherit;text-decoration:underline;word-break:break-all;">$1</a>',

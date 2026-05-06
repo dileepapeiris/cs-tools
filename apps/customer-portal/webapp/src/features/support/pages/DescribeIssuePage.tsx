@@ -222,8 +222,13 @@ export default function DescribeIssuePage(): JSX.Element {
                   }}
                 />
                 {isMessageTooLong ? (
-                  <Typography variant="caption" color="error" sx={{ display: "block", mt: 1 }}>
-                    Message too long ({value.length} chars). Maximum is {CHAT_MAX_CHARS} characters.
+                  <Typography
+                    variant="caption"
+                    color="error"
+                    sx={{ display: "block", mt: 1 }}
+                  >
+                    Message too long ({value.length} characters). Maximum is{" "}
+                    {CHAT_MAX_CHARS} characters.
                   </Typography>
                 ) : (
                   <Typography

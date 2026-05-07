@@ -36,8 +36,7 @@ import {
 import type { ProductUpdate } from "@features/project-details/types/products";
 import { useErrorBanner } from "@context/error-banner/ErrorBannerContext";
 import { useSuccessBanner } from "@context/success-banner/SuccessBannerContext";
-import { useGetRecommendedUpdateLevels } from "@features/updates/api/useGetRecommendedUpdateLevels";
-import { usePostUpdateLevelsSearch } from "@features/updates/api/usePostUpdateLevelsSearch";
+import { useGetProductUpdateLevels } from "@features/updates/api/useGetProductUpdateLevels";
 import UpdateHistoryAddSectionSkeleton from "@features/project-details/components/deployments/update-history/UpdateHistoryAddSectionSkeleton";
 import {
   getUpdateHistoryEntryBackground,
@@ -82,66 +81,30 @@ export default function UpdateHistoryTab({
   const { showError } = useErrorBanner();
 
   const {
-    data: recommendedUpdateLevels = [],
-    isLoading: isLoadingRecommended,
-  } = useGetRecommendedUpdateLevels();
+    data: productUpdateLevels = [],
+    isLoading: isLoadingProductUpdateLevels,
+  } = useGetProductUpdateLevels();
 
-  const matchedRecommendation = useMemo(() => {
-    if (
-      !productName ||
-      !productVersion ||
-      recommendedUpdateLevels.length === 0
-    ) {
-      return null;
-    }
-
-    return recommendedUpdateLevels.find(
-      (item) =>
-        item.productName === productName &&
-        item.productBaseVersion === productVersion,
-    );
-  }, [productName, productVersion, recommendedUpdateLevels]);
-
-  const searchParams = useMemo(() => {
-    if (!productName || !productVersion || !matchedRecommendation) {
-      return null;
-    }
-
-    return {
-      productName,
-      productVersion,
-      startingUpdateLevel: matchedRecommendation.startingUpdateLevel,
-      endingUpdateLevel: matchedRecommendation.endingUpdateLevel,
-    };
-  }, [productName, productVersion, matchedRecommendation]);
-
-  const {
-    data: updateLevelsData,
-    isLoading: isLoadingUpdateLevels,
-    isFetching: isFetchingUpdateLevels,
-  } = usePostUpdateLevelsSearch(searchParams);
-
-  const showUpdateLevelDropdownSkeleton =
-    isLoadingUpdateLevels ||
-    (isFetchingUpdateLevels && updateLevelsData == null);
-
-  const isAddUpdateSectionLoading =
-    isLoadingRecommended ||
-    (searchParams != null && showUpdateLevelDropdownSkeleton);
-
-  const isEditInlineLoading =
-    isLoadingRecommended || showUpdateLevelDropdownSkeleton;
+  const showUpdateLevelDropdownSkeleton = isLoadingProductUpdateLevels;
+  const isAddUpdateSectionLoading = isLoadingProductUpdateLevels;
+  const isEditInlineLoading = isLoadingProductUpdateLevels;
 
   const availableUpdateLevels = useMemo(() => {
-    if (!updateLevelsData) return [];
+    if (!productName || !productVersion || productUpdateLevels.length === 0) {
+      return [];
+    }
 
-    const levels = Object.keys(updateLevelsData)
-      .map((key) => parseInt(key, 10))
-      .filter((level) => !isNaN(level))
-      .sort((a, b) => b - a);
+    const productItem = productUpdateLevels.find(
+      (item) => item.productName === productName,
+    );
+    if (!productItem) return [];
 
-    return levels;
-  }, [updateLevelsData]);
+    const allLevels = productItem.productUpdateLevels
+      .filter((entry) => entry.productBaseVersion === productVersion)
+      .flatMap((entry) => entry.updateLevels);
+
+    return [...new Set(allLevels)].sort((a, b) => b - a);
+  }, [productName, productVersion, productUpdateLevels]);
 
   const sortedUpdates = useMemo(() => {
     return [...updates].sort((a, b) => {

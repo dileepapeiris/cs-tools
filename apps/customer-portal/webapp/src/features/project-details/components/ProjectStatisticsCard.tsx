@@ -69,11 +69,16 @@ const ProjectStatisticsCard = ({
   isError,
   isSidebarOpen = false,
   showDeploymentsStat = true,
+  showServiceRequestStat = true,
+  showChangeRequestStat = true,
 }: ProjectStatisticsCardProps): JSX.Element => {
   const gridSize = isSidebarOpen ? { xs: 12, xl: 4 } : { xs: 12, sm: 6, lg: 4 };
-  const visibleStats = showDeploymentsStat
-    ? statItems
-    : statItems.filter((s) => s.key !== "deployments");
+  const visibleStats = statItems.filter((s) => {
+    if (s.key === "deployments" && !showDeploymentsStat) return false;
+    if (s.key === "outstandingServiceRequestCount" && !showServiceRequestStat) return false;
+    if (s.key === "outstandingChangeRequestCount" && !showChangeRequestStat) return false;
+    return true;
+  });
   const isStatLoading = isLoading || (!isError && !stats);
   return (
     <Card sx={{ height: "100%" }}>

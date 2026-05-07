@@ -175,6 +175,8 @@ export default function ProjectDetails(): JSX.Element {
                   isLoading={(isDetailsLoading || !stats) && !statsError}
                   isError={!!statsError}
                   showDeploymentsStat={permissions.hasDeployments}
+                  showServiceRequestStat={permissions.hasSR}
+                  showChangeRequestStat={permissions.hasCR}
                 />
               </Grid>
               <Grid size={{ xs: 12, md: 5 }}>
@@ -199,7 +201,7 @@ export default function ProjectDetails(): JSX.Element {
       case ProjectDetailsTabId.DEPLOYMENTS:
         return (
           <Box>
-            <ProjectDeployments projectId={projectId ?? ""} />
+            <ProjectDeployments projectId={projectId ?? ""} showServiceRequest={permissions.hasSR} />
           </Box>
         );
       case ProjectDetailsTabId.TIME_TRACKING:

@@ -39,6 +39,8 @@ export type ProjectStatisticsCardProps = {
   isError?: boolean;
   isSidebarOpen?: boolean;
   showDeploymentsStat?: boolean;
+  showServiceRequestStat?: boolean;
+  showChangeRequestStat?: boolean;
 };
 
 export type ProjectNameProps = {
@@ -119,6 +121,7 @@ export type ServiceHoursStatCardsProps = {
 
 export type ProjectDeploymentsProps = {
   projectId: string;
+  showServiceRequest?: boolean;
 };
 
 export type DeploymentCardProps = {

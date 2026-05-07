@@ -30,7 +30,6 @@ import type { JSX } from "react";
 import { statItems } from "@features/project-details/constants/projectDetailsConstants";
 import type { ProjectStatisticsCardProps } from "@features/project-details/types/projectDetailsComponents";
 
-const SKELETON_COUNT = 9;
 
 const StatCardSkeleton = ({ gridSize }: { gridSize: object }): JSX.Element => (
   <Grid size={gridSize} sx={{ display: "flex" }}>
@@ -91,7 +90,7 @@ const ProjectStatisticsCard = ({
 
         <Grid container spacing={2} sx={{ alignItems: "stretch" }}>
           {isStatLoading
-            ? Array.from({ length: SKELETON_COUNT }).map((_, i) => (
+            ? Array.from({ length: visibleStats.length }).map((_, i) => (
                 <StatCardSkeleton key={i} gridSize={gridSize} />
               ))
             : visibleStats.map((stat) => {

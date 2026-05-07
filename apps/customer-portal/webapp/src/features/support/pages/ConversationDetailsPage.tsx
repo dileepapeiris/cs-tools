@@ -584,12 +584,12 @@ export default function ConversationDetailsPage(): JSX.Element {
 
   const handleSendMessage = useCallback(async (): Promise<boolean> => {
     const text = htmlToPlainText(inputValueRef.current).trim();
-    if (!text || isSending || !projectId) return false;
+    if (!text || isSending || !projectId || !accountId) return false;
     setInputValueAndRef("");
     setResetTrigger((prev) => prev + 1);
     await sendViaWebSocket(text);
     return true;
-  }, [isSending, projectId, sendViaWebSocket, setInputValueAndRef]);
+  }, [accountId, isSending, projectId, sendViaWebSocket, setInputValueAndRef]);
 
   const conversationStatus = summary?.status;
   const conversationStatusLabel = conversationStatus ?? "--";

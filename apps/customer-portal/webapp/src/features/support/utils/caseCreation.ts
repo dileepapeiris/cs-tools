@@ -403,7 +403,7 @@ export function getBaseDeploymentOptions(
   projectDeployments: ProjectDeploymentOption[] | undefined,
 ): string[] {
   return (
-    projectDeployments?.map((d) => d.name || d.type?.label).filter(Boolean) ??
+    projectDeployments?.map((d) => d.name ?? d.type?.label).filter(Boolean) ??
     []
   );
 }

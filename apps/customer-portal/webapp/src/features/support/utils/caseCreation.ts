@@ -148,22 +148,25 @@ export function resolveDeploymentMatch(
 
   const labelLower = label.toLowerCase();
 
-  const fromProjectExact = projectDeployments?.find((d) => {
-    const typeLabel = d.type?.label?.trim();
-    const depName = d.name?.trim();
-    return typeLabel === label || depName === label;
-  });
-  if (fromProjectExact) return { id: fromProjectExact.id };
+  const fromProjectByNameExact = projectDeployments?.find(
+    (d) => d.name?.trim() === label,
+  );
+  if (fromProjectByNameExact) return { id: fromProjectByNameExact.id };
 
-  const fromProjectCaseInsensitive = projectDeployments?.find((d) => {
-    const typeLabel = d.type?.label?.trim();
-    const depName = d.name?.trim();
-    return (
-      typeLabel?.toLowerCase() === labelLower ||
-      depName?.toLowerCase() === labelLower
-    );
-  });
-  if (fromProjectCaseInsensitive) return { id: fromProjectCaseInsensitive.id };
+  const fromProjectByTypeLabelExact = projectDeployments?.find(
+    (d) => d.type?.label?.trim() === label,
+  );
+  if (fromProjectByTypeLabelExact) return { id: fromProjectByTypeLabelExact.id };
+
+  const fromProjectByNameInsensitive = projectDeployments?.find(
+    (d) => d.name?.trim().toLowerCase() === labelLower,
+  );
+  if (fromProjectByNameInsensitive) return { id: fromProjectByNameInsensitive.id };
+
+  const fromProjectByTypeLabelInsensitive = projectDeployments?.find(
+    (d) => d.type?.label?.trim().toLowerCase() === labelLower,
+  );
+  if (fromProjectByTypeLabelInsensitive) return { id: fromProjectByTypeLabelInsensitive.id };
 
   const fromFiltersExact = filterDeployments?.find(
     (d) => d.id === label || d.label === label,
@@ -400,7 +403,7 @@ export function getBaseDeploymentOptions(
   projectDeployments: ProjectDeploymentOption[] | undefined,
 ): string[] {
   return (
-    projectDeployments?.map((d) => d.name ?? d.type?.label).filter(Boolean) ??
+    projectDeployments?.map((d) => d.name || d.type?.label).filter(Boolean) ??
     []
   );
 }

@@ -123,18 +123,24 @@ const SecurityPage = (): JSX.Element => {
     [filterMetadata, handleTabChange],
   );
 
-  const tabs = useMemo(
+  const securityPermissions = useMemo(
     () =>
       areFeaturePermissionsReady
+        ? getProjectPermissions(projectDetails?.type?.label, { projectFeatures })
+        : null,
+    [areFeaturePermissionsReady, projectDetails?.type?.label, projectFeatures],
+  );
+
+  const tabs = useMemo(
+    () =>
+      securityPermissions
         ? SECURITY_PAGE_TABS.filter((tab) =>
             tab.id === SecurityTabId.VULNERABILITIES
-              ? getProjectPermissions(projectDetails?.type?.label, {
-                  projectFeatures,
-                }).hasSecurityReportAnalysis
+              ? securityPermissions.hasSecurityReportAnalysis
               : true,
           )
         : SECURITY_PAGE_TABS,
-    [areFeaturePermissionsReady, projectDetails?.type?.label, projectFeatures],
+    [securityPermissions],
   );
   const activeTab = useMemo(() => {
     const hasRawActive = tabs.some((tab) => tab.id === rawActiveTab);
@@ -183,7 +189,9 @@ const SecurityPage = (): JSX.Element => {
           </Typography>
         </Box>
       ) : (
-        <SecurityStats onStatClick={handleStatCardClick} />
+        securityPermissions?.hasSecurityReportAnalysis && (
+          <SecurityStats onStatClick={handleStatCardClick} />
+        )
       )}
       {!isStatFiltered && (
         <TabBar

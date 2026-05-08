@@ -54,6 +54,8 @@ import {
   isNoveraOrBotSender,
 } from "@features/support/utils/support";
 import DOMPurify from "dompurify";
+import { stripLightModeInlineStyles } from "@features/announcements/utils/announcements";
+import { useDarkMode } from "@utils/useDarkMode";
 import ChatMessageCard from "@case-details-activity/ChatMessageCard";
 import { useResolvedInlineImageHtml } from "@features/support/hooks/useResolvedInlineImageHtml";
 import { useGetAttachment } from "@api/useGetAttachment";
@@ -81,6 +83,7 @@ export default function CommentBubble({
   userDetails,
 }: CommentBubbleProps): import("react").JSX.Element {
   const theme = useTheme();
+  const isDarkMode = useDarkMode();
   const { downloadAttachment, isDownloading, downloadingId } = useGetAttachment();
   const rawContent = comment.content ?? "";
   const isFullCodeWrap = hasSingleCodeWrapper(rawContent);
@@ -97,7 +100,8 @@ export default function CommentBubble({
     comment.inlineAttachments,
   );
   const renderAsMarkdown = isNoveraOrBotSender(comment.createdBy, comment.type);
-  const sanitizedHtml = DOMPurify.sanitize(withImages, INLINE_COMMENT_HTML_PURIFY);
+  const darkModeHtml = isDarkMode ? stripLightModeInlineStyles(withImages) : withImages;
+  const sanitizedHtml = DOMPurify.sanitize(darkModeHtml, INLINE_COMMENT_HTML_PURIFY);
   const { resolvedHtml: htmlContent, isLoading: isImagesLoading } =
     useResolvedInlineImageHtml(sanitizedHtml, comment.inlineAttachments);
   const displayName = useMemo(() => {
